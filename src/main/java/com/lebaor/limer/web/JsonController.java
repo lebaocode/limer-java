@@ -15,6 +15,7 @@ import org.json.JSONString;
 import com.lebaor.limer.data.LimerBookStatus;
 import com.lebaor.limer.db.LimerBookStatusDB;
 import com.lebaor.limer.web.data.WebBook;
+import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
 import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
 import com.lebaor.utils.LogUtil;
@@ -53,10 +54,30 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getRecentBooks")) {//所有可借阅书籍列表
 			getRecentBooks(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getBookDetailByIsbn")) {//所有可借阅书籍列表
+			getBookDetailByIsbn(req, res, model);
+			return;
 		} else if (uri.startsWith("/json/wxsign")) {
 			wxSign(req, res, model);
 			return;
 		} 
+	}
+	
+	public void getBookDetailByIsbn(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		JSONObject o = new JSONObject();
+		
+		String isbn = this.getParameterValue(req, "isbn", "");
+		WebBookDetail wbd = cache.getDoubanBookInfo(isbn);
+		if (wbd == null) {
+			o.put("result", "error");
+			o.put("msg", "找不到isbn="+ isbn+"的书");
+			this.setRetJson(model, o.toString());
+			return;
+		}
+		
+		this.setRetJson(model, wbd.toJSON());
 	}
 	
 	public void getRecentBooks(HttpServletRequest req, 

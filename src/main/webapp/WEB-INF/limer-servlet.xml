@@ -53,12 +53,12 @@
     <property name="brDB"><ref bean="brDB"/></property>
     <property name="ltDB"><ref bean="ltDB"/></property>
     
-    <property name="jedisHost" value="${limer-servlet.jedisHost"/>
-    <property name="jedisPort" value="${limer-servlet.jedisPort"/>
-    <property name="jedisPassword" value="${limer-servlet.jedisPassword"/>
-    <property name="jedisMaxTotal" value="${limer-servlet.jedisMaxTotal"/>
-    <property name="jedisMaxIdle" value="${limer-servlet.jedisMaxIdle"/>
-    <property name="jedisMinIdle" value="${limer-servlet.jedisMinIdle"/>
+    <property name="jedisHost" value="${limer-servlet.jedisHost}"/>
+    <property name="jedisPort" value="${limer-servlet.jedisPort}"/>
+    <property name="jedisPassword" value="${limer-servlet.jedisPassword}"/>
+    <property name="jedisMaxTotal" value="${limer-servlet.jedisMaxTotal}"/>
+    <property name="jedisMaxIdle" value="${limer-servlet.jedisMaxIdle}"/>
+    <property name="jedisMinIdle" value="${limer-servlet.jedisMinIdle}"/>
 </bean>
 
 <bean id="jsonController" class="com.lebaor.limer.web.JsonController">

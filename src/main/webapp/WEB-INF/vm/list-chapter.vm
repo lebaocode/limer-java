@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+    	.chapter-line {width:100%;line-height:48px;height:48px;}
+    	.chapter-title {padding:0px 20px;}
+    	.studied {color:#999999; font-size:12px;margin-left:20px;}
+    	.review-icon {background:#FCFCFC url(/images/book-green.png) no-repeat;
+    background-size:32px 32px;
+    background-position:center;
+    width:40px;
+    height:44px;
+    display:inline;
+    position:absolute;
+    right:5px;
+    top:2px;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/fudao/listuserbooks';"></div>
+			<div class="top-bar-mid-title">选择章节</div>
+			<div class="review-icon" onclick="showBookMenu();"></div>
+		</div>
+		
+		<div class="input-area">
+			#foreach ($chapter in $chapters)
+			
+			<div class="chapter-line" haslink="$chapter.isHasLink()" chapterid="$chapter.getChapterId()">
+				<div class="chapter-title">$viewUtils.getHTMLValidText($chapter.getTitle())
+					#if ($chapter.isStudied())
+					<span class="studied">已学习</span>
+					#end
+				</div>
+			</div>
+			#end
+		</div>
+		
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	function showBookMenu() {
+		showRightTopMenu([
+		{"name":"错题本", "url":"/fudao/viewreview?bookId=$book_id"},
+		{"name":"练习本", "url":"/fudao/listuserpractices?bookId=$book_id"}
+		]);
+	}
+	
+	$(document).ready(function(){
+		$(".chapter-line").each(function(){
+			var hasLink = $(this).attr("haslink");
+			if (hasLink == "true") {
+		
+				$(this).on("tap", function(){
+					event.preventDefault();
+					showDivHighlightMenu($(this));
+					var chapterId = $(this).attr("chapterid");
+					
+					setTimeout(function(){
+						window.location = "/fudao/viewchapter?chapterId=" + chapterId + "&bookId=$!book_id";
+					}, 300);
+					
+					
+				});
+			
+			}
+		});
+		
+	});
+	
+</script>
+
+</body></html>

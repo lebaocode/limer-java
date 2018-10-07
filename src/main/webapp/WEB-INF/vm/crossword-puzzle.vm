@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;padding:50px;border:0px;font-size:16px;
+			background:#FCFCFC url(/images/gudian_bg.jpg) repeat;}
+		
+		.page-title {margin-bottom: 30px; font-size:30px;font-weight:bold; color:#333333; font-family:"楷体"; width:100%;text-align:center;}
+		
+		.bdt {border-top:1px solid #333333;}
+		.bdl {border-left:1px solid #333333;}
+		.bdr {border-right:1px solid #333333;}
+		.bdb {border-bottom:1px solid #333333;}
+		
+		.print-bgcolor {}
+		
+		.cell-area {margin-top:10px; width:922px; height:622px;}
+		.cell-item {float:left; width:30px;height:30px;text-align:center;line-height:30px;font-size:20px;color:#000000;font-weight:bold;}
+		.real-cell-area {width:621px; height:621px;font-family:'楷体';}
+		
+		.words-area {margin-top:20px;line-height:24px;color:#000000;font-size:14px;width:600px;}
+		.word-item {float:left; margin:10px 20px 0px 0px;border:1px solid #E0E0E0; color:#000000; line-height:30px;font-size:12px;}
+		.word-content {padding:0px 10px;}
+		
+		.ori-area {margin-top:60px;}
+		.ori-item-selected {background-color:#87C654;color:#FFFFFF;}
+		.btn-ori {text-align:center; padding:10px 10px;line-height:30px;font-size:10px;}
+		
+		.btn-action {cursor:pointer;background-color:#FE6442;margin-right:10px; color:#FFFFFF;text-align:center; width:60px; float:left; line-height:38px;font-size:14px;padding:0px 5px;}
+		.input-text input {float:left;margin-right:5px;color:#333333; width:100px;height:45px;border-bottom:1px solid #E0E0E0;line-height:45px;padding:0px 5px;}
+		
+		.save-area {margin-top:20px;padding:10px 0px 20px;line-height:24px;color:#333333;font-size:14px;width:600px;}
+		.init-data-area {float:left;margin:20px 5px 0px 0px;padding:10px;line-height:24px;border:1px solid #E0E0E0;color:#333333;font-size:14px;width:600px;height:100px;}
+    	.btn-load {margin-top:102px;}
+    	
+    	.input-words-area {float:left;margin:20px 5px 0px 0px;padding:10px;line-height:24px;border:1px solid #E0E0E0;color:#333333;font-size:14px;width:600px;height:100px;}
+    
+    	.vh {visibility:hidden;}
+    	.vb {visibility:visible;}
+    	
+    	.empty-no {margin:5px 0px 0px 5px;font-size:12px;text-align:center;line-height:20px;width:20px;height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;border:0px solid #FF0000;color:#FF0000;}
+    	
+    	.input-explain-area {float:left;margin:20px 5px 0px 0px;padding:10px;line-height:24px;border:1px solid #E0E0E0;color:#333333;font-size:14px;width:600px;height:100px;}
+    	
+    	.explain-display-area {position:absolute;left:700px; top:110px;border-width:0px;}
+    	.explain-line {}
+    	.td-no {font-size:12px;text-align:center;line-height:16px;width:36px;height:16px;color:#FF0000;}
+    	.td-content {padding:5px;line-height:18px;color:#333333;font-size:12px;width:150px;}
+    	.td-content img {display:inline;width:48px;height:48px;}
+    	.td-content span {margin-left:20px;}
+   		.table-title {padding-left:4px;line-height:30px;color:#000000;font-size:14px;width:150px;}
+   
+   		.suggest-layer {width:600px;border:1px solid #999999;background-color:#EFEFF4;padding:10px; z-index:100;position:fixed;left:0px; top:0px;}
+    
+    	.qr-area {position:absolute;left:700px;top:600px;margin-top:20px;}
+    	.logo-name-big {height:40px;margin:0px 0px 10px 100px;}
+    	.qr-code {position:absolute;left:100px;top:55px;width:96px;height:96px;}
+    	.qr-desc {margin:5px 5px 5px 216px;line-height:20px;color:#FF0000;font-size:14px;width:180px;}
+    
+    	.logo-area {position:absolute;top:50px; left:50px;}
+    	.logo-image {width:20px;height:20px;}
+    	.logo-name {height:20px;position:absolute;top:0px;left:20px;}
+    
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	
+		<div class="input-area">
+			<div class="page-title">填字游戏学古诗——《静夜思》</div>
+			<div class="cell-area">
+				<div class="real-cell-area bdl bdt "></div>
+				<table class="explain-display-area">
+				</table>
+			</div>
+			<div class="ori-area">
+				<div class="btn-action" onclick="undoFill()">撤销</div>
+				<div class="btn-action" onclick="deleteCurPosWords();">删除</div>
+				<div class="btn-action" onclick="move(-1, 0)">左移</div>
+				<div class="btn-action" onclick="move(1, 0)">右移</div>
+				<div class="btn-action" onclick="move(0, -1)">上移</div>
+				<div class="btn-action" onclick="move(0, 1)">下移</div>
+				<div class="btn-action" onclick="saveCells();">保存</div>
+				<div class="btn-action empty-action" onclick="startEmpty();">开始挖空</div>
+				<div class="btn-action empty-action dn" onclick="endEmpty();">结束挖空</div>
+				<div class="btn-action" onclick="displayUI(true);">美化</div>
+				<div class="btn-action" onclick="displayUI(false);">美化2</div>
+			</div>
+			<div class="cb"></div>
+			
+			<div class="words-area"></div>
+			<div class="cb"></div>
+			
+			<textarea class="input-words-area"></textarea>
+			<div class="btn-action btn-load" onclick="addInputWords();">添加单词</div>
+			<div class="cb"></div>
+			
+			<textarea class="init-data-area"></textarea>
+			<div class="btn-action btn-load" onclick="loadInputData();">加载</div>
+			<div class="cb"></div>
+			
+			<textarea class="input-explain-area"></textarea>
+			<div class="btn-action btn-load" onclick="loadExplainData();">显示提示</div>
+			<div class="cb"></div>
+		</div>
+				
+		
+	<div class="qr-area">
+		<img class="logo-name-big" src="/images/lebao_name_touming2.png" />
+		<img class="qr-code"  src="/images/qrcode_fwh.jpg" />
+		<div class="qr-desc">扫描二维码：</div>
+		<div class="qr-desc">1. 查看答案</div>
+		<div class="qr-desc">2. 做练习，检查填字游戏里的知识是否掌握</div>
+	</div>
+	
+	<div class="logo-area">
+		<img class="logo-image" src="/images/logo_80x80.png" />
+		<img class="logo-name" src="/images/lebao_name_touming2.png" />
+	</div>
+	
+	<div class="suggest-layer dn"></div>
+</div>
+
+<script type="text/javascript">
+	var lastX = "";
+	var lastY = "";
+	var orientation = "heng";
+	var fillHistory = new Array();
+	var cell_num = 20;
+	var is_emptying = "false";
+	var wordSet = new Array();
+	
+	function deleteCurPosWords() {
+		deleteWords(lastX, lastY);
+	}
+	
+	function loadExplainData() {
+		var explainArr = $(".input-explain-area").val().split("\n");
+		var oushu = false;
+		if (explainArr.length == 2*Math.floor(explainArr.length/2)) oushu = true;
+		
+		for (var i = 0; oushu ? i < explainArr.length/2: i < Math.ceil(explainArr.length/2); i++) {
+			var line = $.trim(explainArr[i]);
+			if (line == "") continue;
+			
+			var arr = line.split(" ", 2);
+			var nos = $.trim(arr[0]);
+			var content = $.trim(arr[1]);
+			
+			var nos2 = "";
+			var content2 = "";
+			
+			if (oushu) {
+				var line2 = $.trim(explainArr[i + explainArr.length/2]);
+				var arr2 = line2.split(" ", 2);
+				nos2 =  $.trim(arr2[0]);
+				content2 = $.trim(arr2[1]);
+			} else {
+				if (i < explainArr.length/2) {
+					var line2 = $.trim(explainArr[i + Math.ceil(explainArr.length/2)]);
+					var arr2 = line2.split(" ", 2);
+					nos2 =  $.trim(arr2[0]);
+					content2 = $.trim(arr2[1]);
+				}
+			}
+			
+			$(".explain-display-area").append(
+				"<tr class=\"explain-line\"><td class=\"td-no\">"+ nos +"</td><td class=\"td-content\">"+ content +"</td><td class=\"td-no\">"+ nos2 +"</td><td class=\"td-content\">"+ content2 +"</td></tr>");
+			
+		}
+		
+		var top = $(".real-cell-area").offset().top + $(".real-cell-area").height() - 146 - 5;
+		$(".qr-area").offset({top: top});
+	}
+	
+	function displayUI(displayNo) {
+		$(".real-cell-area").css("border", "0px solid #E0E0E0");
+		var emptyNo = 1;
+		for (var j = 1; j <= cell_num; j++) {
+			for (var i = 1; i <= cell_num; i++) {
+				var val = $("#" + getCellId(i, j)).html();
+				if (val == "") {
+					if (i == cell_num || $("#" + getCellId(i + 1, j)).html() == "") {//右方没字
+						$("#" + getCellId(i, j)).css("border-right", "1px solid #FDEFD2");
+					} 
+					if (j == cell_num || $("#" + getCellId(i, j + 1)).html() == "") {//下方没字
+						$("#" + getCellId(i, j)).css("border-bottom", "1px solid #FDEFD2");
+					} 
+					if (i == 1) {
+						$("#" + getCellId(i, j)).css("border-left", "1px solid #FDEFD2");
+					}
+					if (j == 1) {
+						$("#" + getCellId(i, j)).css("border-top", "1px solid #FDEFD2");
+					}
+				} else {
+					//$("#" + getCellId(i, j)).css("background-color", "#E2B6AB");
+					if (i == 1) {
+						$("#" + getCellId(i, j)).addClass("bdl");
+					}
+					if (j == 1) {
+						$("#" + getCellId(i, j)).addClass("bdt");
+					}
+				
+					//如果是挖空，则不显示字，显示序号
+					var color = $("#" + getCellId(i, j)).css("color");
+					if (color != "rgb(0, 0, 0)") {
+						$("#" + getCellId(i, j)).html("<div class=\"empty-no\">" + (displayNo ? emptyNo : val) + "</div>");
+						emptyNo ++;
+						
+						$("#" + getCellId(i, j)).css("font-size", displayNo? "12px" : "20px");
+					}
+				}
+				
+			}
+		}
+	}
+	
+	function startEmpty() {
+		is_emptying = "true";
+		$(".empty-action").toggleClass("dn");
+	}
+	
+	function endEmpty() {
+		is_emptying = "false";
+		$(".empty-action").toggleClass("dn");
+	}
+	
+	function initCells(data) {
+		for (var i = 0; i < data.length; i++) {
+			var o = data[i];
+			lastX = o.x;
+			lastY = o.y;
+			wordSet.push(o.word);
+			fillIntoCell(o.word, o.ori, o.emptyArr);
+		}
+	}
+	
+	function loadInputData() {
+		var data = JSON.parse($(".init-data-area").val());
+		initCells(data);
+	}
+	
+	function saveCells() {
+		$(".init-data-area").val(JSON.stringify(fillHistory));
+	}
+	
+	function addInputWords() {
+		var wordArr = $(".input-words-area").val().split("\n");
+		for (var i = 0; i < wordArr.length; i++){
+			var word = $.trim(wordArr[i]);
+			if (word != "") {
+				addWord(word);
+			}
+		}
+		showWindowsToast("添加完成！");
+	}
+	
+	function containsWord(word, arr){
+		for (var i = 0; i < arr.length; i++) {
+			if (arr[i] == word) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function addWord(word) {
+		if (containsWord(word, wordSet)) return;
+		wordSet.push(word);
+	}
+	
+	function getCellId(x, y) {
+		return "cell_" + x +"_"+ y;
+	}
+	
+	function move(x, y) {
+		var curX = lastX;
+		var curY = lastY;
+		var val = $("#"+ getCellId(curX, curY)).html();
+		if (val == "") {
+			moveAll(x, y);
+		} else {
+			var posO = findObject(curX, curY);
+			if (posO.heng) {
+				posO.heng.x = posO.heng.x + x;
+				posO.heng.y = posO.heng.y + y;
+			}
+			if (posO.shu) {
+				posO.shu.x = posO.shu.x + x;
+				posO.shu.y = posO.shu.y + y;
+			}
+			moveAll(0, 0);
+			
+			selectCell(curX + x, curY + y);
+		}
+	}
+	
+	function moveAll(x, y) {
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$("#" + getCellId((i+1), (j+1))).html("");
+				$("#" + getCellId((i+1), (j+1))).css("background-color", "");
+				$("#" + getCellId((i+1), (j+1))).css("color", "#000000");
+			}
+		}
+		
+		var oldHistory = new Array();
+		var n = fillHistory.length;
+		for (var i = 0; i < n; i++) {
+			var o = fillHistory.shift();
+			oldHistory.push(o);
+		}
+		
+		for (var i = 0; i < oldHistory.length; i++) {
+			var o = oldHistory[i];
+			lastX = o.x + x;
+			lastY = o.y + y;
+			fillIntoCell(o.word, o.ori, o.emptyArr);
+		}
+		
+		delete oldHistory;
+		
+		$("#"+ getCellId(lastX, lastY)).css("background-color", "yellow");
+	}
+	
+	function findObject(x, y) {
+		var retO = {};
+		for (var i = 0; i < fillHistory.length; i++) {
+			var o = fillHistory[i];
+			if (o.ori == "shu" && o.x == x && y >= o.y && y < o.y + o.word.length) {
+				retO.shu = o;
+			} else if (o.ori == "heng" && o.y == y && x >= o.x && x < o.x + o.word.length) {
+				retO.heng = o;
+			}
+		}
+		return retO;
+	}
+	
+	function deleteWords(x, y) {
+		
+		for (var i = 0; i < fillHistory.length; i++) {
+			var o = fillHistory[i];
+			if (o.ori == "heng" && o.y == y && x >= o.x && x < o.x + o.word.length) {
+				fillHistory.splice(i, 1);
+				break;
+			}
+		}
+		
+		for (var i = 0; i < fillHistory.length; i++) {
+			var o = fillHistory[i];
+			if (o.ori == "shu" && o.x == x && y >= o.y && y < o.y + o.word.length) {
+				fillHistory.splice(i, 1);
+				break;
+			}
+		}
+		
+		moveAll(0, 0);
+	}
+	
+	function selectCell(x, y) {
+		//如果正在挖空
+		if (is_emptying == "true") {
+			var color = $("#"+ getCellId(x, y)).css("color");
+			if (color == "rgb(0, 0, 0)") {
+				$("#"+ getCellId(x, y)).css("color", "red");
+			} else {
+				$("#"+ getCellId(x, y)).css("color", "#000000");
+			}
+			
+			//增加fillHistory里的object 属性
+			var o = findObject(x, y);
+			if (o.heng) {
+				if (!o.heng.emptyArr) {
+					o.heng.emptyArr = new Array();
+				} 
+				o.heng.emptyArr.push(x - o.heng.x + 1);
+			}
+			if (o.shu) {
+				if (!o.shu.emptyArr) {
+					o.shu.emptyArr = new Array();
+				} 
+				o.shu.emptyArr.push(y - o.shu.y + 1);
+			}
+			
+			return;
+		}
+	
+		if (lastX != "") {
+			$("#"+ getCellId(lastX, lastY)).css("background-color", "");
+		} 
+		lastX = x;
+		lastY = y;
+		$("#"+ getCellId(lastX, lastY)).css("background-color", "yellow");
+		
+		//给出提示单词
+		if (is_emptying == "true") {
+			closeSuggestLayer();
+		} else {
+			showSuggest(lastX, lastY);
+		}
+	}
+	
+	function closeSuggestLayer() {
+		$(".suggest-layer").addClass("dn");
+	}
+	
+	function showSuggest(x, y) {
+		var suggestArr = new Array();
+		
+		var curZi = $("#"+ getCellId(x, y)).html();
+		//找到包含的词
+		for (var i = 0; i < wordSet.length; i++) {
+			var word = wordSet[i];
+			var index = word.indexOf(curZi);
+			if (curZi == "" || index != -1) {
+				var filled = false;
+				for (var j = 0; j < fillHistory.length; j++) {
+					if (fillHistory[j].word == word) {
+						filled = true;
+						break;
+					}
+				} 
+				if (!filled) {
+					suggestArr.push(word);
+				}
+			}
+		}
+		
+		if (suggestArr.length == 0) {
+			closeSuggestLayer();
+			return;
+		}
+		
+		//先清空
+		$(".suggest-layer").html("");
+		
+		//设定显示位置
+		var left = $("#"+ getCellId(x, y)).offset().left + 35;
+		var top = $("#"+ getCellId(x, y)).offset().top + 35;		
+		$(".suggest-layer").offset({left:left, top: top});
+				
+		//添加显示词语
+		for (var i = 0; i < suggestArr.length; i++) {
+			var word = suggestArr[i];
+			$(".suggest-layer").append(
+				"<div class=\"word-item\"><span class=\"btn-ori ori-item-selected\" onclick=\"fillIntoCell('"+ word +"', 'heng');\">横</span>"
+				+ "<span class=\"word-content\">"+word+"</span>" 
+				+ "<span class=\"btn-ori ori-item-selected\" onclick=\"fillIntoCell('"+ word +"', 'shu');\">竖</span>"
+				+"</div>");
+		}
+		$(".suggest-layer").removeClass("dn");
+	}
+	
+	function undoFill() {
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$("#" + getCellId((i+1), (j+1))).html("");
+			}
+		}
+		
+		var oldHistory = new Array();
+		var n = fillHistory.length;
+		for (var i = 0; i < n; i++) {
+			var o = fillHistory.shift();
+			oldHistory.push(o);
+		}
+		
+		for (var i = 0; i < oldHistory.length; i++) {
+			var o = oldHistory[i];
+			lastX = o.x;
+			lastY = o.y;
+			if (i < oldHistory.length - 1) {
+				fillIntoCell(o.word, o.ori, o.emptyArr);
+			}
+		}
+		
+		delete oldHistory;
+	}
+	
+	function fillIntoCell(word, ori, emptyArr) {
+		if (ori == "heng") {//横着
+			for (var i = 0; i < word.length; i++) {
+				var ch = word.substring(i, i+1);
+				$("#" + getCellId(lastX + i ,lastY)).html(ch);
+			}
+			if (emptyArr) {
+				for (var i = 0; i < emptyArr.length; i++) {
+					$("#" + getCellId(lastX + emptyArr[i] - 1 ,lastY)).css("color", "red");
+				}
+			}
+		} else {
+			for (var i = 0; i < word.length; i++) {
+				var ch = word.substring(i, i+1);
+				$("#" + getCellId(lastX ,lastY + i)).html(ch);
+			}
+			if (emptyArr) {
+				for (var i = 0; i < emptyArr.length; i++) {
+					$("#" + getCellId(lastX ,lastY + emptyArr[i] - 1)).css("color", "red");
+				}
+			}
+		}
+		fillHistory.push({word: word, ori: ori, x: lastX, y: lastY, emptyArr: emptyArr});
+	}
+		
+	$(document).ready(function(){
+		
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$(".real-cell-area").append("<div id=\""+ getCellId(i+1, j+1) +"\" class=\"cell-item bdr bdb\" onclick=\"selectCell("+ (i+1)+","+ (j+1) +");\"></div>");
+			}
+			$(".real-cell-area").append("<div class=\"cb\"></div>");
+		}
+		
+		
+	});
+	
+</script>
+
+</body></html>

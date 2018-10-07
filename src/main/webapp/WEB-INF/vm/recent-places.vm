@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;border:0px;font-size:16px;}
+    	
+    	.hint-color {color:#999999;}
+    	    	
+    	.small-font {font-size:12px; color:#999999;line-height:16px;}
+    	.place-line {font-size:16px;color:#333333;line-height:24px;
+    		background:#FFFFFF url(/images/place.png) no-repeat;
+    		background-size:25px 25px;
+    		background-position:22px 19px;}
+    	.place-name {padding:20px 20px 20px 60px;}
+    	.border-top {border-top:1px solid #E0E0E0;}
+    	
+    	.no-places-hint {font-size:16px;color:#999999;line-height:24px;padding:50px 20px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/index';"></div>
+			<div class="top-bar-mid-title">最近访问</div>
+		</div>
+	
+		<div class="input-area">
+			#set ($no = 0)
+			#foreach ($p in $places)
+				#set ($no = $no + 1)
+				#if ($no > 1)
+					#set ($borderClass = "border-top")
+				#else
+					#set ($borderClass = "")
+				#end
+				<div class="place-line $borderClass" placeid="$p.getId()"><div class="place-name">$viewUtils.getHTMLValidText($p.getTitle())</div></div>
+			#end
+			
+			#if ($places.size() == 0)
+			<center><div class="no-places-hint">最近没有访问</div></center>
+			#end
+		</div>
+		
+	</div>
+	
+</div>
+
+<script type="text/javascript">
+	
+	
+	$(document).ready(function(){
+		$(".place-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var placeId = $(this).attr("placeid");
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					window.location = "/mq/viewplace?placeId=" + placeId;
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		var host = window.location.host;
+		configWeixinShare("土著说", "一句话证明你是土著", "http://" + host + "/images/tzs_logo.png", "http://" + host + "/mq/index?placeType=$!placeType");
+	});
+	
+</script>
+
+</body></html>

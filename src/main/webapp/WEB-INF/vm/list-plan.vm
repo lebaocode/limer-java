@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.status-top-tab {width:60%;height:26px;left:20%;position:absolute;top:55px;background-color:#FCFCFC;border-width:1px 0px 1px 1px;border-style:solid;border-color:#6098D5;}
+		.status-top-tab-item {width:33%;height:26px;line-height:26px;text-align:center;font-size:12px;border-width:0px 1px 0px 0px;border-style:solid;border-color:#6098D5;}
+		.status-top-tab-selected {background-color:#047BFD;color:#FFFFFF;}
+		.status-top-tab-unselected {background-color:#FCFCFC;color:#6098D5;}
+		.input-area {width:100%;margin-top:90px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.planlogo {position:absolute;left:15px; margin-top:18px;}
+		.planlogo img {width:32px; height:32px;border-radius:16px;-webkit-border-radius:16px;-moz-border-radius:16px;}
+		.plan {line-height:24px;padding:10px 95px 10px 57px;}
+		.starnum {font-size:18px;width:100px;height:24px;line-height:24px;color:#333333;position:absolute;right:50px;text-align:right;}
+		.plan-status-label {white-space:nowrap; font-size:10px;padding:5px;margin:0px 0px 0px 5px;background-color:#FE6442;color:#FFFFFF;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;}
+		.done {white-space:nowrap; font-size:10px;padding:5px;margin:0px 0px 0px 5px;background-color:#FE6442;color:#FFFFFF;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;}
+		.star {position:absolute;right:20px;background-image:url(/native_app_local_assets/star.png);width:24px;height:24px;background-repeat:no-repeat;background-attatchment:fixed;background-size:24px 24px;background-position:center top;}
+		.date {font-size:12px;width:100px;height:12px;line-height:12px;color:#999999;position:absolute;right:20px;text-align:right;margin-top:42px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.line-text {font-size:16px; text-align:left; width:100%;padding:12px 100px 12px 50px;line-height:24px;}
+		.plan-line {border-bottom:1px solid #E0E0E0;  width:100%;}
+				
+		.third-one {left:33%;}
+		.third-two {left:67%;}
+		.width33 {width:33%;}
+		.width50 {width:50%;}
+		
+		.norecord {font-size:12px;width:100px;height:12px;line-height:12px;color:#999999;position:absolute;right:20px;text-align:right;margin-top:27px;}
+		.hasdate {margin:13px 0px 0px 0px;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		#set ($encodedMemName = $viewUtils.encodeURL($mem_name))
+		<div class="top-bar">
+			#if (!$is_visitor)
+			<div class="person-icon" onclick="switchMemOp();"></div>
+			#end
+			<div class="top-bar-mid-title">$mem_name的行动日历</div>
+			#if ($is_creator)
+			<div class="add-icon" onclick="window.location='/plan/add?memName=$encodedMemName';"></div>
+			#end
+		</div>
+	
+		<table cellspacing="0" cellpadding="0" class="status-top-tab">
+			<tr>
+			#if ($!statusDesc == "running" || $!statusDesc == "")
+			#set ($statusClassName = "status-top-tab-selected")
+			#else
+			#set ($statusClassName = "status-top-tab-unselected")
+			#end
+			<td id="status-top-tab-item-1" class="status-top-tab-item $statusClassName" onclick="window.location='/plan/list?statusDesc=running&userId=$user_id';">进行中</td>
+			
+			#if ($!statusDesc == "end")
+			#set ($statusClassName = "status-top-tab-selected")
+			#else
+			#set ($statusClassName = "status-top-tab-unselected")
+			#end
+			<td id="status-top-tab-item-2" class="status-top-tab-item $statusClassName"  onclick="window.location='/plan/list?statusDesc=end&userId=$user_id';">已结束</td>
+			
+			#if ($!statusDesc == "all")
+			#set ($statusClassName = "status-top-tab-selected")
+			#else
+			#set ($statusClassName = "status-top-tab-unselected")
+			#end
+			<td id="status-top-tab-item-3" class="status-top-tab-item $statusClassName" onclick="window.location='/plan/list?statusDesc=all&userId=$user_id';">全部</td>
+			</tr>
+		</table>
+	
+		<div class="input-area">
+		#foreach ($item in $plan_list)
+			<div id="userplan-$item.getUserPlanId()" class="plan-line" userPlanId="$item.getUserPlanId()">
+				<div class="planlogo"><img src="/native_app_local_assets/$item.getLogo()" /></div>
+				
+				#if ($item.getLastRecordTime() != "")
+				<div class="starnum hasdate">$item.getResultThisMonth()</div>
+				<div class="star hasdate"></div>
+				<div class="date">$item.getLastRecordTime()</div>
+				#else
+				<div class="norecord">本月无记录</div>
+				#end
+				
+				<div class="plan">$item.getPlanName()
+				#if ($item.getStatus() == 0)
+				#if ($item.getLastRecordTime() == $viewUtils.getTodayDate())
+					<div class="di done">今日已完成</div>
+				#end
+				#else
+					<div class="di plan-status-label">$item.getStatusDesc()</div>
+				#end
+				</div>
+				
+				
+			</div>
+		#end
+		</div>
+		
+		#if (!$is_visitor)
+		<div class="bottom-bar">
+			<div class="bottom-bar-item width33 bottom-fudao-bg-unselected" onclick="gotoTab('fudao');">学习辅导</div>
+			<div class="bottom-bar-item width33 bottom-cal-bg-selected third-one">习惯培养</div>
+			<div class="bottom-bar-item width33 bottom-me-bg-unselected third-two" onclick="gotoTab('me');">我</div>
+		</div>
+		#end
+	</div>
+</div>
+
+<script type="text/javascript">
+	function switchMemOp(){
+		showLeftTopMenu([
+			#set ($memNo = 0)
+			#foreach ($mem in $mem_list)
+			#set ($encodedMemName = $viewUtils.encodeURL($mem))
+			#set ($memNo = $memNo + 1)
+			#if ($memNo > 1)
+			,
+			#end
+			{"name":"$mem", "url":"/plan/list?memName=$encodedMemName"}
+			#end
+		]);
+	}
+	
+	function viewRecord(userPlanId) {
+		window.location='/record/view?userPlanId=' + userPlanId + "&userId=$user_id&statusDesc=$!statusDesc";
+	}
+	
+	
+	$(document).ready(function(){
+		#if (!$is_visitor)
+		setTimeout('setDeviceToken("$mobile")', 1000);
+		#end
+		
+		$(".plan-line").each(function(){
+			
+			if ($(this).find(".plan").height() < 30) {
+				$(this).find(".plan").css("line-height", "48px");
+				$(this).find(".plan").height(48);
+			} 
+			//$(this).find(".plan").width($(window).width() - 57 - 95);
+		});
+		//logAction("INDEX");
+		
+		$(".plan-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var userPlanId = $(this).attr("userPlanId");
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					viewRecord(userPlanId);
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		var host = window.location.host;
+		configWeixinShare("乐宝亲子辅导", "$mem_name的行动计划", "http://" + host + "/images/qinzi5.jpg", "http://" + host + "/plan/list?userId=$user_id");
+	});
+	
+</script>
+
+</body></html>

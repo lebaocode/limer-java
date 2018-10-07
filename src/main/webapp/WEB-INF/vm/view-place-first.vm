@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.logo-title {margin-top:20%;font-size:24px;font-weight:bold;line-height:36px;padding:16px 0px 16px 50px;
+			background:#EFEFF4 url(/images/tuzhushuo_shu.png) no-repeat;
+    		background-size:45px 105px;
+    		background-position:80px 0px;}
+    		
+    	.input-keyword {position:fixed;bottom:0px;left:0px;width:100%;height:48px;background-color:#FFFFFF;}
+    	
+    	
+    	.hint-color {color:#999999;}
+    	
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		
+		<center>
+			<div class="logo-title">$viewUtils.getHTMLValidText($place_title)<br/>的$!user_title们<br/>正在说...</div>
+			
+		</center>
+		
+		<div class="input-keyword">
+			<input id="keyword" class="hint-color" type="text" name="keyword" value="一句话证明我是$!user_title" />
+		</div>
+	</div>
+	
+	
+</div>
+
+<script type="text/javascript">
+	var lat = "";
+	var lng = "";
+	
+	function cancelSearch() {
+		$("#mask").addClass("dn");
+		$("#placeSuggestionArea").addClass("dn");
+		$("#keywordreal").val("");
+		$(".suggestion-area").html("");
+	}
+	
+	function updateSuggestionArea(dataArr) {
+		$(".suggestion-area").html("");
+		for (var i = 0; i < dataArr.length; i++){
+			var place = dataArr[i];
+			$(".suggestion-area").append("<div class=\"place-line "+ (i>0 ? "border-top" : "") +"\" placeuid=\""+ place.uid +"\"><div class=\"place-name\">"+ place.name +"<br/><span class=\"small-font\">"+ place.city + place.district +"</span></div></div>");
+		}
+		
+		$(".place-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var placeUid = $(this).attr("placeuid");
+				$("#keywordreal").blur();
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					window.location = "/mq/viewplace?placeUid=" + placeUid;
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+	}
+	
+	function searchPlace() {
+		var s = $("#keywordreal").val();
+		if (s.length > 0 && lat.length > 0 && lng.length > 0) {
+			//showWindowsToast("开始请求" + s);
+			$.ajax({
+				dataType:"json",
+				url: "/mq/searchplace",
+				data: {placeType: "$!placeType", keyword: s, lat:lat, lng: lng},
+				success: function(data){
+		    		if (data.status == "ok") {
+		    			updateSuggestionArea(data.data);
+		    		} else {
+		    			//showWindowsToast(data.msg);
+		    		}
+		    	}
+			});
+		} else {
+			//showWindowsToast("坐标："+s + ","+lat + "," + lng);
+		}
+	}
+	
+	$(document).ready(function(){
+	
+		$("#keyword").on({
+			"focus": function(){
+				var ele = $("#keyword");
+				var hint = "请输入一个$!place_title名";
+				if (ele.val() == hint) {
+					ele.val("");
+				}
+				ele.css("color", "#333333");
+				
+				$("#mask").removeClass("dn");
+				$("#placeSuggestionArea").removeClass("dn");
+				$("#keywordreal").focus();
+			},
+			"blur": function(){
+				var ele = $("#keyword");
+				var hint = "请输入一个$!place_title名";
+				if (ele.val() == "") {
+					ele.val(hint);
+					ele.css("color", "#999999");
+				} 
+			}
+		});
+		
+		$("#keywordreal").bind("input propertychange",
+			function(){
+				searchPlace();
+			}
+		);
+		
+		var host = window.location.host;
+		configWeixinShare("土著说", "一句话证明你是土著", "http://" + host + "/images/tzs_logo.png", "http://" + host + "/mq/index?placeType=$!placeType",
+			function (res) {
+		        lat = res.latitude + ""; // 纬度，浮点数，范围为90 ~ -90
+		        lng = res.longitude + ""; // 经度，浮点数，范围为180 ~ -180。
+		        //showWindowsToast(lat + "," + lng);
+		    }
+		);
+	});
+	
+</script>
+
+</body></html>

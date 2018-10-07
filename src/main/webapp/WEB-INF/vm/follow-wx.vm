@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:40px;border:0px;font-size:16px;}
+		.center-msg {padding:20px 20px 20px 20px;font-size:14px;color:#333333;line-height:24px;}
+		.qr-code {width:180px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/viewplace?placeId=$placeId';"></div>
+			<div class="top-bar-mid-title">关注公众号指引</div>
+		</div>
+		<div class="input-area">
+			
+			<div class="center-msg">您尚未关注公众号，这会导致：<br/>
+			1. 有人向您提问了，我们却无法通知到您。<br/>
+			2. 有人回答了您的提问，我们也无法通知到您。<br/>
+			3. 您下次不知道从哪里回来这里。<br/><br/>
+			
+			长按下方二维码，关注我们的公众号（土著说），以解决以上问题：
+			</div>
+			<center>
+			<img class="qr-code" src="/images/qrcode_fwh.jpg" />
+			</center>
+			
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	
+	$(document).ready(function(){
+	});
+	
+</script>
+
+</body></html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;margin-top:86px;border:0px;}
+		
+		.last-month {line-height: 44px; height:44px;text-align:center; width:100%;font-size:16px; color:#999999;}
+		
+		.title-line {position:fixed;top:48px;z-index:2;width:100%;background-color:#FE6442;color:#FFFFFF;font-size:14px;text-align:center;line-height:36px;height:36px;}
+		.emp-digit {font-size:20px; font-weight:bold;margin:0px 5px;}
+		
+		.day-line {width:100%;background-color:#FFFFFF;margin-bottom:5px;}
+		.date-text {width:100px;position:absolute;left:10px;margin:15px 0px;color:#333333;font-size:16px;text-align:center; }
+		.record-detail {margin:0px 0px 0px 111px; border-left:1px solid #E0E0E0;}
+		.star-area {width:100px; height:72px;}
+		.record-text {line-height:24px;font-size:16px;padding:15px;}
+		.record-text textarea {border:0px solid #E0E0E0; width:100%; font-size:16px; overflow-y: auto;}
+		.record-image {height: 80px; margin-top:10px;}
+		
+		.onestar {background-image:url(/native_app_local_assets/star.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:36px 36px;background-position:15px 15px;}
+		.twostar {background-image:url(/native_app_local_assets/twostar.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:72px 36px;background-position:15px 15px;}
+		.chengfa {background-image:url(/native_app_local_assets/cry.jpg);background-repeat:no-repeat;background-attatchment:fixed;background-size:36px 36px;background-position:15px 15px;}
+		
+		
+		.no-record {font-size:16px;color:#999999;margin:0px 15px;line-height:72px;height:72px;}
+		
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main" style="margin-bottom:0px;">
+		#set ($encodedMemName = $viewUtils.encodeURL($mem_name))
+		<div class="top-bar">
+			#if ($is_visitor)
+			<div class="return-icon" onclick="lastStep();"></div>
+			#else
+			<div class="return-icon" onclick="window.location='/plan/list?memName=$encodedMemName&userId=$user_id';"></div>
+			#end
+			<div class="top-bar-mid-title">$textUtils.getAbbr($month_record.getPlanName(), 7)</div>
+			#if ($month_record.isCreator())
+			<div class="more-icon" onclick="showPlanOp();"></div>
+			#end
+		</div>
+	
+		<div class="title-line">$mem_name累计坚持<span id="topPeriodDay" class="emp-digit">$month_record.getPeriodDay()</span>天，收获<span id="topPrizeNum"  class="emp-digit">$month_record.getPrizeNum()</span>颗星<span id="topRemark">，$month_record.getRemark()</span></div>
+		
+		<div class="input-area">			
+			#if ($!last_month && $last_month != "")
+			<div class="last-month" id="last-month" onclick="window.location='/record/view?detail=true&userPlanId=$userPlanId&userId=$user_id&month=$!last_month';">查看上个月</div>
+			#end
+		#foreach ($item in $month_record.getDays())
+			
+			#if ($item.getPrizeNum() == 1)
+			#set ($starClassName = "onestar")
+			#elseif ($item.getPrizeNum() == 2)
+			#set ($starClassName = "twostar")
+			#elseif ($item.getPrizeNum() == -1)
+			#set ($starClassName = "chengfa")
+			#end
+			<div class="day-line" id="day-line-$item.getDate()" date="$item.getDate()">
+				<div class="date-text">$item.getChnDate()<br/>$item.getWeekDay()</div>
+				<div id="record-detail-$item.getDate()" class="record-detail">
+					#if ($item.getPrizeNum() != 0)
+					<div id="td-$item.getDate()" class="star-area $starClassName"></div>
+					#end
+					
+					#if (!$item.isHasRecord())
+					<div id="td-$item.getDate()" class="no-record">今日无记录</div>
+					#end
+					
+					#if ($item.getTextRecord())
+					<div id="text-record-$item.getDate()" class="record-text">$viewUtils.getHTMLValidText($item.getTextRecord())</div>
+					#end
+					
+					#if ($item.getImages())
+					#foreach ($imageUrl in $item.getImages())
+					<div class="record-image"><img src="$imageUrl" /></div>
+					#end
+					#end
+					
+				</div>		
+			</div>
+		#end
+			
+			#if ($!next_month && $next_month != "")
+			<div class="last-month" id="next-month" onclick="window.location='/record/view?detail=true&userPlanId=$userPlanId&userId=$user_id&month=$!next_month';">查看下个月</div>
+			#end
+			
+			<input id="curDate" type="hidden" name="curDate" value="" />
+			<input id="hiddenOldPrizeNum" type="hidden" name="oldPrizeNum" value="" />
+		</div>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	function record(prizeNum) {
+		var curDate = $("#curDate").val();
+		var oldPrizeNum = 0;
+		if ($("#td-" + curDate).hasClass("onestar")){
+			oldPrizeNum = 1;
+		} else if ($("#td-" + curDate).hasClass("twostar")){
+			oldPrizeNum = 2;
+		} else if ($("#td-" + curDate).hasClass("chengfa")){
+			oldPrizeNum = -1;
+		} else if ($("#td-" + curDate).hasClass("no-record")){
+			oldPrizeNum = 0;
+		} 
+		
+		var userId = "$user_id";
+		var userPlanId = "$month_record.getUserPlanId()";
+		$.ajax({
+			dataType:"json",
+			url: "/record/add",
+			data: {userId : userId, userPlanId: userPlanId, recordResult: prizeNum, oldRecordResult: oldPrizeNum, day: curDate, detail: true },
+			//headers: LEBAO_HEADERS,
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			changePrizeValue(prizeNum);
+	    			
+	    			var oldP = parseInt($("#topPeriodDay").html());
+	    			var newPrizeNum = parseInt(prizeNum);
+	    			var nowP;
+	    			if (oldPrizeNum <= 0 && newPrizeNum > 0) {
+	    				nowP = oldP + 1;
+	    			} else if (oldPrizeNum > 0 && newPrizeNum <= 0){
+	    				nowP = oldP - 1;
+	    			} else {
+	    				nowP = oldP;
+	    			}
+	    			$("#topPeriodDay").html(nowP + "");
+	    			
+	    			var oldP2 = parseInt($("#topPrizeNum").html());
+	    			var nowP2 = oldP2 + newPrizeNum - oldPrizeNum;
+	    			$("#topPrizeNum").html(nowP2 + "");
+	    			
+	    			$("#topRemark").html("");
+	    			
+	    			$("#hiddenOldPrizeNum").val(prizeNum);
+	    		} 
+	    	}
+		});
+	}
+
+	function changePrizeValue(hiddenVal) {
+		
+	
+		var menuId = "pop-mid-prize-menu";
+		toggleMenu(menuId);
+		
+		var curDate = $("#curDate").val();
+		var op = hiddenVal;
+		
+		if ($("#td-" + curDate).length <= 0 && op != "0"){
+			$("#record-detail-" + curDate).html("<div id=\"td-"+ curDate +"\"></div>"+ $("#record-detail-" + curDate).html());
+		}
+		
+		if (op == "0") {
+			if ($("#text-record-" + curDate).length > 0) {
+				$("#td-" + curDate).remove();
+				
+			} else {
+				$("#td-" + curDate).removeClass("onestar twostar chengfa no-record star-area");
+				$("#td-" + curDate).html("今日无记录");
+				$("#td-" + curDate).addClass("no-record");
+			}
+		}else if (op == "1") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa no-record");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("onestar star-area");
+						
+		}else if (op == "2") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa no-record");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("twostar star-area");
+			
+		}else if (op == "-1") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa no-record");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("chengfa star-area");
+			
+		}
+		
+		adjustHeight($("#record-detail-" + curDate));
+	}
+	function showPrizeMenu(menuItems) {
+		var menuId = "pop-mid-prize-menu";
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var html = "<div class='pop-mid-menu dn' id='"+ menuId +"'>";
+		
+		$.each(menuItems, function(i, val){
+			if (val.eleVal == "添加记录" || val.eleVal == "修改记录") {
+				html += "<div id='pop-menu-record-op' class='pop-mid-menu-item' >"+ val.eleVal +"</div>";
+			} else {
+				html += "<div class='pop-mid-menu-item' hiddenVal='"+ val.hiddenVal +"'>"+ val.eleVal +"</div>";
+			}
+		});
+		
+		html += "</div>";
+		genMaskLayerMenuHtml(menuId);
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+		
+		$(".pop-mid-menu-item").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+			
+				var hiddenVal = $(this).attr("hiddenVal");
+				if (hiddenVal) {
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						record(hiddenVal);
+					}, 300);
+				}
+				
+				var menuId = $(this).attr("menuId");
+				if (menuId){
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						toggleMenu(menuId);
+					}, 300);
+				}
+				
+				var id = $(this).attr("id");
+				if (id == "pop-menu-record-op"){
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						addTextRecord();
+					}, 300);
+				}
+				
+			});
+		});
+	}
+	
+	function addTextRecord() {
+		var day = $("#curDate").val();
+		window.location = "/record/addText?userPlanId=$month_record.getUserPlanId()&day="+ day;
+	}
+		
+	function showDayOp(date) {
+		#if ($is_visitor)
+		return;
+		#end
+	
+		#if ($month_record.isUserPlanStatusEnd())
+		showWindowsToast("本计划已结束！");
+		return;
+		#end
+		
+		#if ($month_record.isUserPlanStatusPaused())
+		showWindowsToast("本计划已暂停！");
+		return;
+		#end
+		
+		var curTime = getCurDate();
+		if (date > curTime) {
+			showWindowsToast("只能记录今天及以前的时间哦~");
+			return;
+		}
+	
+		var recordOp = "添加记录";
+		if ($("#text-record-" + date).length > 0 && $("#text-record-" + date).html() != "") {
+			recordOp = "修改记录";
+		}
+		if ($("#pop-menu-record-op").length > 0) {
+			$("#pop-menu-record-op").html(recordOp);
+		}
+		
+		$("#curDate").val(date);
+		showPrizeMenu([
+			{"hiddenVal": "1", "eleVal":"<center><img src='/native_app_local_assets/star.png' style='width:24px;height:24px;margin-top:10px;' /></center>"},
+			{"hiddenVal": "2", "eleVal":"<center><img src='/native_app_local_assets/twostar.png' style='width:48px;height:24px;margin-top:10px;'  /></center>"},
+			#if ($month_record.isParent())
+			{"hiddenVal": "-1", "eleVal":"<center><img src='/native_app_local_assets/cry.jpg' style='width:24px;height:24px;margin-top:10px;'  /></center>"},
+			#end
+			{"hiddenVal": "0", "eleVal":"无奖励"},
+			{"hiddenVal": "0", "eleVal":recordOp}
+			]
+			
+			);
+	}
+	
+	function shareOp(){
+	}
+
+	function showPlanOp(){
+		showRightTopMenu([
+			#if ($month_record.isCreator())
+		
+			#if (!$month_record.isUserPlanStatusEnd())
+			#if ($month_record.isDiyPlan())
+			{"name":"修改计划", "url":"/plan/modify?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			#if ($month_record.isUserPlanStatusPaused())
+			{"name":"继续计划", "url":"/plan/continue?userPlanId=$month_record.getUserPlanId()"},
+			#else
+			{"name":"暂停计划", "url":"/plan/pause?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			#end
+			
+			{"name":"删除计划", "url":"/plan/delete?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			{"name":"查看总览", "url":"/record/view?userPlanId=$month_record.getUserPlanId()&userId=$user_id"}
+		]);
+	}
+	
+
+	function adjustHeight(ele) {
+		
+		var starExists = ele.find(".star-area").length > 0;
+		var textExists = ele.find(".record-text").length > 0;
+		if (starExists && textExists) {
+			ele.find(".star-area").height(51);
+			ele.find(".record-text").css("line-height", "24px");
+		} else if (!starExists && textExists) {
+			if (ele.find(".record-text").height() < 44) {
+				ele.find(".record-text").css("line-height", "42px");
+			}
+		}
+		
+		var h = ele.height();
+		if (h < 72) {
+			ele.height(72);
+		}
+	}
+
+	var times = 0;
+	$(document).ready(function(){
+		
+		$(".record-detail").each(function(){
+			adjustHeight($(this));
+			
+		});
+		
+		#if ($!day && $day != "")
+		var scrollDay = "$day";
+		var scrollTop = $("#day-line-" + scrollDay).offset().top - 86;
+		window.scrollTo(0, scrollTop);
+		#else
+		window.scrollTo(0, document.body.scrollHeight);
+		#end
+		//logAction("INDEX");
+		
+		#if (!$is_visitor)
+		$(".day-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var date = $(this).attr("date");
+				
+				setTimeout(function(){
+					//showWindowsToast(date);
+					showDayOp(date);
+					//hideDivHighlightMenu();
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		#end
+		
+		var host = window.location.host;
+		configWeixinShare("乐宝亲子辅导", "$mem_name的计划《$month_record.getPlanName()》，已坚持$month_record.getPeriodDay()天", "http://" + host + "/images/qinzi5.jpg", "http://" + host + "/record/view?detail=true&userPlanId=$month_record.getUserPlanId()&userId=$user_id");
+		
+	});
+	
+</script>
+
+</body></html>

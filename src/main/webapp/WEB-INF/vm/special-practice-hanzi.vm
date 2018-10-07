@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+		@font-face {
+		    /* font-properties */
+		    font-family: smallkaiti;
+		    src:url('/fonts/$!font_file');
+		}
+    
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;color:#333333;font-size:16px;}
+    	.lp-line {width:100%;padding:20px 0px;clear:both;}
+    	.lp-right {padding:0px 10px 0px 40px;line-height:24px;}
+    	.lp-no {position:absolute; left:20px;line-height:24px;font-weight:bold;}
+    	
+    	.q-title {font-weight:bold;}
+    	.q-hint {color:#999999;font-size:14px;line-height:20px;}
+    	.q-item-line {margin-top:10px;line-height:36px;font-size:16px;color:#333333;}
+    	.q-shuxie-item-line {padding-top:28px;height:32px;}
+    	.kaiti {font-family:smallkaiti;}
+    	.red {color:red;}
+    	.tianzige-front-pinyin {position:relative;top:-20px;float:left;line-height:24px;width:38px;text-align:center;font-size:12px;font-family:hanyupinyin;}
+    	.q-shuxie-zi {font-size:16px;line-height:32px;color:#333333;float:left;}
+    	.fill-zi {font-family:smallkaiti;position:relative;top:-32px;margin-left:3px;font-size:24px;width:32px;text-align:center;line-height:32px;z-index:1;}
+    	.fill-zi-area {height:32px;}
+    	
+    	.review-book {position:fixed;bottom:10px;right:10px;width:48px;height:48px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/book-green.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px;
+    z-index:998;
+    	}
+    	
+    	.small-tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:32px 32px; width:32px;height:32px;font-size:24px; line-height:32px;text-align:center;
+	font-family:smallkaiti;margin-left:3px;}
+    	.tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px; width:48px;height:48px;font-size:40px; line-height:48px;text-align:center;
+	font-family:smallkaiti;}
+	
+		.emp2 {color:red;}
+		.emp {color:#C422CC;}
+    	
+    	.hanzi-pinyin {line-height:34px;width:54px;text-align:center;font-size:16px;font-family:hanyupinyin;}
+    	.vh {visibility:hidden;}
+    	.vb {visibility:visible;}
+    	
+    	
+    	.lp-item-content {margin:0px 30px 10px 0px;display:block;float:left;}
+    	.lp-item-pinyin {margin-left:10px;}
+    	.lp-item-zi {margin-left:12px;}
+    	.mark-line {margin-top:10px;line-height:16px;text-align:center;}
+    	.jianhao-icon {width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/jianhao-gray.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+		.jiahao-icon {width:16px;height:16px;background-position:center center;
+		background-color:#FCFCFC;
+		background-image:url(/images/jiahao-gray.png);
+		background-repeat:no-repeat;
+		background-attatchment:fixed;
+		background-size:16px 16px;}
+		.mark-num {font-size:10px;color:#999999;position:relative;top:-4px;}
+		
+		.btn-style {position:fixed;color:#FFFFFF;font-size:18px; background-color:#87C654; line-height:44px; height:44px;text-align:center;}
+		.btn-style-done {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		
+		.pos-submit {bottom:0px;}
+		.error-lp {width:16px;height:16px;position:relative;top:3px;margin-left:20px;}
+		
+		.width100 {width:100%;}
+		.width50 {width:49%;}
+		.left50 {left:50%;}
+		.left0 {left:10px;}
+		
+		.exit-mark {position:absolute; 
+	top:0px; 
+	left:0px; 
+	width: 80px;
+	text-align:center;
+	line-height:48px;
+	height:48px;
+	font-size:16px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/fudao/listuserpractices?bookId=$!book_id';"></div>
+			<div class="exit-mark dn" onclick="exitMark()">取消</div>
+			<div class="top-bar-mid-title">专项练习</div>
+		</div>
+		
+		<div class="input-area">
+			#set ($no = 0)
+			#foreach ($wq in $wqs)
+			#set ($no = $no + 1)
+			<div class="lp-line">
+				<div class="lp-no">$no.</div>
+				<div class="lp-right">
+				$wq.getHtml()
+				</div>
+			</div>
+			#end
+			
+		</div>
+		<div id="btn-allright" class="btn-style left0 width50 pos-submit" onclick="allRight();">全部做对了</div>
+		<div id="btn-mark" class="btn-style left50 width50 pos-submit" onclick="markError();">开始标记做错的题</div>
+		<div id="btn-submitmark" class="btn-style-done pos-submit dn" onclick="submitMark();">提交</div>
+	</div>
+	
+</div>
+
+<script type="text/javascript">
+	var state = "doing";
+	var errorLpIds = new Array();
+	
+	function markError() {
+		state = "mark";
+		$(".exit-mark").toggleClass("dn");
+		$(".return-icon").toggleClass("dn");
+		
+		//把答案都显示出来
+		$(".vh").toggleClass("vh vb");
+		
+		//提示
+		showWindowsToast("点击做错的题，以进行标记");
+		
+		//改底部button
+		$("#btn-mark").toggleClass("dn");
+		$("#btn-allright").toggleClass("dn");
+		$("#btn-submitmark").toggleClass("dn");
+		
+	}
+	
+	function allRight() {
+		errorLpIds = new Array();
+		submitPracticeErrors();
+	}
+	
+	function exitMark() {
+		state = "doing";
+		$(".exit-mark").toggleClass("dn");
+		$(".return-icon").toggleClass("dn");
+		
+		//隐藏答案
+		$(".vb").toggleClass("vh vb");
+		
+		//改底部button
+		$("#btn-mark").toggleClass("dn");
+		$("#btn-allright").toggleClass("dn");
+		$("#btn-submitmark").toggleClass("dn");
+		$(".error-lp").remove();
+	}
+	
+	function submitPracticeErrors() {
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/practicedone",
+			data: {testId: "$test_id", lpIds: JSON.stringify(errorLpIds)},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			window.location = "/fudao/listuserpractices?bookId=$!book_id";
+	    		}
+	    	}
+		});
+	}
+	
+	function submitMark() {
+		submitPracticeErrors();
+	}
+	
+	function markItemError(e) {
+		var lpId = $(e).attr("lpid");
+		var kpId = $(e).attr("kpid");
+		
+		if ($(e).find(".error-lp").length > 0) {
+			//去掉标记
+			$(e).find(".error-lp").remove();
+			var n = -1;
+			for (var i = 0; i < errorLpIds.length; i++) {
+				if (errorLpIds[i].kpId == kpId && errorLpIds[i].lpId == lpId){
+					n = i;
+				}
+			}
+			if (n != -1) {
+				errorLpIds.splice(n, 1);
+			}
+		} else {
+			//增加标记
+			errorLpIds.push({lpId: lpId, kpId: kpId});
+			$(e).append("<img class=\"error-lp\" src=\"/images/error.gif\" />");
+		}
+		
+		
+		
+	}
+	
+	function showAnswer(e, cls) {
+		if (state == "doing") {
+			$(e).find("." + cls).toggleClass("vh vb");
+		} else {
+			markItemError(e);
+		}
+	}
+	
+	function gotoReview() {
+		window.location = "/fudao/viewreview?bookId=$!book_id";
+	}
+	
+	$(document).ready(function(){
+		
+		var w = ($(window).width() - 30)/2;
+		var left = w + 20;
+		$("#btn-mark").offset({left: left});
+		$("#btn-mark").width(w);
+		$("#btn-allright").offset({left: 10});
+		$("#btn-allright").width(w);
+		
+	});
+	
+</script>
+
+</body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		
+		.test-line {width:100%;border-bottom:1px solid #E0E0E0;}
+		.test-name {font-size:16px;color:#333333;line-height:24px;margin:0px 20px;padding-top:20px;}
+		.test-day {color:#999999; font-size:12px; line-height:24px;margin-left:20px;padding-bottom:10px;}
+		.test-status {margin-left:20px;}
+		.error-num {margin-left:20px;}
+		
+		.test-finished {}
+		.test-unfinished {color:red;}
+		
+		.btn-style {position:fixed;color:#FFFFFF;font-size:18px;bottom:0px;width:100%; background-color:#87C654; line-height:44px; height:44px;text-align:center;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/fudao/listchapter?bookId=$!book_id';"></div>
+			<div class="top-bar-mid-title">练习本</div>
+		</div>
+	
+		<div class="input-area">
+			#foreach ($test in $tests)
+			#if ($test.isFinished())
+			#set ($testStatus = "已完成")
+			#set ($statusClass = "test-finished")
+			#else
+			#set ($testStatus = "未完成")
+			#set ($statusClass = "test-unfinished")
+			#end
+			<div class="test-line" testid="$test.getTestId()">
+				<div class="test-name">$viewUtils.getHTMLValidText($test.getTitle())</div>
+				<div class="test-day">$test.getCreateDay()
+					<span class="test-status $statusClass">$testStatus</span>
+					#if ($test.isFinished())
+					<span class="error-num">$test.getErrorNum()错/$test.getTotalNum()</span>
+					#end
+				</div>
+			</div>
+			#end
+		</div>
+		
+		<div id="btn-newpractice" class="btn-style" onclick="window.location='/fudao/specialpractice?bookId=$book_id';">创建新的练习</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function feedback() {
+		showWindowsToast("您可以关注“乐宝亲子辅导”微信公众号，直接回复反馈建议");
+	}	
+
+	$(document).ready(function(){
+		$(".test-line").each(function(){
+			var testId = $(this).attr("testid");
+			
+		
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				
+				setTimeout(function(){
+					window.location = "/fudao/specialpractice?testId=" + testId + "&bookId=$!book_id";
+				}, 300);
+				
+				
+			});
+			
+			
+		});
+	});
+	
+</script>
+
+</body></html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:40px;border:0px;font-size:16px;}
+		
+		.place-info-area {width:100%;}
+		.place-logo img {width:100%;}
+		.place-info-line {padding:10px 0px;width:100%;background-color:#FFFFFF;margin-top:-5px;}
+		.place-info {width:50%;float:left;text-align:center;font-size:14px;color:#333333;line-height:20px;}
+		.emp-digit {font-weight:bold;}
+		
+		.question-area {width:100%;}
+		.question-line {background-color:#FFFFFF;width:100%;margin:10px 0px;}
+		.question-content {color:#333333;font-size:16px;line-height:24px;padding:20px 20px 5px 20px;}
+		.listen-btn {background-color:#87C654;width:200px;font-size:16px;color:#FFFFFF;text-align:center;line-height:40px;height:40px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;}
+		
+		.author-name {font-size:12px;color:#999999;text-align:left;padding:0px 20px 20px 20px;}
+		.replyer-name {color:#333333;font-size:14px;line-height:24px;}
+		.replyer-desc {color:#999999;font-size:12px;line-height:20px;}
+		
+		.width50 {width:50%;}
+		.half {left:50%;}
+		.bottom-bar-action-item {line-height:48px;
+		    font-size:16px;
+		    text-align:center;
+		    height:48px;
+		    position:fixed;
+		    bottom:0px;}
+	    .bottom-bar-action {
+		    position:fixed;
+		    left:0;
+		    bottom:0;
+		    width:100%;
+		    height:48px;
+		    background-color:#FCFCFC;
+		    color:#FE6442;
+		    border-color:#E0E0E0;
+		    border-width:1px 0px 0px 0px;
+		    border-style:solid;
+		    text-align:center;
+		    z-index:9998;
+		}
+    
+    	.no-question-hint {font-size:16px;color:#333333;line-height:24px;padding:40px 40px 20px;text-align:center;}
+    	.join-btn {height:48px;background-color:#87C654;line-height:48px;width:33%;position:absolute;left:33%;color:#FFFFFF;font-size:16px;text-align:center;}
+    	
+    	.btn-style {position:fixed;width:100%; color:#FE6442;font-size:18px; background-color:#FCFCFC; line-height:44px; height:44px;text-align:center;border-color:#E0E0E0;
+	    border-width:1px 0px 0px 0px;
+	    border-style:solid;}
+		.pos-submit {bottom:0px;}
+		
+		.agree-icon {background:#FFFFFF url(/images/agree.png?t=1) no-repeat;
+    		background-size:12px 12px;
+    		background-position:0px 0px;}
+		
+		.disagree-icon {background:#FFFFFF url(/images/disagree.png?t=1) no-repeat;
+    		background-size:12px 12px;
+    		background-position:0px 0px;}
+    		
+    	.listen-disagree {position:absolute;right:20px;font-size:12px;color:#999999;padding:0px 0px 0px 16px;}
+		.listen-agree {position:absolute;width:40px;right:20px;font-size:12px;color:#999999;padding:0px 0px 0px 16px;}
+    
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/index';"></div>
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($place.getTitle())</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="place-info-area">
+				<div class="place-logo"><img src="$place.getImgPath()?t=1" /></div>
+			</div>
+		
+			<div class="question-area">
+			#foreach ($q in $threads)
+			<div class="question-line" tid="$q.getThreadId()">
+				<div class="question-content">$viewUtils.getHTMLValidText($q.getTitle())</div>
+				#if ($q.getAgreeNum() > 0)
+				<div class="listen-agree agree-icon">$q.getAgreeNum()</div>				
+				#end
+				<div class="author-name">$q.getAuthorName()&nbsp;&nbsp;$q.getDisplayPublishTime()</div>
+			</div>
+			#end
+			
+			#if ($thread_num == 0)
+			<div class="no-question-hint">此地还没有土著出没！<br/>快来做第一个土著吧~</div>
+			#end
+			</div>
+		</div>
+	</div>
+	
+	#if (!$isVisitor)
+		<div class="bottom-bar-action">
+			<div class="bottom-bar-action-item width50" onclick="window.location='/mq/post?placeId=$placeId';">一句话证明你是土著</div>
+			<div class="bottom-bar-action-item width50 half" onclick="window.location='/mq/listplacemems?placeId=$placeId';">向土著提问</div>
+		</div>
+	#end
+</div>
+
+<script type="text/javascript">
+	
+	
+	$(document).ready(function(){
+	
+		$(".question-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var tId = $(this).attr("tid");
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					window.location = "/mq/viewthread?threadId=" + tId;
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		var host = window.location.host;
+		var topSentence = "$viewUtils.escapeDoubleQuote($viewUtils.getHTMLValidText($!top_sentence))";
+		if (topSentence.length > 0) {
+			topSentence = "：" + topSentence;
+		}
+		configWeixinShare("土著说", "一句话证明你是$viewUtils.getHTMLValidText($place.getTitle())土著" + topSentence, "http://" + host + "/images/tzs_logo.png", "http://" + host + "/mq/viewplace?placeId=$!placeId");
+	});
+	
+</script>
+
+</body></html>

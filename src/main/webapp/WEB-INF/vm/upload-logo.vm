@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+	#parse("header.vm")
+	<script type="text/javascript" src="/js/sea.js"></script>
+	<style>
+		.first_form_pos {margin-top:88px;width:100%;}
+		.btn_upload_logo_fake {width:100%;height:160px;}
+		.btn_upload_logo_fake img {height:160px;}
+		.btn_upload_logo_real {width:1px; height:1px; overflow:hidden;}
+		.text_hint {width:100%; text-align:center;font-size:18px;color:#111111;margin:20px 0px 0px 0px;}
+		#debug {word-wrap:break-word; word-break:break-all;margin:16px;}
+	</style>
+</head>
+<body>
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="top-bar">
+		<span class="top-bar-left-action" onclick="lastStep()">返回</span>
+		<span class="top-bar-mid-title">上传头像</span>
+		<span class="top-bar-right-action" onclick="nextStep()">完成</span>
+	</div>
+	<div class="first_form_pos">
+		<div id="btn_upload_logo_fake" class="btn_upload_logo_fake" onclick="uploadLogo()">
+			#set ($imgUrl = $user_info.getBbHeadImgUrl())
+    		#set ($imgUrlSuffix = "?imageView2/1/w/160/h/160")
+			<center>
+				<img id="bb_logo_img" src="$imgUrl$imgUrlSuffix" onerror="useCachedData('$user_info.getId()', this);" />
+			</center>
+		</div>
+		<div class="text_hint" onclick="uploadLogo()">点击图片修改头像</div>
+		<input id="bb_logo_file" type="file" onchange="change(event)" class="btn_upload_logo_real">
+		<form id="frmReg1" name="frmReg1" action="/me/logo" method="post">
+			<input type="hidden" name="submitted" value="true" id="submitted" />
+			<input type="hidden" name="bb_logo_base64" value="" id="bb_logo_base64" />
+		</form>
+	</div>	
+	
+	
+</div>
+
+<script type="text/javascript">
+	seajs.config({
+		base: '/js/',
+		alias: {
+			'zepto': '/js/zepto'
+		}
+	});
+
+	function change(event) {
+		showLoadingIcon();
+		var file = event.target.files[0];
+		seajs.use(['zepto', 'compress'], function ($, compresser) {
+			compresser.compress(file, {maxWidth: 800, maxHeight: 600, quality: .9, type:'image/jpeg'}, function (dataUrl) {
+				$("#bb_logo_img").attr("src", dataUrl);
+				stopLoadingIcon();
+			});
+		});
+	}
+	function uploadLogo() {
+    	$("#bb_logo_file").trigger("click");
+    	
+    }
+	
+    function nextStep() {
+    	var data = $("#bb_logo_img").attr("src");
+    	if (data && data.length > 0) {
+	    	$("#bb_logo_base64").val(data);
+		    $("#frmReg1").submit();	
+		    showLoadingIcon();
+	    } else {
+	    	window.location="/nav/me";
+	    }
+    }
+    $(document).ready(function(){
+    	
+    });
+</script>
+
+#parse("init-msg.vm")
+</body>
+</html>

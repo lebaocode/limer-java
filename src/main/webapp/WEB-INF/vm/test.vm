@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<script type="text/javascript" charset="utf-8" src="/native_app_local_assets/jquery.imagecompress.js"></script>
+	<title>乐宝亲子辅导</title>
+    <style>
+		.button-area{margin:40px 0px 10px;}
+		.button-line{width:90%;}
+		.text-css{text-align:left; font-size:16px;color:#333333;line-height:24px;padding:10px;border:0px; margin: 5px 10px; }
+		.btn-style {border:0px;width:80px; height:40px; line-height:40px; font-size:14px; text-align:center; background-color:#87C654; color:#FFFFFF; margin:5px 5px;}
+		.return-area{width:90%;margin:10px 0px 10px;}
+		.preview {width:200px;}
+		#bb_logo_file {width:1px; height:1px;}
+		
+		@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">测试native方法</div>
+		</div>
+		<center>
+		<div class="button-area">
+			<div class="button-line">
+	            <button class="btn-style" onclick="showCamera()">拍照</button>
+	            <button class="btn-style" onclick="showPhotoLibraryTest()">相册</button>
+	            <button class="btn-style" onclick="showVideo()">视频</button>
+	
+			</div>
+			<div class="button-line">
+	            <button class="btn-style" onclick="shareWithText('乐宝亲子辅导', '协助家长培养孩子达成目标', 'http://www.limer.cn')">分享</button>
+	            <button class="btn-style" onclick="getCurrentLocation()">定位</button>
+	            <button class="btn-style" onclick="showIOSToast('显示提示')">提示</button>
+	            
+			</div>
+			<div class="button-line">
+	            <button class="btn-style" onclick="startAudioRecord()">开始录音</button>
+	            <button class="btn-style" onclick="stopAudioRecord()">结束录音</button>
+	           	<button class="btn-style" onclick="triggerFileInput()">选择文件</button><input id="bb_logo_file" type="file">
+			</div>
+			<div class="button-line">
+	            <button class="btn-style" onclick="showAppInfo()">获取appinfo</button>
+	            <button class="btn-style" onclick="refreshCache()">刷新缓存</button>
+	            <button class="btn-style" onclick="clearCookie()">清除cookie</button>
+			</div>
+			<div class="button-line">
+	            <button class="btn-style" onclick="clearSelfData()">清除本用户数据</button>
+			</div>
+		</div>
+		<div class="return-area">
+			<div id="returndiv" class="text-css">
+			</div>
+		</div>
+		<div style="margin:50px 0px 0px; font-size:48px; ">
+			<ruby>
+				水落石出<rt style="font-family:hanyupinyin;">guǐ ào lǚ lüè</rt>
+			</ruby>
+		</div>
+		</center>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function refreshCache() {
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/refreshcache",
+			data: {},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		} else {
+	    			showWindowsToast("刷新完成");
+	    		}
+	    	}
+		});
+	}
+	
+	function clearCookie() {
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/clearcookie",
+			data: {},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		} else {
+	    			showWindowsToast("清除完成");
+	    		}
+	    	}
+		});
+	}
+	
+	function clearSelfData() {
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/clearselfdata",
+			data: {},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		} else {
+	    			showWindowsToast("清除数据完成");
+	    		}
+	    	}
+		});
+	}
+
+	$("#bb_logo_file").imageCompress({
+		'quality': 50,
+		'onloadStart': function(result){
+			//console.log('读取图片开始'+result);
+		},
+		'onloadEnd': function(result){
+			//console.log('读取图片结束'+result);
+		},
+		'oncompressStart': function(result){
+			//console.log('压缩图片开始'+result);
+		},
+		'oncompressEnd': function(result){
+			//console.log('压缩图片结束'+result);
+			$('#returndiv').append(result);
+			$('#returndiv').find('img').addClass('preview');
+		},
+		'callback': function(){
+			//alert('处理完毕');
+			//alert($('#returndiv').html());
+		}
+	});
+
+function readLocal(filePath) {
+	//$("#returndiv").html(filePath);
+	$("#returndiv").html("<img src='file:///"+ filePath +"' />");
+	
+}
+function triggerFileInput() {
+	//alert("selectFile");
+	$("#bb_logo_file").trigger("click");
+}
+
+function showPhotoLibraryTest(){
+	if (typeof(NativeBridge) == "undefined") {
+    	showWindowsToast("NativeBridge is undefined.");
+    } else {
+	    NativeBridge.showPhotoLibraryWithCallback(function(path){
+	        readLocal(path);
+	    });
+    }
+}
+</script>
+
+</body></html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	.input-area {width:100%;height:1024px;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+    	.book-line {width:100%;height:168px;}
+    	.bottom-border {border-bottom:1px solid #E0E0E0;}
+    	.book-img {width:90px;display:inline;position:absolute;left:20px;padding:20px 0px;}
+    	.book-firstline {padding:30px 0px 0px 0px;margin:0px 0px 0px 120px;font-weight:bold;font-size:16px;line-height:16px;color:#333333;}
+    	.book-secondline {margin:10px 0px 10px 120px;font-size:14px;line-height:14px;color:#333333;}
+		
+		
+    	.third-one {left:33%;}
+		.third-two {left:67%;}
+		.half {left:50%;}
+		.width33 {width:33%;}
+		.width50 {width:50%;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			#if ($mem_list.size() > 1)
+			<div class="person-icon" onclick="switchMemOp();"></div>
+			#end
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($!mem_name)的课本</div>
+			<div class="add-icon" onclick="addBook()"></div>
+		</div>
+		
+		<div class="input-area">
+			#set ($no = 0)
+			#foreach ($book in $books)
+			#set ($no = $no + 1)
+			#if ($no != $books.size() )
+			#set ($lineClass = "bottom-border")
+			#else
+			#set ($lineClass = "")
+			#end
+			<div class="book-line $lineClass" bookid="$book.getBookId()">
+				<img class="book-img" src="$book.getImgPath()"  />
+				<div class="book-firstline">$book.getSubject()</div>
+				<div class="book-secondline">$book.getGradeDesc()</div>
+				<div class="book-secondline">$book.getPublisher()</div>
+				<div class="book-secondline">$book.getVersion()</div>
+			</div>
+			#end
+		</div>
+		
+		<div class="bottom-bar">
+			#if ($user.getMobile() == "18601030171")
+			<div class="bottom-bar-item width33 bottom-fudao-bg-selected">学习辅导</div>
+			<div class="bottom-bar-item width33 bottom-cal-bg-unselected third-one" onclick="gotoTab('cal');">习惯培养</div>
+			<div class="bottom-bar-item width33 bottom-me-bg-unselected third-two" onclick="gotoTab('me');">我</div>
+			#else
+			<div class="bottom-bar-item width50 bottom-fudao-bg-selected">学习辅导</div>
+			<div class="bottom-bar-item width50 bottom-me-bg-unselected half" onclick="gotoTab('me');">我</div>
+			#end
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function switchMemOp(){
+		showLeftTopMenu([
+			#set ($memNo = 0)
+			#foreach ($mem in $mem_list)
+			#set ($encodedMemName = $viewUtils.encodeURL($mem))
+			#set ($memNo = $memNo + 1)
+			#if ($memNo > 1)
+			,
+			#end
+			{"name":"$mem", "url":"/fudao/listuserbooks?memName=$encodedMemName"}
+			#end
+		]);
+	}
+
+	function addBook(){
+		window.location = "/fudao/adduserbook";
+	}
+	$(document).ready(function(){
+		$(".book-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var bookId = $(this).attr("bookid");
+				
+				setTimeout(function(){
+					window.location = "/fudao/listchapter?bookId=" + bookId;
+				}, 300);
+				
+			});
+		});
+		
+	});
+	
+</script>
+
+</body></html>

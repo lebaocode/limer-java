@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+    <style>
+    	.content {font-size:18px; color:#111111; line-height:26px; text-align:center; margin:70px 16px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+
+
+<div class="content">您可以关注<br/>“乐宝亲子辅导”微信公众号，<br/>提供反馈建议~<br/><br/><a href="javascript:lastStep();">返回上一页</a></div>
+
+
+</div>
+
+</body></html>

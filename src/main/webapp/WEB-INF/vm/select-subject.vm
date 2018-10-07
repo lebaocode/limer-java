@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	.input-area {width:100%;height:1024px;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;padding-top:60px;}
+    	
+    	.subject-icon {font-size:18px;color:white; width:60px;line-height:60px; height:60px;text-align:center; border-radius:30px;-webkit-border-radius:30px;-moz-border-radius:30px;}
+    	
+    	.invalid-item {background-color:#CCCCCC;}
+    
+    	.bg-chn {background-color:#FE6442;}
+    	.bg-math {background-color:#87C654;}
+    	.bg-eng {background-color:#FDE8E5;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">$!grade_desc</div>
+		</div>
+		
+		<div class="input-area">
+			<center>
+			<table cellspacing="30" cellpadding="0">
+				<tr>
+				<td class="subject-icon bg-chn" subject="1">语文</td>
+				<td class="subject-icon invalid-item" subject="2">数学</td>
+				<td class="subject-icon invalid-item" subject="3">英语</td>
+				</tr>
+			</table>
+			</center>
+		</div>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		$(".subject-icon").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var invalid = $(this).hasClass("invalid-item");
+				var subject = $(this).attr("subject");
+				
+				setTimeout(function(){
+					if (invalid){
+						showWindowsToast("目前只开通了语文，其它暂未开通");
+					} else {
+						window.location = "/fudao/selectbook?grade=$!grade&term=$!term&subject=" + subject;
+					}
+				}, 300);
+				
+			});
+		});
+		
+	});
+	
+</script>
+
+</body></html>

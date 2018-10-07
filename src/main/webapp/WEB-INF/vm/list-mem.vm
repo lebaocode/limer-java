@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.action-area {width:100%;margin-top:10px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		
+		.add-action-icon{
+		    background:#FCFCFC url(/native_app_local_assets/add.png) no-repeat;
+		    background-size:24px 24px;
+		    background-position:center;
+		    width:16px;
+		    height:16px;
+		    display:inline;
+		    position:relative;
+		    top:2px;
+		    margin-right:5px;
+		}
+		
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; right:10px;text-align:right;width:140px;}
+		.mem-line {border-bottom:1px solid #E0E0E0;  width:100%;padding:0px 10px;line-height:46px;font-size:16px;}
+		
+		.line1 {border-bottom:1px solid #E0E0E0;  width:100%;padding:0px 10px;line-height:46px;font-size:16px;}
+		
+		
+		.pos-submit {bottom:0px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+	
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/ucenter/list';"></div>
+			<div class="top-bar-mid-title">我的家庭成员</div>
+		</div>
+	
+		<div class="input-area">
+		#foreach ($item in $mem_list)
+			#set ($tempDesc = $item.getDesc())
+			#if ($tempDesc.length() > 0)
+			<div class="mem-line" memName="$item.getName()">$item.getName()</div>
+			#else
+			<div class="mem-line" memName="$item.getName()">$item.getName()</div>
+			#end
+		#end
+		</div>
+		
+		#if ($is_creator)
+		<div class="action-area">
+			<div class="line1" onclick="window.location='/mem/addChild';"><img src="/native_app_local_assets/add.png" class="add-action-icon" />添加孩子</div>
+			<div class="line1" onclick="window.location='/mem/addParent';"><img src="/native_app_local_assets/add.png" class="add-action-icon" />添加家长</div>
+		</div>
+		#end
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	
+	function showOpMenu(memName) {
+		var isCreator = $!is_creator ;
+		if (!isCreator) return;
+	
+		var url = "/mem/delete?memName=" + encodeURIComponent(memName);
+		showMidOpMenu([
+			{name: "删除", url: url}
+		]);
+	}
+
+	$(document).ready(function(){
+		$(".mem-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var memName = $(this).attr("memName");
+				
+				setTimeout(function(){
+					//showWindowsToast(date);
+					showOpMenu(memName);
+					//hideDivHighlightMenu();
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		//logAction("INDEX");
+		
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

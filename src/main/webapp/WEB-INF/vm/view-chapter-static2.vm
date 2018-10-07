@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+		@font-face {
+		    /* font-properties */
+		    font-family: smallkaiti;
+		    src:url('/css/small-kaiti.ttf');
+		}
+    
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;color:#333333;font-size:16px;}
+    	.lp-line {width:100%;padding:20px 0px;clear:both;}
+    	.lp-right {padding:0px 10px 0px 40px;line-height:24px;}
+    	.lp-no {position:absolute; left:20px;line-height:24px;font-weight:bold;}
+    	
+    	.lp-title {font-weight:bold;}
+    	.lp-goal {color:#999999;font-size:14px;line-height:20px;}
+    	.goal-label {}
+    	
+    	.add-review-num {position:fixed;bottom:48px;right:8px;width:20px;height:20px;background-color:red;color:white;font-size:12px;text-align:center;line-height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;z-index:999;}
+    	.review-book {position:fixed;bottom:10px;right:10px;width:48px;height:48px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/book-green.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px;
+    z-index:998;
+    	}
+    	
+    	.add-review-icon {position:absolute;margin:-8px 0px 0px 42px;width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/add-icon-square.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+	    	
+    	.tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px; width:48px;height:48px;font-size:40px; line-height:48px;text-align:center;
+	font-family:smallkaiti;}
+    	
+    	.hanzi-pinyin {line-height:24px;width:54px;text-align:center;font-size:16px;font-family:hanyupinyin;}
+    	
+    	.lp-item-line {margin-top:10px;}
+    	.lp-item-content {margin:0px 30px 10px 0px;display:block;float:left;}
+    	.lp-item-pinyin {margin-left:10px;}
+    	.lp-item-zi {margin-left:12px;}
+    	.mark-line {margin-top:10px;line-height:16px;text-align:center;}
+    	.jianhao-icon {width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/jianhao-gray.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+		.jiahao-icon {width:16px;height:16px;background-position:center center;
+		background-color:#FCFCFC;
+		background-image:url(/images/jiahao-gray.png);
+		background-repeat:no-repeat;
+		background-attatchment:fixed;
+		background-size:16px 16px;}
+		.mark-num {font-size:10px;color:#999999;position:relative;top:-4px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($chapter.getTitle())</div>
+		</div>
+		
+		<div class="input-area">
+		
+			<div class="lp-line">
+				<div class="lp-no">1.</div>
+				<div class="lp-right">
+					<div class="lp-title">写字</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>会写以下汉字及其拼音，并能够组词。</div>
+					
+					<div class="lp-item-line">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">chūn</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">春</div>
+							<div class="mark-line" marknum="0">
+								<img class="jiahao-icon di" lpid="1" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">fēng</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">风</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">chūn</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">春</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">fēng</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">风</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="lp-line">
+				<div class="lp-no">2.</div>
+				<div class="lp-right">
+					<div class="lp-title">识字</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>能认识以下汉字，并能正确发音。</div>
+					<div class="lp-item-line">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">shuāng</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">霜</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">chuī</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">吹</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">luò</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">落</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">jiàng</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">降</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">piāo</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">飘</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">yóu</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">游</div>
+							<div class="mark-line">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin lp-item-pinyin">chí</div>
+							<div class="tianzige-zi lp-item-zi" lpid="1">池</div>
+							<div class="mark-line" marknum="0">
+								<img class="jiahao-icon di" lpid="2" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num">0</span> 次</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="cb"></div>
+		</div>
+		
+		<div class="review-book" onclick="gotoReview()"></div>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	function addReview(e) {
+		var markNum = parseInt($(e).parent().attr("marknum"));
+		$(e).parent().prev().css("color", "red");
+		$(e).parent().prev().prev().css("color", "red");
+		markNum++;
+		$(e).parent().attr("marknum", markNum + "");
+		$("#mark-num").html(markNum + "");
+	}
+	
+	function subReview(e) {
+		var markNum = parseInt($(e).parent().attr("marknum"));
+		if (markNum == 0) return;
+		
+		markNum--;
+		$(e).parent().attr("marknum", markNum + "");
+		$("#mark-num").html(markNum + "");
+		
+		if (markNum == 0) {
+			$(e).parent().prev().css("color", "#333333");
+			$(e).parent().prev().prev().css("color", "#333333");
+		}
+	}
+	
+	function gotoReview() {
+		window.location = "/fudao/viewreview?bookId=$!book_id";
+	}
+	
+	$(document).ready(function(){
+		
+	});
+	
+</script>
+
+</body></html>

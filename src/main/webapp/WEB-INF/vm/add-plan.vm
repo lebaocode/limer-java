@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; right:10px;text-align:right;width:180px;}
+		.line1 { padding:10px;}
+		.line2 {border-top:1px solid #E0E0E0; padding:10px;}
+		.line-logo {border-top:1px solid #E0E0E0; padding:10px;height:50px;}
+		.pos-submit {bottom:0px;}
+		.logo-selected {height:40px;width:40px;border-radius:20px;-webkit-border-radius:20px;-moz-border-radius:20px;}
+		
+		.pop-item-day-selected {background-position:80% center;
+			background-color:#FCFCFC;
+			background-image:url(/images/selected.png);
+			background-repeat:no-repeat;
+			background-attatchment:fixed;
+			background-size:24px 24px;}
+		.pop-item-day-confirm {background-color:#87C654;color: #FFFFFF;}
+		.pop-mid-menu-day-font {background-color:#FCFCFC;color: #333333;}
+		.pop-mid-menu-day {
+			font-size:16px;
+			position:fixed;
+			width:70%;
+			left:15%;
+			bottom:20%;
+			z-index:19997;
+			opacity:0.95;
+		    filter:alpha(opacity=95);
+		}
+		
+		#pop-item-hour {border-width:1px 0px 0px 1px;border-style:solid;border-color:#4C4D4F;width:100%;}
+		.pop-item-hour-display {text-align:center;font-size: 28px;line-height:84px;height:84px;color:#FFFFFF;background-color:#232323;}
+		.pop-item-hour-keyboard-item {font-size:20px;text-align:center;line-height:64px;height:64px;width:50px;background-color:#D4D5D7;border-width:0px 1px 1px 0px;border-style:solid;border-color:#4C4D4F;}
+		.pop-item-hour-confirm {text-align:center;background-color:#F88A0F; color:#FFFFFF;line-height:44px;height:44px;border-width:0px 1px 1px 0px;border-style:solid;border-color:#4C4D4F;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/plan/add">
+		<input type="hidden" name="submitted" value="true" />
+		<input type="hidden" name="memName" value="$!mem_name" />
+		
+		#if ($user_plan)
+			#set ($className = "normal-color")
+			#set ($userPlanId = $user_plan.getId())
+			#set ($notifyDayInt = $user_plan.getNotifyDay())
+			#set ($notifyDayDesc = $user_plan.getNotifyDayDesc())
+			#set ($notifyHour = $user_plan.getNotifyHour())
+			#set ($planPrize = $user_plan.getPrize())
+			
+			#if ($planPrize == "")
+			#set ($planPrize = "例如：一起去公园")
+			#end
+			
+			#if ($notifyDayDesc == "")
+			#set ($notifyDayInt = "1,2,3,4,5,6,7")
+			#set ($notifyDayDesc = "每天")
+			#set ($notifyHour = "20:00")
+			#end
+			
+			#if ($user_plan.hasNotify())
+			#set ($isNotify = "1")
+			#else
+			#set ($isNotify = "0")
+			#end
+			
+			#if ($user_plan.hasNotify())
+			#set ($isNotifyDesc = "设置提醒")
+			#else
+			#set ($isNotifyDesc = "不设提醒")
+			#end
+			
+			#set ($actionName = "修改")
+			#set ($startTime = $user_plan.getStartTimeDisplay())
+			
+			#if ($user_plan.hasEndTime())
+			#set ($hasEndTime = "1")
+			#set ($hasEndTimeDesc = "需要设置")
+			#set ($endTime = $user_plan.getEndTimeDisplay())
+			#else
+			#set ($hasEndTime = "0")
+			#set ($hasEndTimeDesc = "不设置")
+			#set ($endTime = "请输入日期（yyyymmdd格式）")
+			#end
+		#else
+			#set ($className = "hint-color")
+			#set ($userPlanId = "0")
+			#set ($notifyDayInt = "1,2,3,4,5,6,7")
+			#set ($notifyDayDesc = "每天")
+			#set ($notifyHour = "20:00")
+			#set ($planPrize = "例如：一起去公园")
+			#set ($isNotify = "0")
+			#set ($isNotifyDesc = "不设提醒")
+			#set ($actionName = "添加")
+			#set ($startTime = $viewUtils.getToday())
+			#set ($hasEndTime = "0")
+			#set ($hasEndTimeDesc = "不设置")
+			#set ($endTime = "请输入日期（yyyymmdd格式）")
+		#end
+		
+		#if ($act_plan)
+		#set ($planLogo = $act_plan.getLogo())
+		#set ($planName = $act_plan.getName())
+		#set ($statType = $act_plan.getStatType())
+		#set ($statTypeDesc = $act_plan.getStatTypeDesc())
+		#else
+		#set ($planLogo = "qinzi0.jpg")
+		#set ($planName = "例如：坚持每日读英语")
+		#set ($statType = 1)
+		#set ($statTypeDesc = "持续计划")
+		#end
+		
+		<input type="hidden" name="userPlanId" value="$userPlanId" />
+		<input type="hidden" name="notifyDayInt" id="hiddenNotifyDay" value="$notifyDayInt" />
+		<input id="logo" type="hidden" name="logo" value="$planLogo" />
+		<input id="isNotify" type="hidden" name="isNotify" value="$isNotify" />
+		<input id="hiddenNotifyHour" type="hidden" name="notifyHour" value="$notifyHour" />
+		<input id="hiddenHasEnd" type="hidden" name="hasEnd" value="$hasEndTime" />
+		<input id="hiddenStatType" type="hidden" name="statType" value="$statType" />
+	<div class="main">
+	
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep();"></div>
+			<div class="top-bar-mid-title">$actionName行动计划</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="line1"><div class="di">计划名称</div><input id="inputName" class="input-text $className" type="text" value="$planName" name="planName" /></div>
+			#if ($planPrize == "例如：一起去公园")
+			#set ($prizeClassName = "hint-color")
+			#else
+			#set ($prizeClassName = "normal-color")
+			#end
+			<div class="line2"><div class="di">计划类型</div><div id="inputStatType" class="input-text normal-color">$statTypeDesc</div></div>
+			<div class="line2"><div class="di">完成奖励</div><input id="inputPrize" class="input-text $prizeClassName" type="text" value="$planPrize" name="prize" /></div>
+			<div class="line-logo"><div class="di">显示图标</div><div id="inputLogo" class="input-text"><img class="logo-selected" src="/native_app_local_assets/$planLogo" /></div></div>
+			<div class="line2"><div class="di">开始时间</div><input id="inputStartTime" class="input-text normal-color" value="$startTime" name="startTime" type="text" /></div>
+			<div class="line2"><div class="di">是否设置结束时间</div><div id="inputHasEnd" class="input-text normal-color">$hasEndTimeDesc</div></div>
+			
+			#if ($hasEndTime == "0")
+			#set ($endClassName = "hint-color")
+			#set ($dnClassName = "dn")
+			#else
+			#set ($endClassName = "normal-color")
+			#set ($dnClassName = "")
+			#end
+			<div class="$dnClassName" id="endDetail">
+				<div class="line2"><div class="di">结束时间</div><input id="inputEndTime" class="input-text $endClassName" value="$endTime" name="endTime" type="text" /></div>
+			</div>
+			
+			<div class="line2"><div class="di">是否提醒</div><div id="inputNotify" class="input-text normal-color">$isNotifyDesc</div></div>
+			#if ($isNotify == "0")
+			#set ($dnClassName = "dn")
+			#else
+			#set ($dnClassName = "")
+			#end
+			<div class="$dnClassName" id="notifyDetail">
+				<div class="line2"><div class="di">提醒日</div><div id="inputNotifyDay" class="input-text normal-color">$notifyDayDesc</div></div>
+				<div class="line2"><div class="di">提醒时间</div><div id="inputNotifyHour" class="input-text normal-color">$notifyHour</div></div>
+			</div>
+		</div>
+		
+		<div id="btn-submit" class="btn-style pos-submit" onclick="submitForm();">提交</div>
+
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	function submitForm(){
+		var m = $("#inputName").val();
+		if (m == "" || m == "例如：坚持每日读英语") {
+			showWindowsToast("请输入计划名称");
+			return;
+		}
+		
+		m = $("#inputPrize").val();
+		if (m == "例如：一起去公园") {
+			$("#inputPrize").val("");
+		}
+		
+		var t = $("#inputStartTime").val();
+		if (t.length != 8) {
+			showWindowsToast("开始时间格式有误");
+			return;
+		}
+		
+		m = $("#hiddenHasEnd").val();
+		if (m == "1") {
+			var t = $("#inputEndTime").val();
+			if (t.length != 8) {
+				showWindowsToast("结束时间格式有误");
+				return;
+			}
+		}
+		
+		//如果一次性计划，则结束时间和开始时间必须在60天以内
+		if ($("#hiddenStatType").val() == "0") {
+			if (m != "1") {
+				showWindowsToast("一次性计划，必须设置结束时间");
+				return;
+			}
+		
+			try {
+				var startDay = $("#inputStartTime").val();
+				var endDay = $("#inputEndTime").val();
+				
+				
+				var startYear = parseInt(startDay.substring(0,4));
+				var startMonth = parseInt(startDay.substring(4,6));
+				var startDate = parseInt(startDay.substring(6,8));
+				
+				var endYear = parseInt(endDay.substring(0,4));
+				var endMonth = parseInt(endDay.substring(4,6));
+				var endDate = parseInt(endDay.substring(6,8));
+				
+				var startTimeDate = new Date();
+				startTimeDate.setFullYear(startYear);
+				startTimeDate.setMonth(startMonth) - 1;
+				startTimeDate.setDate(startDate);
+				
+				var endTimeDate = new Date();
+				endTimeDate.setFullYear(endYear);
+				endTimeDate.setMonth(endMonth) - 1;
+				endTimeDate.setDate(endDate);
+				
+				if (endTimeDate.getTime() - startTimeDate.getTime() > 366 * 24 * 3600 * 1000) {
+					showWindowsToast("一次性计划，不可以超过1年");
+					return;
+				} 
+			} catch (e) {
+				showWindowsToast("开始时间或结束时间格式有误");
+				return;
+			}
+		}
+		
+		$("#btn-submit").attr("disabled", "disabled");
+		$("#frm").submit();
+	}
+
+	function changeLogoValue(menuId, eleId, eleVal, hiddenId) {
+		toggleMenu(menuId);
+		$("#" + eleId).html("<img class='logo-selected' src='/native_app_local_assets/"+ eleVal+"' />"); //这个是div
+		$("#" + hiddenId).val(eleVal); //这个是input
+		
+	}
+	function showLogoMenu(menuId, eleId, hiddenId, menuItems) {
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var windowWidth = $(window).width();
+		var imgWidth = (windowWidth*0.7 - 60)/3;
+		var imgHeight = imgWidth;
+		var radius = imgWidth/2;
+		
+		var html = "<div class='pop-mid-menu dn' id='"+ menuId +"'>";
+		
+		$.each(menuItems, function(i, val){
+			html += "<img style='margin:10px;";
+			html += "border-radius:"+ radius +"px;-webkit-border-radius:"+ radius +"px;-moz-border-radius:"+ radius +"px;";
+			html += "width:"+ imgWidth +"px;height:"+ imgHeight +"px;' onclick='changeLogoValue(\""+ menuId +"\", \""+ eleId +"\", \""+ val.eleVal +"\", \""+ hiddenId +"\");' src='/native_app_local_assets/"+ val.eleVal +"' />";
+		});
+		
+		html += "</div>";
+		genMaskLayerMenuHtml(menuId);
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+	}
+	
+	function changeDayValue(day) {
+		
+		
+		$("#pop-item-day-" + day).toggleClass("pop-item-day-selected");
+		var v = "";
+		var desc = "";
+		for (var i = 1; i <= 7; i++) {
+			if ($("#pop-item-day-" + i).hasClass("pop-item-day-selected")) {
+				if (v.length>0) v = v + "," + i;
+				else v = i + "";
+				
+				var weekdayDesc = "";
+				if (i == 1) weekDayDesc = "一";
+				else if (i == 2) weekDayDesc = "二";
+				else if (i == 3) weekDayDesc = "三";
+				else if (i == 4) weekDayDesc = "四";
+				else if (i == 5) weekDayDesc = "五";
+				else if (i == 6) weekDayDesc = "六";
+				else if (i == 7) weekDayDesc = "日";
+				if (desc.length > 0) desc = desc + ",";
+				desc = desc + weekDayDesc;
+			}
+		}
+		if (desc == "一,二,三,四,五"){
+			desc = "周一到周五";
+		} else if (desc == "一,二,三,四,五,六,日") {
+			desc = "每天";
+		} else {
+			desc = "星期" + desc;
+		}
+		
+		$("#hiddenNotifyDay").val(v);
+		$("#inputNotifyDay").html(desc);
+	}
+	function showDayMenu() {
+		var menuId = "pop-day-menu";
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var html = "";
+		genMaskLayerMenuHtml(menuId);
+		html += "<div class='pop-mid-menu-day dn' id='"+ menuId +"'>";
+		
+		var selectedClass = "";
+		var arr = $("#hiddenNotifyDay").val().split(",");
+		for (var i=1;i<=7;i++) {
+			var weekdayDesc = "";
+			if (i == 1) weekDayDesc = "一";
+			else if (i == 2) weekDayDesc = "二";
+			else if (i == 3) weekDayDesc = "三";
+			else if (i == 4) weekDayDesc = "四";
+			else if (i == 5) weekDayDesc = "五";
+			else if (i == 6) weekDayDesc = "六";
+			else if (i == 7) weekDayDesc = "日";
+			var className = $.inArray(i+"", arr) != -1 ? "pop-item-day-selected" : "";
+			html += "<div id='pop-item-day-"+ i +"' class='pop-mid-menu-item pop-mid-menu-day-font "+ className +"' onclick='changeDayValue("+ i +");'>星期"+ weekDayDesc +"</div>";
+		
+		}
+		
+		html += "<div class='pop-mid-menu-item pop-item-day-confirm' style='border-width:0px;' onclick='toggleMenu(\""+ menuId +"\");'>确定</div>";
+		
+		html += "</div>";
+		
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+	}
+	
+	function changeHourDisplay(s) {
+		
+	
+		var v = $("#pop-item-hour-display").html();
+		var nv;
+		if (s == "退格") {
+			if (v.length == 0) return;
+			else nv = v.substring(0, v.length - 1);
+		} else {
+			nv = v + s;
+		}
+		
+		var i = nv.indexOf(":");
+		if (i == -1) {
+			try {
+				if (parseInt(nv) > 23) {
+					return;
+				}
+			} catch (e) {
+				return;
+			}
+		} else {
+			var arr = nv.split(":");
+			if (arr.length > 2) {
+				return;
+			}
+			
+			if (arr[0] == "0") {
+				return;
+			}
+			
+			if (arr[1].length == 1) {
+				if (arr[1] > "5") {
+					return;
+				}
+			}
+			
+			try {
+				if (parseInt(arr[0]) > 23) {
+					return;
+				}
+			}catch (e) {
+				return;
+			}
+			
+			try {
+				if (parseInt(arr[1]) > 59) {
+					return;
+				}
+			}catch (e) {
+				return;
+			}
+		}
+		
+
+		$("#pop-item-hour-display").html(nv);
+		
+	}
+	
+	function verifyHour(menuId) {
+		var v = $("#pop-item-hour-display").html();
+		var arr = v.split(":");
+		
+		var right = true;
+		if (arr.length != 2 || arr[1].length != 2) right = false;
+		
+		if (!right){
+			showWindowsToast("您输入的时间有误");
+			return false;
+		} else {
+			$("#inputNotifyHour").html(v);
+			$("#hiddenNotifyHour").val(v);
+			toggleMenu(menuId);
+		}
+	}
+	
+	function showHourMenu() {
+		var menuId = "pop-hour-menu";
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		
+		var html = "";
+		genMaskLayerMenuHtml(menuId);
+		html += "<div class='pop-mid-menu dn' style='border-width:0px;' id='"+ menuId +"'>";
+		html += "<center>";
+		html += "<table cellspacing='0' cellpadding='0' id='pop-item-hour'>";
+		html += "<tr>";
+		html += "<td colspan='3' class='pop-item-hour-display' id='pop-item-hour-display'>"+ $("#inputNotifyHour").html() +"</td>";
+		html += "</tr>";
+		
+		html += "<tr>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"1\");'>1</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"2\");'>2</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"3\");'>3</td>";
+		html += "</tr>";
+		html += "<tr>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"4\");'>4</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"5\");'>5</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"6\");'>6</td>";
+		html += "</tr>";
+		html += "<tr>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"7\");'>7</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"8\");'>8</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"9\");'>9</td>";
+		html += "</tr>";
+		html += "<tr>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\":\");'>:</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"0\");'>0</td>";
+		html += "<td class='pop-item-hour-keyboard-item' onclick='changeHourDisplay(\"退格\");'>退格</td>";
+		html += "</tr>";
+		html += "<tr>";
+		html += "<td colspan='3' class='pop-item-hour-confirm' onclick='verifyHour(\""+ menuId +"\");'>确定</td>";
+		html += "</tr>";
+		html += "</table>";
+		html += "</center>";
+		
+		html += "</div>";
+			
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+	}
+
+	function changeIsNotifyValue(menuId, eleId, eleVal, hiddenId, hiddenVal) {
+		toggleMenu(menuId);
+		$("#" + eleId).html(eleVal); //这个是div
+		$("#" + eleId).css("color", "#333333");
+		$("#" + hiddenId).val(hiddenVal); //这个是input
+		if (hiddenVal == "1") {
+			$("#notifyDetail").removeClass("dn");
+		} else {
+			$("#notifyDetail").addClass("dn");
+		}
+	}
+	function showIsNotifyMenu(menuId, eleId, hiddenId, menuItems) {
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var html = "<div class='pop-mid-menu dn' id='"+ menuId +"'>";
+		
+		$.each(menuItems, function(i, val){
+			html += "<div class='pop-mid-menu-item' onclick='changeIsNotifyValue(\""+ menuId +"\", \""+ eleId +"\", \""+ val.eleVal +"\", \""+ hiddenId +"\", \""+ val.hiddenVal +"\");'>"+ val.eleVal +"</div>";
+		});
+		
+		html += "</div>";
+		genMaskLayerMenuHtml(menuId);
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+	}
+	
+	function changeHasEndValue(menuId, eleId, eleVal, hiddenId, hiddenVal) {
+		toggleMenu(menuId);
+		$("#" + eleId).html(eleVal); //这个是div
+		$("#" + eleId).css("color", "#333333");
+		$("#" + hiddenId).val(hiddenVal); //这个是input
+		if (hiddenVal == "1") {
+			$("#endDetail").removeClass("dn");
+		} else {
+			$("#endDetail").addClass("dn");
+		}
+	}
+	function showHasEndMenu(menuId, eleId, hiddenId, menuItems) {
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var html = "<div class='pop-mid-menu dn' id='"+ menuId +"'>";
+		
+		$.each(menuItems, function(i, val){
+			html += "<div class='pop-mid-menu-item' onclick='changeHasEndValue(\""+ menuId +"\", \""+ eleId +"\", \""+ val.eleVal +"\", \""+ hiddenId +"\", \""+ val.hiddenVal +"\");'>"+ val.eleVal +"</div>";
+		});
+		
+		html += "</div>";
+		genMaskLayerMenuHtml(menuId);
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+	}
+
+	$(document).ready(function(){
+		
+		
+		//logAction("INDEX");
+		addAutoFocusEffect($("#inputName"), "例如：坚持每日读英语", "#333333", "#999999");
+		addAutoFocusEffect($("#inputPrize"), "例如：一起去公园", "#333333", "#999999");
+		addAutoFocusEffect($("#inputEndTime"), "请输入日期（yyyymmdd格式）", "#333333", "#999999");
+		
+		$("#inputLogo").click(function() {
+			showLogoMenu("pop-mid-logo-menu", "inputLogo", "logo", [
+			{"eleVal": "qingcai.jpg"},
+			{"eleVal": "zuoye.jpg"},
+			{"eleVal": "piano.jpg"},
+			{"eleVal": "tiaosheng.jpg"},
+			{"eleVal": "brush.jpg"},
+			{"eleVal": "qinzi1.jpg"},
+			{"eleVal": "qinzi2.jpg"},
+			{"eleVal": "qinzi0.jpg"},
+			{"eleVal": "maobizi.jpg"},
+			{"eleVal": "yingwen.jpg"},
+			{"eleVal": "yuedu.jpg"},
+			{"eleVal": "qinzi5.jpg"}
+			]);
+		});
+		
+		$("#inputStatType").click(function() {
+			showSelectMenu("pop-mid-stattype-menu", "inputStatType", "hiddenStatType", [
+			{"hiddenVal": "0", "eleVal":"一次性计划"},
+			{"hiddenVal": "1", "eleVal":"持续计划"}
+			]);
+		});
+		
+		$("#inputNotify").click(function() {
+			showIsNotifyMenu("pop-mid-notify-menu", "inputNotify", "isNotify", [
+			{"hiddenVal": "0", "eleVal":"不设提醒"},
+			{"hiddenVal": "1", "eleVal":"设置提醒"}
+			]);
+		});
+		
+		$("#inputNotifyDay").click(function() {
+			showDayMenu();
+		});
+		
+		$("#inputNotifyHour").click(function() {
+			showHourMenu();
+		});
+		
+		$("#inputHasEnd").click(function() {
+			showHasEndMenu("pop-mid-hasend-menu", "inputHasEnd", "hiddenHasEnd", [
+			{"hiddenVal": "0", "eleVal":"不设置"},
+			{"hiddenVal": "1", "eleVal":"需要设置"}
+			]);
+		});
+		
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

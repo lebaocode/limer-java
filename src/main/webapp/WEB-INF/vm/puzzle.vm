@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;padding:20px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		
+		.cell-area {margin-top:10px;border-left:1px solid #E0E0E0;border-top:1px solid #E0E0E0;width:622px; height:622px;font-family:'楷体';}
+		.cell-item {float:left; border-right:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;width:30px;height:30px;text-align:center;line-height:30px;font-size:20px;color:#000000;font-weight:bold;}
+		.real-cell-area {width:621px; height:621px;}
+		
+		.words-area {margin-top:20px;line-height:24px;color:#000000;font-size:14px;width:600px;}
+		.word-item {float:left; margin:10px 20px 0px 0px;border:1px solid #E0E0E0; color:#000000; line-height:48px;font-size:16px;}
+		.word-content {padding:0px 10px;}
+		
+		.ori-area {margin-top:20px;}
+		.ori-item-selected {background-color:#87C654;color:#FFFFFF;}
+		.btn-ori {text-align:center; padding:16px 10px;line-height:48px;font-size:16px;}
+		
+		.btn-action {cursor:pointer;background-color:#FE6442;margin-right:10px; color:#FFFFFF;text-align:center; width:60px; float:left; line-height:38px;font-size:14px;padding:0px 5px;}
+		.input-text input {float:left;margin-right:5px;color:#333333; width:100px;height:45px;border-bottom:1px solid #E0E0E0;line-height:45px;padding:0px 5px;}
+		
+		.save-area {margin-top:20px;padding:10px 0px 20px;line-height:24px;color:#333333;font-size:14px;width:600px;}
+		.init-data-area {float:left;margin:20px 5px 0px 0px;padding:10px;line-height:24px;border:1px solid #E0E0E0;color:#333333;font-size:14px;width:600px;height:100px;}
+    	.btn-load {margin-top:102px;}
+    	
+    	.input-words-area {float:left;margin:20px 5px 0px 0px;padding:10px;line-height:24px;border:1px solid #E0E0E0;color:#333333;font-size:14px;width:600px;height:100px;}
+    
+    	.vh {visibility:hidden;}
+    	.vb {visibility:visible;}
+    	
+    	.empty-no {margin:5px 0px 0px 5px;font-size:12px;text-align:center;line-height:20px;width:20px;height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;border:0px solid #FF0000;background-color:#FF0000;color:#FFFFFF;}
+    	
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="top-bar-mid-title">填字游戏制作工具</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="cell-area">
+				<div class="real-cell-area">
+				</div>
+			</div>
+			<div class="ori-area">
+				<div class="btn-action" onclick="undoFill()">撤销</div>
+				<div class="btn-action" onclick="move(-1, 0)">左移</div>
+				<div class="btn-action" onclick="move(1, 0)">右移</div>
+				<div class="btn-action" onclick="move(0, -1)">上移</div>
+				<div class="btn-action" onclick="move(0, 1)">下移</div>
+				<div class="btn-action" onclick="saveCells();">保存</div>
+				<div class="btn-action empty-action" onclick="startEmpty();">开始挖空</div>
+				<div class="btn-action empty-action dn" onclick="endEmpty();">结束挖空</div>
+				<div class="btn-action" onclick="displayUI();">美化</div>
+			</div>
+			<div class="cb"></div>
+			
+			<div class="words-area"></div>
+			<div class="cb"></div>
+			
+			<textarea class="input-words-area"></textarea>
+			<div class="btn-action btn-load" onclick="addInputWords();">添加单词</div>
+			<div class="cb"></div>
+			
+			<textarea class="init-data-area"></textarea>
+			<div class="btn-action btn-load" onclick="loadInputData();">加载</div>
+			<div class="cb"></div>
+		</div>
+				
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	var lastX = "";
+	var lastY = "";
+	var orientation = "heng";
+	var fillHistory = new Array();
+	var cell_num = 20;
+	var is_emptying = "false";
+	
+	function displayUI() {
+		$(".cell-area").css("border", "0px solid #E0E0E0");
+		var emptyNo = 1;
+		for (var j = 1; j <= cell_num; j++) {
+			for (var i = 1; i <= cell_num; i++) {
+				var val = $("#" + getCellId(i, j)).html();
+				if (val == "") {
+					if (i == cell_num || $("#" + getCellId(i + 1, j)).html() == "") {//右方没字
+						$("#" + getCellId(i, j)).css("border-right", "1px solid #FFFFFF");
+					} 
+					if (j == cell_num || $("#" + getCellId(i, j + 1)).html() == "") {//下方没字
+						$("#" + getCellId(i, j)).css("border-bottom", "1px solid #FFFFFF");
+					}
+				} else {
+					if (i == 1) {
+						$("#" + getCellId(i, j)).css("border-left", "1px solid #E0E0E0");
+					}
+					if (j == 1) {
+						$("#" + getCellId(i, j)).css("border-top", "1px solid #E0E0E0");
+					}
+				
+					//如果是挖空，则不显示字，显示序号
+					var color = $("#" + getCellId(i, j)).css("color");
+					if (color != "rgb(0, 0, 0)") {
+						$("#" + getCellId(i, j)).html("<div class=\"empty-no\">" + emptyNo + "</div>");
+						emptyNo ++;
+					}
+				}
+				
+			}
+		}
+	}
+	
+	function startEmpty() {
+		is_emptying = "true";
+		$(".empty-action").toggleClass("dn");
+	}
+	
+	function endEmpty() {
+		is_emptying = "false";
+		$(".empty-action").toggleClass("dn");
+	}
+	
+	function initCells(data) {
+		for (var i = 0; i < data.length; i++) {
+			var o = data[i];
+			$("#" + getCellId(o.x, o.y)).html(o.val);
+			if (o.isEmpty) {
+				$("#" + getCellId(o.x, o.y)).css("color", "red");
+			}
+		}
+	}
+	
+	function loadInputData() {
+		var data = JSON.parse($(".init-data-area").val());
+		initCells(data);
+	}
+	
+	function saveCells() {
+		var cellArr = new Array();
+		for (var j = 1; j <= cell_num; j++) {
+			for (var i = 1; i <= cell_num; i++) {
+				var val = $("#" + getCellId(i, j)).html();
+				var color = $("#" + getCellId(i, j)).css("color");
+				if (val != "") {
+					cellArr.push(
+						{x: i,
+						y: j,
+						val: val,
+						isEmpty: (color != "rgb(0, 0, 0)")
+						}
+					 );
+				 }
+			}
+		}
+		$(".init-data-area").val(JSON.stringify(cellArr));
+	}
+	
+	function addInputWords() {
+		var wordArr = $(".input-words-area").val().split("\n");
+		for (var i = 0; i < wordArr.length; i++){
+			var word = $.trim(wordArr[i]);
+			if (word != "") {
+				addWord(word);
+			}
+		}
+	}
+	
+	function addWord(word) {
+		$(".words-area").append("<div class=\"word-item\"><span class=\"btn-ori ori-item-selected\" onclick=\"fillIntoCell('"+ word +"', 'heng');\">横</span>"
+			+ "<span class=\"word-content\">"+word+"</span>" 
+			+ "<span class=\"btn-ori ori-item-selected\" onclick=\"fillIntoCell('"+ word +"', 'shu');\">竖</span>"
+			+"</div>");
+	}
+	
+	function getCellId(x, y) {
+		return "cell_" + x +"_"+ y;
+	}
+	
+	function move(x, y) {
+		var curX = lastX;
+		var curY = lastY;
+		var val = $("#"+ getCellId(curX, curY)).html();
+		if (val == "") {
+			moveAll(x, y);
+		} else {
+			//只挪该位置的words
+			var startX = curX;
+			val = $("#"+ getCellId(startX, curY)).html();
+			while (val != "" && startX > 0) {
+				startX --;
+				if (startX > 0) {
+					val = $("#"+ getCellId(startX, curY)).html();
+				}
+			}
+			startX ++;
+			
+			var endX = curX;
+			val = $("#"+ getCellId(endX, curY)).html();
+			while (val != "" && endX <= cell_num) {
+				endX ++;
+				if (endX <= cell_num) {
+					val = $("#"+ getCellId(endX, curY)).html();
+				}
+			}
+			endX --;
+			
+			var startY = curY;
+			val = $("#"+ getCellId(curX, startY)).html();
+			while (val != "" && startY > 0) {
+				startY --;
+				if (startY > 0) {
+					val = $("#"+ getCellId(curX, startY)).html();
+				}
+			}
+			startY ++;
+			
+			var endY = curY + 1;
+			val = $("#"+ getCellId(curX, endY)).html();
+			while (val != "" && endY <= cell_num) {
+				endY ++;
+				if (endY <= cell_num){
+					val = $("#"+ getCellId(curX, endY)).html();
+				}
+				
+			}
+			endY --;
+			
+			if (x == 0 && y == -1) {//上移
+				for (var j = startY; j < curY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+				for (var i = startX; i <= endX; i++) {
+					$("#" + getCellId(i + x, curY + y)).html($("#" + getCellId(i, curY)).html());
+					$("#" + getCellId(i, curY)).html("");
+				}
+				for (var j = curY + 1; j <= endY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+			} else if (x == 0 && y == 1) {//下移
+				for (var j = endY; j >= curY + 1; j--) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+				for (var i = startX; i <= endX; i++) {
+					$("#" + getCellId(i + x, curY + y)).html($("#" + getCellId(i, curY)).html());
+					$("#" + getCellId(i, curY)).html("");
+				}
+				for (var j = curY - 1; j >= startY; j--) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+			} else if (x == -1 && y == 0) {//左移
+				for (var j = startY; j < curY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+				for (var i = startX; i <= endX; i++) {
+					$("#" + getCellId(i + x, curY + y)).html($("#" + getCellId(i, curY)).html());
+					$("#" + getCellId(i, curY)).html("");
+				}
+				for (var j = curY + 1; j <= endY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+			} else {//右移
+				for (var j = startY; j < curY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+				for (var i = endX; i >= startX; i--) {
+					$("#" + getCellId(i + x, curY + y)).html($("#" + getCellId(i, curY)).html());
+					$("#" + getCellId(i, curY)).html("");
+				}
+				for (var j = curY + 1; j <= endY; j++) {
+					$("#" + getCellId(curX + x, j + y)).html($("#" + getCellId(curX, j)).html());
+					$("#" + getCellId(curX, j)).html("");
+				}
+			}
+		}
+	}
+	
+	function moveAll(x, y) {
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$("#" + getCellId((i+1), (j+1))).html("");
+				$("#" + getCellId((i+1), (j+1))).css("background-color", "#FFFFFF");
+			}
+		}
+		
+		var oldHistory = new Array();
+		var n = fillHistory.length;
+		for (var i = 0; i < n; i++) {
+			var o = fillHistory.shift();
+			oldHistory.push(o);
+		}
+		
+		for (var i = 0; i < oldHistory.length; i++) {
+			var o = oldHistory[i];
+			lastX = o.x + x;
+			lastY = o.y + y;
+			fillIntoCell(o.word, o.ori);
+		}
+		
+		delete oldHistory;
+		
+		$("#"+ getCellId(lastX, lastY)).css("background-color", "yellow");
+	}
+	
+	function selectCell(x, y ) {
+		//如果正在挖空
+		if (is_emptying == "true") {
+			var color = $("#"+ getCellId(x, y)).css("color");
+			if (color == "rgb(0, 0, 0)") {
+				$("#"+ getCellId(x, y)).css("color", "red");
+			} else {
+				$("#"+ getCellId(x, y)).css("color", "#000000");
+			}
+			
+			return;
+		}
+	
+		if (lastX != "") {
+			$("#"+ getCellId(lastX, lastY)).css("background-color", "#FFFFFF");
+		} 
+		lastX = x;
+		lastY = y;
+		$("#"+ getCellId(lastX, lastY)).css("background-color", "yellow");
+	}
+	
+	function undoFill() {
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$("#" + getCellId((i+1), (j+1))).html("");
+			}
+		}
+		
+		var oldHistory = new Array();
+		var n = fillHistory.length;
+		for (var i = 0; i < n; i++) {
+			var o = fillHistory.shift();
+			oldHistory.push(o);
+		}
+		
+		for (var i = 0; i < oldHistory.length; i++) {
+			var o = oldHistory[i];
+			lastX = o.x;
+			lastY = o.y;
+			if (i < oldHistory.length - 1) {
+				fillIntoCell(o.word, o.ori);
+			}
+		}
+		
+		delete oldHistory;
+	}
+	
+	function fillIntoCell(word, ori) {
+		if (ori == "heng") {//横着
+			for (var i = 0; i < word.length; i++) {
+				var ch = word.substring(i, i+1);
+				$("#" + getCellId(lastX + i ,lastY)).html(ch);
+			}
+		} else {
+			for (var i = 0; i < word.length; i++) {
+				var ch = word.substring(i, i+1);
+				$("#" + getCellId(lastX ,lastY + i)).html(ch);
+			}
+		}
+		fillHistory.push({word: word, ori: ori, x: lastX, y: lastY});
+	}
+	
+	$(document).ready(function(){
+		
+		for (var j = 0; j < cell_num; j++) {
+			for (var i = 0; i < cell_num; i++) {
+				$(".real-cell-area").append("<div id=\""+ getCellId(i+1, j+1) +"\" class=\"cell-item\" onclick=\"selectCell("+ (i+1)+","+ (j+1) +");\"></div>");
+			}
+			$(".real-cell-area").append("<div class=\"cb\"></div>");
+		}
+		
+	});
+	
+</script>
+
+</body></html>

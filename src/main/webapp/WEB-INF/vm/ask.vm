@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;height:600px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.display-text {}
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; left:100px;text-align:left;width:50px;line-height:20px;}
+		.input-textarea {position:absolute;display:inline;border:0px;height:400px;font-size:16px; left:100px;text-align:left;line-height:20px;font-family:inherit;}
+		.price-unit {position:absolute;left:155px;}
+		.line1 { padding:20px 20px 0px;line-height:20px;}
+		.line2 {border-top:1px solid #E0E0E0; padding:20px 20px 0px;line-height:20px;}
+		.bb {border-bottom:1px solid #E0E0E0; }
+		.pos-submit {bottom:0px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/mq/ask">
+		<input type="hidden" name="submitted" value="true"/>
+		<input type="hidden" name="placeId" value="$!placeId"/>
+		<input type="hidden" name="toUserId" value="$!toUserId"/>
+		<input type="hidden" name="price" value="$!price"/>
+		<input id="prepay_id" type="hidden" name="prepayId" value=""/>
+	<div class="main2">
+	
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/listplacemems?placeId=$!placeId';"></div>
+			<div class="top-bar-mid-title">我要提问</div>
+		</div>
+		
+		<div class="input-area">
+			#if ($hasToUser)
+			<div class="line1 bb"><div class="di">咨询目标</div><div class="input-text normal-color">$viewUtils.getHTMLValidText($toUserName)</div></div>
+			#end
+			<div class="line1 bb"><div class="di">咨询价格</div><div class="input-text normal-color">$price 元</div></div>
+			<div class="line1"><div class="di">问题描述</div><textarea id="inputContent" class="input-textarea hint-color" name="content">请详细描述您的问题</textarea></div>
+			
+		</div>
+		
+		<div id="btn-submit" class="btn-style pos-submit" onclick="submitForm();">提交</div>
+
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	var req_data = {};
+
+	function startPay() {
+		$.ajax({
+			dataType:"json",
+			url: "/mq/startprepay",
+			data: {placeId: "$!placeId", price: $!price, payReason:1, toUserId:$!toUserId},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			//可以发起支付
+	    			req_data = data.data;
+	    			$("#prepay_id").val(req_data.package.split("=")[1]);
+	    			$("#frm").submit();
+	    			startPayRequestWx();
+	    		} else {
+	    			showWindowsToast(data.msg);
+	    		}
+	    	}
+		});
+	}
+	
+	function onBridgeReady(){
+	   WeixinJSBridge.invoke(
+	       'getBrandWCPayRequest', req_data,
+	       function(res){
+	           if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+	           	  //支付成功
+	           	  window.location = "/mq/listmyquestions";
+	           } else {
+	              //支付失败
+	              showWindowsToast("支付失败");
+	           }
+	       }
+	   ); 
+	}
+	
+	
+	function startPayRequestWx() {
+		if (typeof WeixinJSBridge == "undefined"){
+		   if( document.addEventListener ){
+		       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+		   }else if (document.attachEvent){
+		       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+		       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+		   }
+		}else{
+		   onBridgeReady();
+		}
+	}
+
+	function submitForm(){
+		
+		if ($("#inputContent").val().length == 0) {
+			showWindowsToast("请填写问题描述");
+			return;
+		}
+		
+		//先支付，成功后才能提交
+		startPay();
+	}
+
+	$(document).ready(function(){
+		$("#inputContent").width($(window).width() - 120);
+		addAutoFocusEffect($("#inputContent"), "请详细描述您的问题", "#333333", "#999999");
+	});
+	
+</script>
+
+</body></html>

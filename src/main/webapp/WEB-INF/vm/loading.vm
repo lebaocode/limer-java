@@ -1,0 +1,7 @@
+<div class="w-load"><div class="spin"></div></div>
+<script type="text/javascript">
+	showLoadingIcon();
+	$(document).ready(function(){
+		stopLoadingIcon();
+	});
+</script>

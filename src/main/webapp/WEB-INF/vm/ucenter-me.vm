@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;height:800px;}
+		
+		.remark {line-height:24px;padding:20px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">我的信息</div>
+		</div>
+	
+		<div class="input-area">
+			#if ($mobile.length() == 11)
+			<div class="remark">您的登录信息：$mobile</div>
+			#else
+			<div class="remark">您的登录信息：从微信公众号登录</div>
+			#end
+		</div>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+
+	$(document).ready(function(){
+	
+		
+		//logAction("INDEX");
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

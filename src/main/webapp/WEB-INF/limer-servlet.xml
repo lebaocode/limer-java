@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+<!-- View resolver                                              -->
+<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+    <property name="prefix" value=""/>
+    <property name="suffix" value=".vm"/>
+    <property name="contentType"><value>text/html; charset=UTF-8</value></property>
+</bean>
+
+<bean id="dbUtils" class="com.lebaor.dbutils.DBUtils" init-method="connect" destroy-method="release">
+    <property name="dbUrl" value="${limer.dbUrl}"/>
+    <property name="dbUser" value="${limer.user}"/>
+    <property name="dbPassword" value="${limer.passwd}"/>
+    <property name="dbName" value="${limer.dbName}"/>
+    <property name="charset" value="${limer.charset}"/>
+</bean>
+
+<bean id="ltDB" class="com.lebaor.limer.db.LogisticsDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="brDB" class="com.lebaor.limer.db.BorrowRecordDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="lbiDB" class="com.lebaor.limer.db.LimerBookInfoDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="lbsDB" class="com.lebaor.limer.db.LimerBookStatusDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="bookDB" class="com.lebaor.limer.db.BookDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="userScoreDB" class="com.lebaor.limer.db.UserScoreDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="userAuthDB" class="com.lebaor.limer.db.UserAuthDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="userDB" class="com.lebaor.limer.db.UserDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+
+<bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init">
+    <property name="userDB"><ref bean="userDB"/></property>
+    <property name="userAuthDB"><ref bean="userAuthDB"/></property>
+    <property name="lbsDB"><ref bean="lbsDB"/></property>
+    <property name="bookDB"><ref bean="bookDB"/></property>
+    <property name="lbiDB"><ref bean="lbiDB"/></property>
+    <property name="userScoreDB"><ref bean="userScoreDB"/></property>
+    <property name="brDB"><ref bean="brDB"/></property>
+    <property name="ltDB"><ref bean="ltDB"/></property>
+    
+    <property name="jedisHost" value="${limer-servlet.jedisHost"/>
+    <property name="jedisPort" value="${limer-servlet.jedisPort"/>
+    <property name="jedisPassword" value="${limer-servlet.jedisPassword"/>
+    <property name="jedisMaxTotal" value="${limer-servlet.jedisMaxTotal"/>
+    <property name="jedisMaxIdle" value="${limer-servlet.jedisMaxIdle"/>
+    <property name="jedisMinIdle" value="${limer-servlet.jedisMinIdle"/>
+</bean>
+
+<bean id="jsonController" class="com.lebaor.limer.web.JsonController">
+	<property name="domain" value="${limer-servlet.domain}"/>
+    <property name="tomcatURLEncoding" value="${limer-servlet.tomcatURLEncoding}"/>
+    <property name="cache"><ref bean="lebaoCache"/></property>
+</bean>
+
+
+<bean id="errorPageController" class="com.lebaor.limer.web.ErrorPageController">
+    <property name="viewPath" value="error"/>
+    <property name="tomcatURLEncoding" value="${limer-servlet.tomcatURLEncoding}"/>
+    <property name="domain" value="${limer-servlet.domain}"/>
+    <property name="cache"><ref bean="lebaoCache"/></property>
+</bean>
+
+<bean id="wxController" class="com.lebaor.limer.web.WxController">
+    <property name="tomcatURLEncoding" value="${limer-servlet.tomcatURLEncoding}"/>
+    <property name="domain" value="${limer-servlet.domain}"/>
+    <property name="cache"><ref bean="mqCache"/></property>
+</bean>
+
+
+<bean id="wxAccessTokenUtil" class="com.lebaor.wx.WxAccessTokenUtil" init-method="start">
+</bean>
+
+<!-- UrlMapping                                                 -->
+<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    <property name="mappings">
+        <props>
+            
+            <prop key="json/*">jsonController</prop>
+            
+            <prop key="wxcallback">wxController</prop>  
+            <prop key="wxgetcode">wxController</prop>
+            <prop key="wxsign">wxController</prop>
+            <prop key="wx/*">wxController</prop> 
+            
+            <prop key="error">errorPageController</prop>
+            <prop key="errorpage">errorPageController</prop>
+            
+            <prop key="/">entryController</prop>
+       <!--      <prop key="/**/*">errorPageController</prop> -->
+        </props>
+    </property>
+</bean>
+
+<!-- Velocity configurator                                      -->
+<bean 
+    id="velocityConfig" 
+    class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"
+    singleton="true">
+    <property name="resourceLoaderPath" value="/WEB-INF/vm"/>
+    <property name="velocityPropertiesMap">
+        <props>
+            <prop key="input.encoding">UTF-8</prop>
+            <prop key="output.encoding">UTF-8</prop>
+        </props>
+    </property>
+</bean>
+
+</beans>

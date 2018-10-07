@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:40px;border:0px;font-size:16px;}
+		
+		.place-type {line-height:24px;padding:10px 20px 5px 20px;color:#999999;font-size:14px;}
+		.place-line {width:100%;background-color:#FFFFFF;background-color:#FFFFFF;}
+		.top-border {border-top:1px solid #E0E0E0;}
+		
+		.place-line-1 {padding:20px 20px 5px 20px;font-size:16px;color:#333333;line-height:20px;}
+		.place-line-2 {padding:0px 20px 20px;font-size:12px;color:#999999;}
+		.place-title {}
+		.place-level {margin-left:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;line-height:12px;font-size:12px;color:#FFFFFF;padding:2px 10px;}
+   		.place-level0 {background-color:#999999;}
+   		.place-level1 {background-color:#FE6442;}
+   		.place-digit {margin:0px 15px 0px 2px;}
+   		
+   		.search-icon {}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="top-bar-mid-title">附近的地方</div>
+			<div class="search-icon" onclick="window.location='/mq/searchplace';"></div>
+		</div>
+	
+		<div class="input-area">
+		#foreach ($pt in $place_types)
+			#set ($place_items = $place_map.get($pt))
+			#if ($place_items && $place_items.size() > 0)
+			<div class="place-type">$pt</div>
+			#set ($no = 0)
+			#foreach ($pi in $place_items)
+			#set ($no = $no + 1)
+			#if ($no > 1)
+			#set ($topClass = "top-border")
+			#else
+			#set ($topClass = "")
+			#end
+			#if ($pi.getLevel() == 0)
+			#set ($levelClass = "place-level0")
+			#else
+			#set ($levelClass = "place-level1")
+			#end
+			<div id="place-$pi.getId()" class="place-line $topClass" placeid="$pi.getId()">
+				<div class="place-line-1">
+					<div class="place-title">$viewUtils.getHTMLValidText($pi.getTitle())<span class="place-level dn $levelClass">Lv.$pi.getLevel()</span></div>
+					
+				</div>
+				<div class="place-line-2">
+					入驻土著&nbsp;<span class="place-digit">$pi.getMemNum()</span>回复问题&nbsp;<span class="place-digit">$pi.getReplyNum()</span>
+				</div>
+			</div>
+			#end
+			#end
+		#end
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	
+	$(document).ready(function(){
+	
+		$(".place-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var placeId = $(this).attr("placeid");
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					window.location = "/mq/viewplace?placeId=" + placeId;
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		var host = window.location.host;
+		configWeixinShare("土著说——当地人的回答最靠谱", "小区生活环境怎样，对口学校好不好？问土著，才靠谱！", "http://" + host + "/images/qinzi5.jpg", "http://" + host + "/mq/nearby");
+	});
+	
+</script>
+
+</body></html>

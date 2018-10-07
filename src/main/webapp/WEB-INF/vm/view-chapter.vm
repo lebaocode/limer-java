@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+		@font-face {
+		    /* font-properties */
+		    font-family: smallkaiti;
+		    src:url('/fonts/$!font_file');
+		}
+    
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;color:#333333;font-size:16px;padding-bottom:10px;}
+    	.lp-line {width:100%;padding:20px 0px;clear:both;}
+    	.lp-right {padding:0px 20px 0px 40px;line-height:24px;}
+    	.lp-no {position:absolute; left:20px;line-height:24px;font-weight:bold;}
+    	
+    	.lp-title {font-weight:bold;}
+    	.lp-goal {color:#999999;font-size:14px;line-height:20px;}
+    	.goal-label {}
+    	
+    	.add-review-num {position:fixed;bottom:48px;right:8px;width:20px;height:20px;background-color:red;color:white;font-size:12px;text-align:center;line-height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;z-index:999;}
+    	.review-book {position:fixed;bottom:10px;right:10px;width:48px;height:48px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/book-green.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px;
+    z-index:998;
+    	}
+    	
+    	.add-review-icon {position:absolute;margin:-8px 0px 0px 42px;width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/add-icon-square.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+	    	
+    	.tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px; width:48px;height:48px;font-size:40px; line-height:48px;text-align:center;
+	font-family:smallkaiti;}
+	
+		.emp2 {color:red;}
+		.emp {color:#C422CC;}
+    	
+    	.hanzi-pinyin {line-height:24px;width:54px;text-align:center;font-size:16px;font-family:hanyupinyin;}
+    	
+    	.lp-item-line {margin-top:10px;}
+    	.lp-item-content {margin:0px 30px 10px 0px;display:block;float:left;}
+    	.lp-item-pinyin {margin-left:-2px;}
+    	.lp-item-zi {margin-left:0px;}
+    	.mark-line {margin-top:10px;line-height:28px;height:28px;padding:0px 9px;background-color:#87C654;color:#FFFFFF;font-size:10px;}
+    	.jianhao-icon {width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/jianhao-gray.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+		.jiahao-icon {width:16px;height:16px;background-position:center center;margin-left:2px;
+		background-image:url(/images/add-white.png);
+		background-repeat:no-repeat;
+		background-attatchment:fixed;
+		background-size:16px 16px;}
+		.mark-num {font-size:10px;color:#FFFFFF;position:relative;top:-4px;}
+		
+		#mark-layer {width:100%;position:fixed;bottom:0px;min-height:50%;left:0px;background-color:#FFFFFF;z-index:10001;}
+		.mark-layer-hint {margin:10px 20px;text-align:left;line-height:24px;color:#999999;font-size:14px;}
+		#mark-layer-kp-line {width:100%;margin:0px 20px 10px 20px;}
+		#mark-layer-timestamp-line {width:100%;margin:0px 20px 20px;}
+		#mark-layer-pinyin {margin-top:20px;}
+		.mark-layer-kp-label {cursor:pointer;float:left;background-color:#87C654;color:#FFFFFF;font-size:14px;line-height:36px;height:36px;padding:0px 15px;margin:0px 10px 10px 0px;}
+		.mark-layer-date {position:absolute;left:20px;font-size:14px;color:#333333;line-height:24px;}
+		.mark-layer-kp-display {padding:0px 0px 0px 80px; color:#333333;font-size:14px;line-height:24px;}
+				
+				
+		#hint-layer {color:#FFFFFF;font-size:20px;width:100%;text-align:center;position:fixed;top:50%;z-index:10001;}
+		
+		.practice-hint-line {margin-top:20px; padding:0px 20px 0px 20px;clear:both;color:#999999;font-size:14px;line-height:24px;}
+		.practice-btn {width:100%;margin:10px 0px 20px 0px;height:46px;line-height:46px;text-align:center;font-size:16px;background-color:#87C654;color:#FFFFFF;}
+   
+   
+		.kp-master-line {margin:0px;width:100%;height:32px;}
+		.kp-master-green {margin:11px 0px 0px 0px;background-color:#87C654;height:10px;}
+		.kp-master-red {margin:11px 0px 0px 10px;background-color:#FE6442;height:10px;}
+		.kp-master-title {text-align:right;width:180px;line-height:32px;font-size:14px;color:#333333;}
+		
+		.review-icon {background:#FCFCFC url(/images/book-green.png) no-repeat;
+    background-size:32px 32px;
+    background-position:center;
+    width:40px;
+    height:44px;
+    display:inline;
+    position:absolute;
+    right:5px;
+    top:2px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/fudao/listchapter?bookId=$!book_id';"></div>
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($page_title)</div>
+			<div class="review-icon" onclick="showBookMenu();"></div>
+		</div>
+		
+		<div class="input-area">
+			#set ($no = 0)
+			#foreach ($lp in $lps)
+			#set ($no = $no + 1)
+			<div class="lp-line">
+				<div class="lp-no">$no.</div>
+				<div class="lp-right">
+					<div class="lp-title">$viewUtils.getHTMLValidText($lp.getTitle())</div>
+					#if ($lp.getGoal() != "")
+					<div class="lp-goal"><span class="goal-label">学习目标：$viewUtils.getHTMLValidText($lp.getGoal())</span></div>
+					#end
+					
+					<div class="lp-item-line">
+						#foreach ($lpi in $lp.getItems())
+						#if ($lpi.getMarkNum() > 0)
+						#set ($empClass = "emp2")
+						#else
+						#set ($empClass = "")
+						#end
+						<div class="lp-item-content" lpid="$lpi.getLpId()" onclick="addReview(this);">
+							<div id="lp-item-pinyin-$lpi.getLpId()" class="hanzi-pinyin lp-item-pinyin $empClass">$lpi.getValue("pinyin")</div>
+							<div id="lp-item-zi-$lpi.getLpId()" class="tianzige-zi lp-item-zi $empClass">$lpi.getValue("hanzi")</div>
+						</div>
+						#end
+					</div>
+					<div class="cb"></div>
+				</div>
+			</div>
+			#end
+			
+			#if ($lps.size() > 0 && $!show_review_icon == "false")
+			
+			#if ($statList.size() > 0) 
+			<div class="practice-hint-line">经过分析，您的孩子在目前的学习中遇到的主要问题是：</div>
+			#foreach ($stat in $statList)
+				#set ($greenScore = $stat.getScore())
+				#set ($redScore = 100 - $stat.getScore())
+				<div class="kp-master-line">
+					<div class="kp-master-title fl">$stat.getKpTitle()</div>
+					<div class="kp-master-red fl" style="width:${redScore}px;"></div>
+				</div>
+				<div class="cb"></div>
+			#end
+			<div class="practice-hint-line">
+				根据以上情况，我们为您推荐了几道针对性的题目，以巩固这些错误的知识点。
+				<div class="practice-btn" onclick="window.location='/fudao/listuserpractices?bookId=$!book_id';">开始练习</div>
+			</div>
+			#else
+			<div class="practice-hint-line">真棒！经过练习，以上出错过的知识点都已经掌握啦！</div>
+			#end
+			
+			#end
+		</div>
+		
+		#if ($!is_owner == "true")
+		<div id="mark-layer-mask" class="mask dn" onclick="closeMarkLayer()"></div>
+		<div id="mark-layer" class="dn">
+			<center>
+				<div id="mark-layer-pinyin" class="hanzi-pinyin lp-item-pinyin"></div>
+				<div id="mark-layer-tianzige" class="tianzige-zi lp-item-zi"></div>
+			</center>
+			<div class="mark-layer-hint">遇到的问题是：</div>
+			<div id="mark-layer-kp-line"></div>
+			<div class="cb"></div>
+			<div id="mark-layer-timestamp-line"></div>
+		</div>
+		
+		<div id="hint-layer-mask" class="mask dn" onclick="closeHintLayer()"></div>
+		<div id="hint-layer" class="dn">点击汉字，可记录掌握情况</div>
+		#end
+	</div>
+</div>
+
+<script type="text/javascript">
+	function closeHintLayer() {
+		$("#hint-layer-mask").addClass("dn");
+		$("#hint-layer").addClass("dn");
+	}
+	
+	function closeMarkLayer() {
+		$("#mark-layer-mask").addClass("dn");
+		$("#mark-layer").addClass("dn");
+	}
+
+	function addMarkKp(e){
+		var curDate = getCurDate2();
+		var kpId = $(e).attr("kpId");
+		var lpId = $(e).attr("lpId");
+		var kpDesc = $(e).html();
+		
+		if ($("#mark-layer-timestamp-line .mark-layer-date").length > 0) {
+			var firstRecordDate = $(".mark-layer-date-line .mark-layer-date").filter(":first").html();
+			if (curDate == firstRecordDate) {
+				//今天已经添加过一个
+				$(".mark-layer-date-line").filter(":first").append("<div class=\"mark-layer-kp-display\">"+ kpDesc +"</div>");
+			} else {
+				//今天还没添加
+				$("#mark-layer-timestamp-line").append(
+					"<div class=\"mark-layer-date-line\">" +
+					"<div class=\"mark-layer-date\">"+ curDate +"</div>" +
+					"<div class=\"mark-layer-kp-display\">"+ kpDesc +"</div>" +
+					"</div>"
+					);
+				
+			}
+		} else {
+			$("#mark-layer-timestamp-line").append(
+					"<div class=\"mark-layer-date-line\">" +
+					"<div class=\"mark-layer-date\">"+ curDate +"</div>" +
+					"<div class=\"mark-layer-kp-display\">"+ kpDesc +"</div>" +
+					"</div>"
+					);
+		}
+		changeMarkNum(lpId);
+		showWindowsToast("已加入错题本");
+		
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/addmark",
+			data: {lpId: lpId, kpId: kpId},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		}
+	    	}
+		});
+	}
+
+	function showMarkLayer(lpId){
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/viewmarkdetail",
+			data: {lpId: lpId},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		} else {
+	    			var hanzi = data.hanzi;
+	    			var pinyin = data.pinyin;
+	    			var kpArr = data.kpArr;
+	    			var timestampArr = data.timestampArr;
+	    			
+	    			$("#mark-layer-pinyin").html(pinyin);
+	    			$("#mark-layer-tianzige").html(hanzi);
+	    			$("#mark-layer-kp-line").html("");
+	    			
+	    			for (var i = 0; i< kpArr.length; i++){
+	    				$("#mark-layer-kp-line").append("<div class=\"mark-layer-kp-label\" lpId=\""+ lpId +"\" kpId=\""+ kpArr[i].kpId +"\" onclick=\"addMarkKp(this);\">"+ kpArr[i].kpDesc +"</div>");
+	    			}
+	    			
+	    			$("#mark-layer-timestamp-line").html("");
+	    			var lastDate = "";
+	    			for(var i=0;i<timestampArr.length;i++){
+	    				if (lastDate != timestampArr[i].date) {
+	    					if (i != 0) $("#mark-layer-timestamp-line").append("</div>");
+	    					$("#mark-layer-timestamp-line").append(
+	    						"<div class=\"mark-layer-date-line\">" +
+	    						"<div class=\"mark-layer-date\">"+ timestampArr[i].date +"</div>"
+	    						);
+	    				}
+	    				$("#mark-layer-timestamp-line").append(
+	    					"<div class=\"mark-layer-kp-display\">"+ timestampArr[i].kpDesc +"</div>"
+	    					);
+	    				lastDate = timestampArr[i].date;
+	    			}
+	    			$("#mark-layer-timestamp-line").append("</div>");
+	    				    
+	    			$("#mark-layer-mask").removeClass("dn");		
+	    			$("#mark-layer").removeClass("dn");
+	    		}
+	    	}
+		});
+	
+		
+	}
+	
+	function addReview(e) {
+		#if ($!is_owner == "true")
+		var lpId = $(e).attr("lpid");
+		showMarkLayer(lpId);
+		#end
+	}
+	
+	
+	function changeMarkNum(lpId) {
+		$("#lp-item-pinyin-" + lpId).addClass("emp2");
+		$("#lp-item-zi-" + lpId).addClass("emp2");
+	}
+	
+	function showBookMenu() {
+		showRightTopMenu([
+		{"name":"错题本", "url":"/fudao/viewreview?bookId=$book_id"},
+		{"name":"练习本", "url":"/fudao/listuserpractices?bookId=$book_id"}
+		]);
+	}
+	
+	$(document).ready(function(){
+		#if ($is_first_visit == "true")
+		$("#hint-layer-mask").removeClass("dn");
+		$("#hint-layer").removeClass("dn");
+		#end
+		
+	});
+	
+</script>
+
+</body></html>

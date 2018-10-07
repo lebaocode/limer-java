@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;height:600px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		
+		.hint-left {position:absolute;left:20px;}
+		.hint-price {padding:0px 20px 0px 100px;}
+		.normal-text {font-size:16px;line-height:24px;}
+		.gray-text {font-size:12px;line-height:24px;}
+		.input-text {}
+		
+		.input-text {border:0px;text-align:left;width:240px;margin:0px 20px 0px 100px;}
+		.input-textarea {border:0px;height:400px;text-align:left;width:240px;margin:0px 20px 0px 100px;}
+		.input-price {border:0px;text-align:left;width:40px;margin:0px 5px 0px 100px;}
+		
+		.line1 { padding:10px 0px;}
+		.line2 {border-top:1px solid #E0E0E0; padding:10px 0px;}
+		.pos-submit {bottom:0px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/mq/joinplace">
+		<input type="hidden" name="submitted" value="true"/>
+		<input type="hidden" name="jiedan" value="$!jiedan"/>
+		<input type="hidden" name="placeId" value="$!placeId"/>
+	<div class="main2">
+	
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/viewplace?placeId=$!placeId';"></div>
+			<div class="top-bar-mid-title">$page_title</div>
+		</div>
+		
+		#if ($maxPrice == 1)
+		#set ($hintPrice = "您刚入驻，目前提问价格只能是1元")
+		#else
+		#set ($hintPrice = "设置向您提问的价格，1-$maxPrice元之间")
+		#end
+		
+		#if ($!nick_name == "")
+		#set ($nick_name = "请输入昵称")
+		#set ($nameClass = "gray-text hint-color")
+		#else
+		#set ($nameClass = "normal-text normal-color")
+		#end
+		
+		#if ($!desc == "")
+		#set ($desc = "简要介绍一下自己，来说明自己回答问题为什么有说服力")
+		#set ($descClass = "gray-text hint-color")
+		#else
+		#set ($descClass = "normal-text normal-color")
+		#end
+		
+		#if ($!jiedan == "true")
+		#set ($jiedanDesc = "接单")
+		#else
+		#set ($jiedanDesc = "不接单")
+		#end
+		
+		<div class="input-area">
+			<div class="line1">
+				<div class="hint-left normal-text normal-color">您的昵称</div>
+				<input id="inputName" class="input-text $nameClass" type="text" value="$!nick_name" name="name" />
+			</div>
+			<div class="line2">
+				<div class="hint-left normal-text normal-color">提问价格</div>
+				<input id="inputPrice" class="input-price normal-text normal-color" type="text" value="$!price" name="price" />元
+				<div class="hint-price gray-text hint-color">$hintPrice</div>
+			</div>
+			<div class="line2">
+				<div class="hint-left normal-text normal-color">您的介绍</div>
+				<textarea id="inputDesc" class="input-textarea $descClass" name="desc">$!desc</textarea>
+			</div>
+		</div>
+		
+		<div id="btn-submit" class="btn-style pos-submit" onclick="submitForm();">提交</div>
+
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	function submitForm(){
+		if ($("#inputName").val().length == 0 || $("#inputName").val()== "请输入昵称") {
+			showWindowsToast("请填写昵称");
+			return;
+		}
+		if ($("#inputPrice").val().length == 0) {
+			showWindowsToast("请填写提问价格");
+			return;
+		}
+		try {
+			var p = parseInt($("#inputPrice").val());
+			if (isNaN(p)) {
+				showWindowsToast("提问价格必须是数字!");
+				return;
+			}
+			if (p < 1 || p > $maxPrice) {
+				showWindowsToast("提问价格超出范围，请重新填写！");
+				return;
+			}
+		} catch (e) {
+			showWindowsToast("提问价格必须是数字!");
+			return;
+		}
+		
+		if ($("#inputDesc").val().length == 0 || $("#inputDesc").val()=="简要介绍一下自己，来说明自己回答问题为什么有说服力") {
+			showWindowsToast("请填写您的介绍");
+			return;
+		}
+		$("#frm").submit();
+	}
+
+	$(document).ready(function(){
+		addAutoFocusEffect($("#inputName"), "请输入昵称", "#333333", "#999999", "16px", "12px");
+		addAutoFocusEffect($("#inputDesc"), "简要介绍一下自己，来说明自己回答问题为什么有说服力", "#333333", "#999999", "16px", "12px");
+		$("#inputDesc").width($(window).width() - 120);
+		$("#inputName").width($(window).width() - 120);
+		
+	});
+	
+</script>
+
+</body></html>

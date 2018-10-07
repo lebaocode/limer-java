@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:40px;border:0px;font-size:16px;}
+		
+		.question-area {background-color:#FFFFFF;padding:20px 20px 10px 20px;}
+		.ask-time {margin-bottom:15px;}
+		.question-content {color:#333333;font-size:16px;line-height:20px;}
+		.gray-text {color:#999999;font-size:12px;line-height:20px;margin-top:5px;}
+		.normal-text {color:#333333;font-size:14px;line-height:24px;margin-top:5px;}
+		
+		.listen-btn {margin-top:5px;width:150px;font-size:16px;color:#FFFFFF;text-align:center;line-height:40px;height:40px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;}
+		.listen-btn-paied-bg {background-color:#3388FF;}
+		.listen-btn-unpaied-bg {background-color:#87C654;}
+		.answer-audio-len {position:absolute;left:180px;line-height:48px;}
+		
+		.other-reply-title {margin:20px 20px 5px 20px;color:#999999;}
+		
+		.reply-time {margin:0px 7px 0px 5px;}
+		
+		.reply-line {width:100%;background-color:#FFFFFF;padding:10px 20px;margin:0px 0px 10px;}
+		
+		.pre-record-area {width:100%;position:fixed;top:60%;}
+		.record-hint {margin-bottom:5px;}
+		.record-hint img {width:48px;}
+		.recording img {width:100px;}
+		.post-record-area {width:100%;position:fixed;top:50%;}
+		
+   		.btn-style {position:fixed;width:100%; color:#FE6442;font-size:16px; background-color:#FCFCFC; line-height:44px; height:44px;text-align:center;border-color:#E0E0E0;
+	    border-width:1px 0px 0px 0px;
+	    border-style:solid;}
+		.pos-submit {bottom:0px;}
+		
+		.record-btn {height:48px;width:150px;background-color:#87C654;line-height:48px;color:#FFFFFF;font-size:16px;text-align:center;margin-top:10px;}
+    
+    	#record-layer {width:100%;position:fixed;bottom:0px;min-height:60%;left:0px;background-color:#FFFFFF;z-index:10001;}
+		#listen-layer {width:100%;position:fixed;bottom:0px;height:200px;left:0px;background-color:#FFFFFF;z-index:10001;}
+		
+		.timer-display {margin:20px 0px 0px 2px;}
+		.listen-icon img {width:48px;}
+		.listen-remark {margin:20px 0px 0px;}
+		.listen-remark img {width:32px;}
+		.listen-remark-text {color:#999999;font-size:16px;line-height:16px;position:relative;top:-8px;margin:0px 5px 0px 5px;}
+		.listen-remark-action {}
+		.img2 {margin-left: 30px;}
+    
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='$return_url';"></div>
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($place.getName())</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="question-area">
+				<div class="question-content">$viewUtils.getHTMLValidText($q.getContent())</div>
+				<div class="ask-time gray-text">$q.getDisplayAskTime()</div>
+				#if ($q.isAnswered())
+				<div class="normal-text">
+					<span class="reply-name">$q.getFirstReply().getReplyUserName()</span>
+					<span class="reply-time">$q.getFirstReply().getDisplayReplyTime()</span>回答：
+				</div>
+				<div class="answer-audio-len gray-text">$q.getFirstReply().getDisplayLen()</div>
+				#if ($q.getFirstReply().isPaied() == "true")
+				#set ($btnName = "点击播放")
+				#set ($bgClass = "listen-btn-paied-bg")
+				#else
+				#set ($btnName = "$q.getFirstReply().getListenPriceYuan()&nbsp;元听听")
+				#set ($bgClass = "listen-btn-unpaied-bg")
+				#end
+				
+				<div class="listen-btn $bgClass" saved="$q.getFirstReply().isSaved()" len="$q.getFirstReply().getLen()" paied="$q.getFirstReply().isPaied()" replyid="$q.getFirstReply().getReplyId()" content="$q.getFirstReply().getReplyContent()" price="$q.getFirstReply().getListenPriceYuan()">$btnName</div>
+				<div id="reply-agree-$q.getFirstReply().getReplyId()" class="listen-agree gray-text">$q.getFirstReply().getListenUserNum()人听过，$q.getFirstReply().getGoodPercent()%认为有用</div>
+				#end
+			</div>
+			
+			#if ($q.hasOtherReplys())
+			<div class="other-reply-title normal-text">补充回答</div>
+			<div class="reply-area">
+			#foreach ($r in $q.getOtherReplys())
+			<div class="reply-line">
+				<div class="normal-text">
+					<span class="reply-name">$r.getReplyUserName()</span>
+					<span class="reply-time">$r.getDisplayReplyTime()</span>补充：
+				</div>
+				<div class="answer-audio-len gray-text">$r.getDisplayLen()</div>
+				#if ($r.isPaied() == "true")
+				#set ($btnName = "点击播放")
+				#set ($bgClass = "listen-btn-paied-bg")
+				#else
+				#set ($btnName = "$r.getListenPriceYuan()&nbsp;元听听")
+				#set ($bgClass = "listen-btn-unpaied-bg")
+				#end
+				<div class="listen-btn $bgClass" saved="$r.isSaved()" len="$r.getLen()" paied="$r.isPaied()" replyid="$r.getReplyId()" content="$r.getReplyContent()" price="$r.getListenPriceYuan()">$btnName</div>
+				<div id="reply-agree-$r.getReplyId()"  class="listen-agree gray-text">$r.getListenUserNum()人听过，$r.getGoodPercent()%认为有用</div>
+				
+			</div>
+			#end
+			</div>
+			#end
+		</div>
+	</div>
+	
+	#if ($isPlaceMember && !$q.isAnswered())
+		#if ($q.isExpired())
+		<div class="btn-style pos-submit">已过期</div>
+		#else
+		<div class="btn-style pos-submit" onclick="startRecord();">开始回答</div>
+		#end
+	#else
+		#if (!$isSelfQuestion)
+		#if ($isVisitor)
+			<div class="btn-style pos-submit" onclick="hintPlaceMember();">补充回答</div>
+		#else
+			#if ($isPlaceMember)
+				#if ($hasListenedAllAnswers)
+				<div class="btn-style pos-submit" onclick="startRecord();">补充回答</div>
+				#else
+				<div class="btn-style pos-submit" onclick="hintListenAll();">补充回答</div>
+				#end
+			#else
+				<div class="btn-style pos-submit" onclick="hintPlaceMember();">补充回答</div>
+			#end
+		#end
+		#end
+	#end
+	
+	<div id="record-layer-mask" class="mask dn" onclick="cancelAll()"></div>
+	<div id="record-layer" class="dn">
+		<div class="pre-record-area dn" onclick="stopRecord()">
+			<center>
+			<div class="gray-text record-hint">正在录音&nbsp;&nbsp;<span class="gray-text timer-display">00:00</span></div>
+			<div class="recording"><img src="/images/recording.png" /></div>
+			<div class="gray-text record-hint">点击麦克风，结束录音</div>
+			</center>
+		</div>
+		<div class="post-record-area dn">
+			<center>
+			<div class="gray-text record-hint" onclick="togglePlayAudioNotSubmitted();"><img id="play_icon" class="" src="/images/sound2.png?t=1" /><img id="pause_icon" class="dn" src="/images/pause.png" /></div>
+			<div class="record-btn" onclick="cancelAll();startRecord();">重新录音</div>
+			<div class="record-btn" onclick="submitForm();">提交</div>
+			<div class="record-btn" onclick="cancelAll();">取消</div>
+			</center>
+		</div>
+	</div>
+	
+	
+	<div id="listen-layer-mask" class="mask dn" onclick="hintListenRemark()"></div>
+	<div id="listen-layer" class="dn">
+		<center>
+		<div id="timer-display" class="gray-text timer-display">00:00</div>
+		<div class="listen-icon" onclick="togglePlayAudio();"><img class="listen-pause" src="/images/pause.png"/><img class="listen-play dn" src="/images/sound2.png?t=1"/></div>
+		<div class="listen-remark">
+			<div class="di" onclick="listenAgree(100);"><img class="di" src="/images/zan.jpg?t=1"/><span class="listen-remark-text">有用</span></div>
+			<div class="di" onclick="listenAgree(0);"><img class="img2 di" src="/images/bad.jpg?t=1"/><span class="listen-remark-text">没用</span></div>
+		</div>
+		</center>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var audioLocalId = null;
+	var isPlaying = false;
+	var isRecording = false;
+	var startRecordTime = 0;
+	var playEndThread = -1;
+	
+	var changeTimeThread = -1;
+	var curPlayLen = 0;
+	
+	function hintListenRemark() {
+		showWindowsToast("请评价此回答是否有用");
+	}
+	
+	function listenReply(price, replyId, content, len, isSaved) {
+		$("#listen-layer-mask").removeClass("dn");
+		$("#listen-layer").removeClass("dn");
+		$("#listen-layer").attr("replyid", replyId);
+		$("#listen-layer").attr("len", len);
+		
+		
+		if (isSaved == "false") {
+			//没保存，则用微信播放
+			wx.downloadVoice({
+			    serverId: content, // 需要下载的音频的服务器端ID，由uploadVoice接口获得
+			    isShowProgressTips: 1, // 默认为1，显示进度提示
+			    success: function (res) {
+			        audioLocalId = res.localId; // 返回音频的本地ID
+			        togglePlayAudio(replyId);
+			        
+			        addListenAction(replyId);
+			    }
+			});
+		} else {
+			//已保存，用七牛播放
+			var url = "$audio_prefix/"+ content +".amr";
+			if ($("#audio-" + replyId).length <= 0) {
+				$("#listen-layer").append("<audio id=\"audio-"+ replyId +"\" src=\""+ url +"\"></audio>");
+				$("#audio-" + replyId)[0].autoplay = false;
+			}
+			togglePlayAudio(replyId);
+			addListenAction(replyId);
+		}
+	}
+	
+	function listenAgree(score) {
+		var replyId = $("#listen-layer").attr("replyid");
+		$.ajax({
+			dataType:"json",
+			url: "/mq/addlistenagree",
+			data: {replyId: replyId, score:score},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			$("#reply-agree-" + replyId).html(data.listenUserNum + "人听过，" + data.goodPercent + "%认为有用");
+	    		} else {
+	    			showWindowsToast(data.msg);
+	    		}
+	    	}
+		});
+		$("#listen-layer-mask").addClass("dn");
+		$("#listen-layer").addClass("dn");
+		if (isPlaying) {
+			stopAudio(replyId);
+		}
+		isPlaying = false;
+		clearTimeout(playEndThread);
+		clearInterval(changeTimeThread);
+	}
+	
+	function closeRecordLayer() {
+		$("#record-layer-mask").addClass("dn");
+		$("#record-layer").addClass("dn");
+	}
+	
+	function hintListenAll() {
+		showWindowsToast("听完已有的回答，才能补充回答哦~");
+	}
+	
+	function hintPlaceMember() {
+		showWindowsToast("您尚未入驻，不能补充回答哦~");
+	}
+	
+	function cancelAll() {
+		if (isPlaying) {
+			stopAudio(-1);
+		}
+		if (isRecording) {
+			cancelRecord();
+		}
+		
+		audioLocalId = null;
+		isPlaying = false;
+		$(".pre-record-area").addClass("dn");
+		$(".post-record-area").addClass("dn");
+		$("#play_icon").removeClass("dn");
+		$("#pause_icon").addClass("dn");
+		closeRecordLayer();
+		
+	}
+	
+	function refreshTime() {
+		curPlayLen++;
+		var m = Math.floor(curPlayLen/60);
+		var s = curPlayLen -  m*60;
+		var str = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0": "") + s;
+		$(".timer-display").html(str);
+	}
+	
+	function togglePlayAudio(replyId) {
+		clearTimeout(playEndThread);
+		clearInterval(changeTimeThread);
+		$(".timer-display").html("00:00");
+		curPlayLen = 0;
+	
+		if (isPlaying) {
+			$(".listen-pause").addClass("dn");
+			$(".listen-play").removeClass("dn");
+			isPlaying = false;
+			stopAudio(replyId);
+		} else {
+			isPlaying = true;
+			$(".listen-pause").removeClass("dn");
+			$(".listen-play").addClass("dn");
+			playAudio(replyId);
+			var len = $("#listen-layer").attr("len");
+			playEndThread = setTimeout(function(){
+				isPlaying = false;
+				$(".listen-pause").addClass("dn");
+				$(".listen-play").removeClass("dn");
+				clearInterval(changeTimeThread);
+				$(".timer-display").html("00:00");
+				curPlayLen = 0;
+			}, len*1000);
+			changeTimeThread = setInterval(function(){
+				refreshTime();
+			}, 1000);
+		}
+	}
+	
+	function togglePlayAudioNotSubmitted() {
+		if (playEndThread != -1) {
+			clearTimeout(playEndThread);
+		}
+	
+		if (isPlaying) {
+			isPlaying = false;
+			$(".record-hint img").toggleClass("dn");
+			stopAudio(-1);
+		} else {
+			isPlaying = true;
+			$(".record-hint img").toggleClass("dn");
+			playAudio(-1);
+			var audioLen = $(".post-record-area").attr("len");
+			playEndThread = setTimeout(function(){
+				isPlaying = false;
+				$(".record-hint img").toggleClass("dn");
+			}, audioLen*1000);
+		}
+	}
+	
+	function playAudio(replyId) {
+		stopAudio(replyId);
+		if (replyId > 0 && $("#audio-" + replyId).length > 0) {
+			$("#audio-" + replyId)[0].load();
+			$("#audio-" + replyId)[0].play();
+		} else {
+			wx.playVoice({
+			    localId: audioLocalId // 需要播放的音频的本地ID，由stopRecord接口获得
+			});
+		}
+	}
+	function pauseAudio(replyId) {
+		if (replyId > 0 && $("#audio-" + replyId).length > 0) {
+			$("#audio-" + replyId)[0].pause();
+		} else {
+			wx.pauseVoice({
+			    localId: audioLocalId // 需要暂停的音频的本地ID，由stopRecord接口获得
+			});
+		}
+	}
+	function stopAudio(replyId) {
+		if (replyId > 0 && $("#audio-" + replyId).length > 0) {
+			$("#audio-" + replyId)[0].pause();
+		} else {
+			wx.stopVoice({
+			    localId: audioLocalId // 需要暂停的音频的本地ID，由stopRecord接口获得
+			});
+		}
+	}
+	
+	
+	function submitForm() {
+		if (isPlaying) {
+			stopAudio(-1);
+		}
+	
+		wx.uploadVoice({
+		    localId: audioLocalId, // 需要上传的音频的本地ID，由stopRecord接口获得
+		    isShowProgressTips: 1, // 默认为1，显示进度提示
+	        success: function (res) {
+	        	var serverId = res.serverId; // 返回音频的服务器端ID
+	        	var audioLen = $(".post-record-area").attr("len");
+	        	window.location = "/mq/addreply?serverId="+ serverId + "&questionId=$q.getQuestionId()&len=" + audioLen;
+		    }
+		});
+	}
+
+	function startRecord() {
+		isRecording = true;
+		audioLocalId = null;
+		$("#record-layer").removeClass("dn");
+		$("#record-layer-mask").removeClass("dn");
+		$(".pre-record-area").removeClass("dn");
+		wx.startRecord();
+		startRecordTime = new Date().getTime();
+		
+		clearInterval(changeTimeThread);
+		$(".timer-display").html("00:00");
+		curPlayLen = 0;
+		changeTimeThread = setInterval(function(){
+				refreshTime();
+			}, 1000);
+	}
+	
+	function cancelRecord() {
+		isRecording = false;
+		audioLocalId = null;
+		wx.stopRecord({
+		    success: function (res) {
+		    }
+		});
+		
+		clearInterval(changeTimeThread);
+		$(".timer-display").html("00:00");
+		curPlayLen = 0;
+	}
+	
+	function stopRecord() {
+		isRecording = false;
+		wx.stopRecord({
+		    success: function (res) {
+		        audioLocalId = res.localId;
+		        onRecordFinished();
+		    }
+		});
+		
+		clearInterval(changeTimeThread);
+		$(".timer-display").html("00:00");
+		curPlayLen = 0;
+	}
+	
+	function addListenAction(replyId) {
+		$.ajax({
+			dataType:"json",
+			url: "/mq/addlistenaction",
+			data: {replyId: replyId },
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			
+	    		} 
+	    	}
+		});
+	}
+	
+	function onRecordFinished() {
+		$(".pre-record-area").addClass("dn");
+		$(".post-record-area").removeClass("dn");
+		
+		var curTime = new Date().getTime();
+		var audioLen = Math.ceil((curTime - startRecordTime)/1000);
+		$(".post-record-area").attr("len", audioLen);
+	}
+	
+	var wxpay_req_data = {};
+
+	function startPay(price, replyId) {
+		$.ajax({
+			dataType:"json",
+			url: "/mq/startprepay",
+			data: {placeId: "$place.getId()", price: price, payReason:2, replyId: replyId},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			//可以发起支付
+	    			wxpay_req_data = data.data;
+	    			startPayRequestWx();
+	    		} else {
+	    			showWindowsToast(data.msg);
+	    		}
+	    	}
+		});
+	}
+	
+	function onBridgeReady(){
+	   WeixinJSBridge.invoke(
+	       'getBrandWCPayRequest', wxpay_req_data,
+	       function(res){
+	           if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+	           	  //支付成功
+	           	  window.location = "/mq/viewquestion?questionId=$!questionId";
+	           } else {
+	              //支付失败
+	              showWindowsToast("支付失败");
+	           }
+	       }
+	   ); 
+	}
+	
+	
+	function startPayRequestWx() {
+		if (typeof WeixinJSBridge == "undefined"){
+		   if( document.addEventListener ){
+		       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+		   }else if (document.attachEvent){
+		       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+		       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+		   }
+		}else{
+		   onBridgeReady();
+		}
+	}
+	
+	$(document).ready(function(){
+	
+		$(".listen-btn").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var price = $(this).attr("price");
+				var replyId = $(this).attr("replyid");
+				var content = $(this).attr("content");
+				var len = $(this).attr("len");
+				var isPaied = $(this).attr("paied");
+				var isSaved = $(this).attr("saved");
+				
+				setTimeout(function(){
+						//hideDivHighlightMenu();
+						if (isPaied == "true") {
+							listenReply(price, replyId, content, len, isSaved);
+						} else {
+							startPay(price, replyId);
+						}
+					}, 300);
+				
+				//times++;
+			});
+		});
+		
+		
+		var host = window.location.host;
+		configWeixinShare("土著说", "【$viewUtils.escapeDoubleQuote($viewUtils.getHTMLValidText($place.getName()))】$viewUtils.escapeDoubleQuote($viewUtils.getHTMLValidText($q.getContentAbstract()))", "http://" + host + "/images/tzs_logo.png", "http://" + host + "/mq/viewquestion?questionId=$!questionId");
+
+		
+		wx.onVoiceRecordEnd({
+		    // 录音时间超过一分钟没有停止的时候会执行 complete 回调
+		    complete: function (res) {
+		        audioLocalId = res.localId; 
+		        onRecordFinished();
+		    }
+		});
+		
+	});
+	
+</script>
+
+</body></html>

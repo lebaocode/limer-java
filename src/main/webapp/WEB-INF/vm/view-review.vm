@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+		@font-face {
+		    /* font-properties */
+		    font-family: smallkaiti;
+		    src:url('/fonts/$!font_file');
+		}
+    
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;color:#333333;font-size:16px;}
+    	.lp-line {width:100%;padding:20px 0px;clear:both;}
+    	.lp-right {padding:0px 10px 0px 40px;line-height:24px;}
+    	.lp-no {position:absolute; left:20px;line-height:24px;font-weight:bold;}
+    	
+    	.lp-title {font-weight:bold;}
+    	.lp-goal {color:#999999;font-size:14px;line-height:20px;}
+    	.goal-label {}
+    	
+    	.add-review-num {position:fixed;bottom:48px;right:8px;width:20px;height:20px;background-color:red;color:white;font-size:12px;text-align:center;line-height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;z-index:999;}
+    	.review-book {position:fixed;bottom:10px;right:10px;width:48px;height:48px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/book-green.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px;
+    z-index:998;
+    	}
+    	
+    	.add-review-icon {position:absolute;margin:-8px 0px 0px 42px;width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/add-icon-square.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+	    	
+    	.tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px; width:48px;height:48px;font-size:40px; line-height:48px;text-align:center;
+	font-family:smallkaiti;}
+	
+		.emp2 {color:red;}
+		.emp {color:#C422CC;}
+    	
+    	.hanzi-pinyin {line-height:24px;width:54px;text-align:center;font-size:16px;font-family:hanyupinyin;}
+    	
+    	.lp-item-line {margin-top:10px;}
+    	.lp-item-content {margin:0px 30px 10px 0px;display:block;float:left;}
+    	.lp-item-pinyin {margin-left:10px;}
+    	.lp-item-zi {margin-left:12px;}
+    	.mark-line {margin-top:10px;line-height:16px;text-align:center;}
+    	.jianhao-icon {width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/jianhao-gray.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+		.jiahao-icon {width:16px;height:16px;background-position:center center;
+		background-color:#FCFCFC;
+		background-image:url(/images/jiahao-gray.png);
+		background-repeat:no-repeat;
+		background-attatchment:fixed;
+		background-size:16px 16px;}
+		.mark-num {font-size:10px;color:#999999;position:relative;top:-4px;}
+		
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">错题本</div>
+		</div>
+		
+		<div class="input-area">
+			#set ($no = 0)
+			#foreach ($lp in $lps)
+			#set ($no = $no + 1)
+			<div class="lp-line">
+				<div class="lp-no">$no.</div>
+				<div class="lp-right">
+					<div class="lp-title">$viewUtils.getHTMLValidText($lp.getTitle())</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：$viewUtils.getHTMLValidText($lp.getGoal())</span></div>
+					
+					<div class="lp-item-line">
+						#foreach ($lpi in $lp.getItems())
+						#if ($lpi.getMarkNum() > 2)
+						#set ($empClass = "emp2")
+						#elseif ($lpi.getMarkNum() > 0)
+						#set ($empClass = "emp")
+						#else
+						#set ($empClass = "")
+						#end
+						<div class="lp-item-content" lpid="$lpi.getLpId()">
+							<div class="hanzi-pinyin lp-item-pinyin $empClass">$lpi.getValue("pinyin")</div>
+							<div class="tianzige-zi lp-item-zi $empClass">$lpi.getValue("hanzi")</div>
+							#if ($!is_owner)
+							<div class="mark-line" marknum="$lpi.getMarkNum()">
+								<img class="jiahao-icon di" onclick="addReview(this);"></img>
+								<div class="mark-num di">标记 <span id="mark-num-$lpi.getLpId()">$lpi.getMarkNum()</span> 次</div>
+							</div>
+							#end
+						</div>
+						#end
+					</div>
+					<div class="cb"></div>
+				</div>
+			</div>
+			#end
+			
+			
+		</div>
+		
+		#if ($!is_owner)
+		<div class="review-book" onclick="gotoReview()"></div>
+		#end
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	function addReview(e) {
+		var lpId = $(e).parent().parent().attr("lpid");
+	
+		var markNum = parseInt($(e).parent().attr("marknum"));
+		markNum++;
+		
+		var color = markNum > 2 ? "red": "#C422CC";
+		
+		$(e).parent().prev().css("color", color);
+		$(e).parent().prev().prev().css("color", color);
+		
+		$(e).parent().attr("marknum", markNum + "");
+		$("#mark-num-" + lpId).html(markNum + "");
+		
+		$.ajax({
+			dataType:"json",
+			url: "/fudao/addmark",
+			data: {lpId: lpId, markNum: markNum},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			showWindowsToast(data.msg);
+	    		} 
+	    	}
+		});
+	}
+	
+	
+	function gotoReview() {
+		window.location = "/fudao/viewreview?bookId=$!book_id";
+	}
+	
+	$(document).ready(function(){
+		
+	});
+	
+</script>
+
+</body></html>

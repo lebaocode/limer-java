@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	.title {position:absolute;top:40%;font-size:36px;color:#333333;width:100%;text-align:center;}
+		.btn-style {position:fixed;width:80%;left:10%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.hint-text {color:#999999;font-size:16px;line-height:16px;padding:12px 5px;background-color:#FFFFFF;border:0 none;text-align:left;}
+		.line-input {width:80%;left:10%;border-bottom:1px solid #999999; position:fixed;}
+		.btn-code {width:100px;right:10%;position:fixed;bottom:130px;height:30px;font-size:14px;line-height:30px;text-align:center;color:#FFFFFF;background-color:#87C654;}
+		.btn-code-disabled {width:100px;right:10%;position:fixed;bottom:130px;height:30px;font-size:14px;line-height:30px;text-align:center;color:#999999;background-color:#EFEFF4;}
+		
+		.pos-login {bottom:55px;}
+		.pos-mobile {bottom:170px;}
+		.pos-code {bottom:120px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+
+<div id="main-bg" class="main-bg">
+	<form id="frm" method="get" action="/login">
+		<input type="hidden" name="submitted" value="true" />
+		<input type="hidden" name="flag" value="$!flag" />
+		<div class="pos-mobile line-input">
+			<input id="inputMobile" class="hint-text" type="text" value="请输入手机号" name="mobile" />
+		</div>
+		<div class="pos-code line-input">
+			<input id="inputCode" class="hint-text" type="text" value="请输入短信验证码" name="verifyCode" />
+			<div id="btnCode" class="btn-code">获取验证码</div>
+		</div>
+		<div id="btn-login" class="btn-style pos-login" onclick="submitForm();">登录</div>
+	</form>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+	var second = 60;
+	var resetThread;
+
+	function resetSmsSecond() {
+		second--;
+		if (second > 0) {
+			$("#btnCode").html(second + "秒");
+		} else {
+			clearInterval(resetThread);
+			$("#btnCode").removeClass("btn-code-disabled");
+			$("#btnCode").addClass("btn-code");
+			$("#btnCode").html("获取验证码");
+			$("#btnCode").unbind('click');
+			$("#btnCode").bind('click', function(){
+				sendSms();
+			});
+			second = 60;
+		}
+	}
+
+	function sendSms() {
+		var mobile = $("#inputMobile").val();
+		if (mobile.length != 11) {
+			showWindowsToast("请输入正确的手机号码");
+			return;
+		}
+		
+		$("#btnCode").removeClass("btn-code");
+		$("#btnCode").addClass("btn-code-disabled");
+		$("#btnCode").html(second + "秒");
+		$("#btnCode").unbind('click');
+		$("#btnCode").bind('click', function(){
+			});
+		resetThread = setInterval("resetSmsSecond()", 1000);
+		
+		$.ajax({
+			dataType:"json",
+			url: "/json/sendsms",
+			data: {mobile : mobile},
+			success: function(data){
+	    		if (data.status != "ok") {
+	    			if (data.status == "sent_once") {
+	    				showWindowsToast("已发送过验证码，请在短信里寻找");
+	    			} else {
+	    				showWindowsToast("发送验证码失败");
+	    			}
+	    		} else {
+	    			if (data.msg) {
+	    				showWindowsToast(data.msg);
+	    			} else {
+	    				showWindowsToast("短信验证码已发送");
+	    			}
+	    		}
+	    	}
+		});
+	}
+	
+	function verifyCode(mobile, code) {
+		if (code == "" || code.length !=6){
+			showWindowsToast("请输入六位验证码");
+			return;
+		}
+	
+		$.ajax({
+			dataType:"json",
+			url: "/json/verifysmscode",
+			data: {mobile : mobile, code: code, flag: "$!flag"},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			$("#frm").submit();
+	    		} else {
+	    			showWindowsToast("验证码不正确，请重新输入");
+	    		}
+	    	}
+		});
+	}
+
+	function submitForm(){
+		var m = $("#inputMobile").val();
+		var code = $("#inputCode").val();
+		if (m != "" && m.length == 11) {
+			verifyCode(m, code);
+		} else {
+			showWindowsToast("请输入正确的手机号！");
+		}
+	}
+
+	$(document).ready(function(){
+		$("#btnCode").bind('click', function(){
+			sendSms();
+		});
+		
+		//logAction("INDEX");
+		
+		addAutoFocusEffect($("#inputMobile"), "请输入手机号", "#333333", "#999999");
+		addAutoFocusEffect($("#inputCode"), "请输入短信验证码", "#333333", "#999999");
+		
+		//loadSuccess();
+	});
+	
+</script>
+
+</body></html>

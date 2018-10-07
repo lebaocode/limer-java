@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	.input-area {width:100%;height:1024px;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:14px;padding-top:40px;}
+    	.grade-line {margin:20px 0px;}
+    	.grade-item {height:46px;width:120px;text-align:center;color:white;line-height:46px;}
+    	
+    	.invalid-item {background-color:#CCCCCC;}
+    	.valid-item {background-color:#87C654;}
+    
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">请选择学年</div>
+		</div>
+		
+		<div class="input-area">
+		<center>
+		<table cellspacing="20" cellpadding="0">
+			<tr class="grade-line">
+				<td class="grade-item valid-item" grade="1" term="0">一年级 上</td><td class="grade-item valid-item"  grade="1" term="1">一年级 下</td>
+			</tr>
+			<tr class="grade-line">
+				<td class="grade-item invalid-item" grade="2" term="0">二年级 上</td><td class="grade-item invalid-item" grade="2" term="1">二年级 下</td>
+			</tr>
+			<tr class="grade-line">
+				<td class="grade-item invalid-item" grade="3" term="0">三年级 上</td><td class="grade-item invalid-item" grade="3" term="1">三年级 下</td>
+			</tr>
+			<tr class="grade-line">
+				<td class="grade-item invalid-item" grade="4" term="0">四年级 上</td><td class="grade-item invalid-item" grade="4" term="1">四年级 下</td>
+			</tr>
+			<tr class="grade-line">
+				<td class="grade-item invalid-item" grade="5" term="0">五年级 上</td><td class="grade-item invalid-item" grade="5" term="1">五年级 下</td>
+			</tr>
+			<tr class="grade-line">
+				<td class="grade-item invalid-item" grade="6" term="0">六年级 上</td><td class="grade-item invalid-item" grade="6" term="1">六年级 下</td>
+			</tr>
+		</table>
+		</center>
+		</div>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		$(".grade-item").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var invalid = $(this).hasClass("invalid-item");
+				var grade = $(this).attr("grade");
+				var term = $(this).attr("term");
+				
+				setTimeout(function(){
+					if (invalid){
+						showWindowsToast("目前只开通了一年级下，其它暂未开通");
+					} else {
+						window.location = "/fudao/selectsubject?grade="+ grade +"&term=" + term;
+					}
+				}, 300);
+				
+			});
+		});
+		
+	});
+	
+</script>
+
+</body></html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; right:10px;text-align:right;width:140px;}
+		.line1 { padding:10px;}
+		
+		.pos-submit {bottom:0px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/mem/setName">
+		<input id="hiddenName" type="hidden" name="name" value="妈妈"/>
+	<div class="main">
+	
+		<div class="top-bar">
+			<div class="top-bar-mid-title">您的信息</div>
+		</div>
+		
+		<div class="input-area">
+			<div class="line1"><div class="di">您是孩子的</div><div id="inputName" class="input-text hint-color">请选择</div></div>
+		</div>
+		
+		<div id="btn-submit" class="btn-style pos-submit" onclick="submitForm();">下一步</div>
+
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	function submitForm(){
+		$("#frm").submit();
+	}
+
+	$(document).ready(function(){
+		$("#inputName").click(function() {
+			showSelectMenu("pop-mid-name-menu", "inputName", "name", [
+			{"hiddenVal": "妈妈", "eleVal":"妈妈"},
+			{"hiddenVal": "爸爸", "eleVal":"爸爸"},
+			{"hiddenVal": "阿姨", "eleVal":"阿姨"},
+			{"hiddenVal": "姑姑", "eleVal":"姑姑"},
+			{"hiddenVal": "叔叔", "eleVal":"叔叔"},
+			{"hiddenVal": "长辈", "eleVal":"长辈"},
+			{"hiddenVal": "老师", "eleVal":"老师"}
+			]);
+		});
+		
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

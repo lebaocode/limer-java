@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		
+		.title-line {width:100%; padding:10px 0px;border-bottom:1px solid #E0E0E0;}
+		.title-line-star-bg {background-image:url(/native_app_local_assets/star.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:24px 24px;background-position:right center;}
+		.plan-title {font-size:20px;#color:#333333; font-weight:bold;text-align:center;width:70%;line-height:24px;margin:0px 15px;}
+		.hint-text {font-size:14px;color:#333333;position:absolute;right:40px;line-height:20px;}
+		.starnum {font-size:20px;#color:#333333;font-weight:bold;margin:0px 5px 0px 5px;line-height:20px;}
+		.star {position:absolute;right:15px;width:24px;height:24px; background-image:url(/native_app_local_assets/star.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:24px 24px;background-position:center center;}
+		.date {font-size:12px;width:100px;height:12px;line-height:12px;color:#999999;position:absolute;right:20px;text-align:right;margin-top:18px;}
+		.has-text-record {background-image:url(/images/ddd.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:10px 10px;background-position:43px 36px;}
+		.bottom-action {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;bottom:0px;}
+		
+		.month {width:100%;}
+		.line-month {width:100%;font-size:16px;color:#333333; padding:10px 0px;text-align:center;border-bottom:1px solid #E0E0E0;}
+		.last-month {position:absolute;line-height:20px; width:50px;left:10px;font-size:14px;color:#999999;}
+		.next-month {position:absolute;line-height:20px; width:50px;left:60px;font-size:14px;color:#999999;}
+		
+		.line-week {width:100%;font-size:14px;text-align:center;}
+		.line-week table {width:100%;}
+		.grid-day {border-right:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;height:45px;width:14%;}
+		.normal-color {color:#333333;}
+		.hint-color {color:#999999;}
+		.today {color:#FE6442;}
+		.nottoday {color:#999999;}
+		
+		.onestar {background-image:url(/native_app_local_assets/star.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:24px 24px;background-position:center center;}
+		.twostar {background-image:url(/native_app_local_assets/twostar.png);background-repeat:no-repeat;background-attatchment:fixed;background-size:48px 24px;background-position:center center;}
+		.chengfa {background-image:url(/native_app_local_assets/cry.jpg);background-repeat:no-repeat;background-attatchment:fixed;background-size:24px 24px;background-position:center center;}
+		
+		.prize-area {padding:10px 10px;height:200px;width:100%;font-size:14px;color:#333333;text-align:center;line-height:20px;}
+		.remark img {width:24px; height:24px; position:relative; top:5px;}
+		.remark {line-height:24px;height:30px;}
+		
+		.status-top-tab {width:40%;height:26px;left:30%;position:absolute;top:55px;background-color:#FCFCFC;border-width:1px 0px 1px 1px;border-style:solid;border-color:#6098D5;}
+		.status-top-tab-item {width:50%;height:26px;line-height:26px;text-align:center;font-size:12px;border-width:0px 1px 0px 0px;border-style:solid;border-color:#6098D5;}
+		.status-top-tab-selected {background-color:#047BFD;color:#FFFFFF;}
+		.status-top-tab-unselected {background-color:#FCFCFC;color:#6098D5;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		#set ($encodedMemName = $viewUtils.encodeURL($mem_name))
+		<div class="top-bar">
+			#if ($is_visitor)
+			<div class="return-icon" onclick="lastStep();"></div>
+			#else
+			<div class="return-icon" onclick="window.location='/plan/list?memName=$encodedMemName&userId=$user_id&statusDesc=$!statusDesc';"></div>
+			#end
+			<div class="top-bar-mid-title">$textUtils.getAbbr($month_record.getPlanName(), 7)</div>
+			<div class="more-icon" onclick="showPlanOp();"></div>
+		</div>
+		
+		#if (!$is_visitor)
+		#set ($tabCss = "margin-top:90px;")
+		<table cellspacing="0" cellpadding="0" class="status-top-tab">
+			<tr>
+			<td id="status-top-tab-item-1" class="status-top-tab-item status-top-tab-selected" onclick="window.location='/record/view?userPlanId=$month_record.getUserPlanId()&userId=$user_id&month=$!month';">$mem_name</td>
+			#if (!$month_record.isDiyPlan())
+			<td id="status-top-tab-item-2" class="status-top-tab-item status-top-tab-unselected"  onclick="window.location='/record/viewothers?userPlanId=$month_record.getUserPlanId()&userId=$user_id&month=$!month';">大家</td>
+			#else
+			<td id="status-top-tab-item-2" class="status-top-tab-item status-top-tab-unselected"  onclick="window.location='/record/viewfriends?userPlanId=$month_record.getUserPlanId()&userId=$user_id&month=$!month';">朋友们</td>
+			#end
+			</tr>
+		</table>
+		#else
+		#set ($tabCss = "")
+		#end
+	
+		<div class="input-area" style="$tabCss">
+			<div class="line-month">
+				#if ($!last_month && $last_month != "")
+				<div class="last-month" onclick="window.location='/record/view?userPlanId=$month_record.getUserPlanId()&userId=$user_id&month=$!last_month';">上月</div>
+				#end
+				#if ($!next_month && $!next_month != "")
+				#if ($!last_month && $last_month != "")
+				#set ($monthClassName = "next-month")
+				#else
+				#set ($monthClassName = "last-month")
+				#end
+				<div class="$monthClassName" onclick="window.location='/record/view?userPlanId=$month_record.getUserPlanId()&userId=$user_id&month=$!next_month';">下月</div>
+				#end
+				<div class="hint-text"><span class="hint-color">本月</span><span id="monthStarNum" class="starnum">$month_record.getPrizeNum()</span></div>
+				<div class="star"></div>
+				<div class="month">$month_record.getYear()年$month_record.getMonth()月</div>
+			</div>
+			<div class="line-week">
+				<table cellspacing="0" cellpadding="0">
+				<tr class="normal-color">
+					<td class="grid-day mondy">一</td>
+					<td class="grid-day preday">二</td>
+					<td class="grid-day preday">三</td>
+					<td class="grid-day preday">四</td>
+					<td class="grid-day preday">五</td>
+					<td class="grid-day preday">六</td>
+					<td class="grid-day preday">日</td>
+				</tr>
+				
+			
+		#set ($no = 0)
+		#foreach ($item in $month_record.getDays())
+			#if ($no == 0 || $no == 7 || $no == 14 || $no == 21 || $no == 28 || $no == 35)
+			#set ($isMonday = "true")
+			#else
+			#set ($isMonday = "false")
+			#end
+			
+			
+			#if ($isMonday == "true")
+				#if ($no > 0)
+					</tr>
+				#end
+				<tr>
+			#end
+			#set ($no = $no + 1)
+			
+			#if ($item.isHasTextRecord())
+			#set ($textRecordClassName = "has-text-record")
+			#else
+			#set ($textRecordClassName = "")
+			#end
+			
+			#if ($item.getPrizeNum() == 0)
+				#if ($item.isToday())
+				#set ($className = "today")
+				#else
+				#set ($className = "nottoday")
+				#end
+				<td id="td-$item.getDate()" class="grid-day $className $textRecordClassName" date="$item.getDate()">$item.getDay()</td>
+			#elseif ($item.getPrizeNum() == 1)
+				<td id="td-$item.getDate()" class="grid-day $className onestar" date="$item.getDate()">
+				#if ($item.isHasTextRecord())
+				<div class="has-text-record" style="width:100%;height:100%;"></div>
+				#end
+				</td>
+			#elseif ($item.getPrizeNum() == 2)
+				<td id="td-$item.getDate()" class="grid-day $className twostar" date="$item.getDate()">
+				#if ($item.isHasTextRecord())
+				<div class="has-text-record" style="width:100%;height:100%;"></div>
+				#end
+				</td>
+			#elseif ($item.getPrizeNum() == -1)
+				<td id="td-$item.getDate()" class="grid-day $className chengfa" date="$item.getDate()">
+				#if ($item.isHasTextRecord())
+				<div class="has-text-record" style="width:100%;height:100%;"></div>
+				#end
+				</td>
+			#end
+		#end
+				</tr>
+				</table>
+			</div>
+			
+			<div class="prize-area">
+				#set ($prize = $month_record.getPrize())
+				#if ( $!prize != "")
+				<div class="remark">奖励：$prize</div>
+				#end
+				<div class="remark">计算规则：</div>
+				<div class="remark"><img src="/native_app_local_assets/star.png"> = 1颗星</div>
+				<div class="remark"><img style="width:48px;" src="/native_app_local_assets/twostar.png"> = 2颗星</div>
+				
+				#if ($month_record.isParent())
+				<div class="remark"><img src="/native_app_local_assets/cry.jpg"> = -1颗星</div>
+				#end
+			</div>
+			<input id="curDate" type="hidden" name="curDate" value="" />
+		</div>
+		
+		#if ($is_visitor)
+		<div class="bottom-action" onclick="attendPlan('$month_record.getUserPlanId()');">参加计划</div>
+		#end
+	</div>
+</div>
+
+<script type="text/javascript">
+	function attendPlan(userPlanId){
+		#if ($is_reg_user)
+		$.ajax({
+			dataType:"json",
+			url: "/json/listmem",
+			data: {userId : $cookie_user_id },
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			var memArr = eval(data.mems);
+	    			var arr = new Array();
+	    			for (var i = 0; i < memArr.length; i++){
+	    				arr.push({name: memArr[i], url: "/plan/attend?userPlanId=" + userPlanId + "&memName=" + encodeURIComponent(memArr[i])});
+	    			}
+	    			
+	    			showMidOpMenu(arr);
+	    		}
+	    	}
+		});
+		#else
+		window.location = "/plan/attend?userPlanId=" + userPlanId;
+		#end
+	}
+
+	function record(prizeNum) {
+		var curDate = $("#curDate").val();
+		var userId = "$user_id";
+		var userPlanId = "$month_record.getUserPlanId()";
+		$.ajax({
+			dataType:"json",
+			url: "/record/add",
+			data: {userId : userId, userPlanId: userPlanId, recordResult: prizeNum, day: curDate, month: "$month" },
+			//headers: LEBAO_HEADERS,
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			changePrizeValue(prizeNum);
+	    			$("#monthStarNum").html(data.curPrizeNum);
+	    		} 
+	    	}
+		});
+	}
+
+	function changePrizeValue(hiddenVal) {
+		
+	
+		var menuId = "pop-mid-prize-menu";
+		toggleMenu(menuId);
+		
+		var curDate = $("#curDate").val();
+		var op = hiddenVal;
+		//alert(curDate +" " + op);
+		
+		var day = curDate.substring(6,8);
+		if (day.substring(0,1) == "0"){
+			day = day.substring(1,2);
+		}
+		
+		if (op == "0") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa");
+			$("#td-" + curDate).html(day);
+			$("#monthStarNum").html();
+		}else if (op == "1") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("onestar");
+			
+		}else if (op == "2") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("twostar");
+		}else if (op == "-1") {
+			$("#td-" + curDate).removeClass("onestar twostar chengfa");
+			$("#td-" + curDate).html("");
+			$("#td-" + curDate).addClass("chengfa");
+		}
+	}
+	function showPrizeMenu(menuItems) {
+		var menuId = "pop-mid-prize-menu";
+		if ($("#" + menuId).length > 0) {
+			toggleMenu(menuId);
+			return;
+		}
+		
+		var html = "<div class='pop-mid-menu dn' id='"+ menuId +"'>";
+		
+		$.each(menuItems, function(i, val){
+			if (val.eleVal == "添加记录" || val.eleVal == "修改记录") {
+				html += "<div id='pop-menu-record-op' class='pop-mid-menu-item' >"+ val.eleVal +"</div>";
+			} else {
+				html += "<div class='pop-mid-menu-item' hiddenVal='"+ val.hiddenVal +"'>"+ val.eleVal +"</div>";
+			}		
+		
+		});
+		
+		html += "</div>";
+		genMaskLayerMenuHtml(menuId);
+		
+		$("body").append(html);
+		toggleMenu(menuId);
+		
+		$(".pop-mid-menu-item").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+			
+				var hiddenVal = $(this).attr("hiddenVal");
+				if (hiddenVal) {
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						record(hiddenVal);
+					}, 300);
+				}
+				
+				var menuId = $(this).attr("menuId");
+				if (menuId){
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						toggleMenu(menuId);
+					}, 300);
+				}
+				
+				var id = $(this).attr("id");
+				if (id == "pop-menu-record-op"){
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						addTextRecord();
+					}, 300);
+				}
+				
+			});
+		});
+	}
+	
+	function addTextRecord() {
+		var day = $("#curDate").val();
+		window.location = "/record/addText?userPlanId=$month_record.getUserPlanId()&day="+ day;
+	}
+	
+	function showDayOp(date) {
+		#if ($is_visitor)
+		return;
+		#end
+	
+		#if ($month_record.isUserPlanStatusEnd())
+		showWindowsToast("本计划已结束！");
+		return;
+		#end
+		
+		#if ($month_record.isUserPlanStatusPaused())
+		showWindowsToast("本计划已暂停！");
+		return;
+		#end
+		
+		var curTime = getCurDate();
+		if (date > curTime) {
+			showWindowsToast("只能记录今天及以前的时间哦~");
+			return;
+		}
+		
+		var recordOp = "添加记录";
+		if ($("#td-" + date).hasClass("has-text-record") || $("#td-" + date).children(".has-text-record").length > 0) {
+			recordOp = "修改记录";
+		}
+		if ($("#pop-menu-record-op").length > 0) {
+			$("#pop-menu-record-op").html(recordOp);
+		}
+	
+		$("#curDate").val(date);
+		showPrizeMenu([
+			{"hiddenVal": "1", "eleVal":"<center><img src='/native_app_local_assets/star.png' style='width:24px;height:24px;margin-top:10px;' /></center>"},
+			{"hiddenVal": "2", "eleVal":"<center><img src='/native_app_local_assets/twostar.png' style='width:48px;height:24px;margin-top:10px;'  /></center>"},
+			#if ($month_record.isParent())
+			{"hiddenVal": "-1", "eleVal":"<center><img src='/native_app_local_assets/cry.jpg' style='width:24px;height:24px;margin-top:10px;'  /></center>"},
+			#end
+			{"hiddenVal": "0", "eleVal":"无奖励"},
+			{"hiddenVal": "0", "eleVal":recordOp}
+			]
+			
+			);
+	}
+	
+	function shareOp(){
+	}
+
+	function showPlanOp(){
+		showRightTopMenu([
+			#if ($month_record.isCreator() || $!is_admin)
+		
+			#if (!$month_record.isUserPlanStatusEnd())
+			#if ($month_record.isDiyPlan() || $!is_admin)
+			{"name":"修改计划", "url":"/plan/modify?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			#if ($month_record.isUserPlanStatusPaused())
+			{"name":"继续计划", "url":"/plan/continue?userPlanId=$month_record.getUserPlanId()"},
+			#else
+			{"name":"暂停计划", "url":"/plan/pause?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			#end
+			
+			{"name":"删除计划", "url":"/plan/delete?userPlanId=$month_record.getUserPlanId()"},
+			#end
+			{"name":"查看详细", "url":"/record/view?userPlanId=$month_record.getUserPlanId()&detail=true&userId=$user_id"}
+		]);
+	}
+	
+
+	$(document).ready(function(){
+				
+		$(".plan-title").width($(window).width() - 130);
+		
+		//logAction("INDEX");
+		$(".grid-day").each(function(){
+			$(this).width($(window).width()/7);
+			
+			#if (!$is_visitor)
+			var date = $(this).attr("date");
+			if (date && date.length > 0) {
+				$(this).on("tap", function(){
+					event.preventDefault();
+					showDivHighlightMenu($(this));
+				
+					setTimeout(function(){
+						//hideDivHighlightMenu();
+						showDayOp(date);
+					}, 300);
+									
+				});
+			}
+			#end
+		});
+		
+		var host = window.location.host;
+		configWeixinShare("乐宝亲子辅导", "$mem_name的计划《$month_record.getPlanName()》，已坚持$month_record.getHasRecordDay()天", "http://" + host + "/images/qinzi5.jpg", "http://" + host + "/record/view?userPlanId=$month_record.getUserPlanId()&userId=$user_id");
+		
+	});
+	
+</script>
+
+</body></html>

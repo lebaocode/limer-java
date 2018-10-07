@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;height:100%;position:absolute;margin-top:10px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.book-menu-area {padding:20%;}
+		.book-menu-item {width:100%;margin-bottom:20px;text-align:center;font-size:16px;line-height:48px;color:#FFFFFF;}
+		
+		.bg1 {background-color:#87C654;}
+		.bg2 {background-color:#87C654;}
+		.bg3 {background-color:#87C654;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/fudao/listuserbooks';"></div>
+			<div class="top-bar-mid-title">$!subject</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="book-menu-area">
+				<div class="book-menu-item bg1" link="/fudao/listchapter?bookId=$book_id">生字本</div>
+				<div class="book-menu-item bg1" link="/fudao/viewreview?bookId=$book_id">错题本</div>
+				<div class="book-menu-item bg1" link="/fudao/listuserpractices?bookId=$book_id">练习本</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+
+	$(document).ready(function(){
+		$(".book-menu-item").each(function(){
+			var link = $(this).attr("link");
+			
+		
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				
+				setTimeout(function(){
+					window.location = link;
+				}, 300);
+				
+				
+			});
+			
+			
+		});
+	});
+	
+</script>
+
+</body></html>

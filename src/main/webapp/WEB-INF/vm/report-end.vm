@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.report-area {width:100%;margin-top:60px;border:0px;font-size:16px;}
+		
+		.best-remark {}
+		.good-remark {}
+		.ok-remark {}
+		.bad-remark {}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">完成报告</div>
+			<div class="share-icon" onclick="shareOp()">分享</div>
+		</div>
+	
+		<div class="report-area">
+		
+			#if ($report.getPlanRemarkLevel() == "A")
+			#set ($bgClassName = "best-remark")
+			#elseif ($report.getPlanRemarkLevel() == "B")
+			#set ($bgClassName = "good-remark")
+			#elseif ($report.getPlanRemarkLevel() == "C")
+			#set ($bgClassName = "ok-remark")
+			#else
+			#set ($bgClassName = "bad-remark")
+			#end
+			<div class="module">
+				<div class="module-header">$report.getMemName()的目标</div>
+				<div class="module-plan-name">$report.getPlanName()</div>
+				<div class="module-plan-remark $bgClassName">$report.getPlanRemarkDesc()</div>
+				<div class="module-plan-period">$report.getStartTime() - $report.getEndTime()</div>
+			</div>
+			
+			
+			#if ($report.hasPrize())
+			#set ($mgClassName = "has-prize-mg")
+			#else
+			#set ($mgClassName = "no-prize-mg")
+			#end
+			<div class="module">
+				<div class="module-header">得到的奖励</div>
+				<div class="text-line star-bg $mgClassName">
+					<div class="text-line1">累计收获</div>
+					<div class="text-line2"><span class="star-num">$report.getTotalPrizeNum()</span>颗星星</div>
+				</div>
+				<div class="text-line twostar-bg $mgClassName">
+					<div class="text-line1">两星奖励</div>
+					<div class="text-line2"><span class="star-num">$report.getTwoStarDayNum()</span>天</div>
+				</div>
+				#if ($report.hasPrize())
+				<div class="text-line present-bg has-prize-mg">
+					<div class="text-line1">$report.getCreatorName()的奖励</div>
+					<div class="text-line2">$report.getPrize()</div>
+				</div>
+				#end
+			</div>
+			
+			<div class="module">
+				<div class="module-header">最佳纪录</div>
+				<div class="best-record-text">$viewUtils.getHTMLValidText($report.getBestTextRecord())</div>
+				<div class="best-record-time">$report.getBestRecordTime()</div>
+				<div class="best-recorder">$report.getBestRecorderName()&nbsp;纪录</div>
+			</div>
+			
+			<div class="module">
+				<div class="module-header">数据来自</div>
+				<div class="logo"></div>
+				<div class="product-name"></div>
+				<div class="slogan">陪伴孩子一起行动</div>
+				<div class="qr-code"></div>
+			</div>
+			
+		</div>
+		
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	function shareOp() {
+	
+	}
+
+	$(document).ready(function(){
+	
+		
+		//logAction("INDEX");
+		
+	});
+	
+</script>
+
+</body></html>

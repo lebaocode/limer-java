@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:40px;border:0px;font-size:16px;}
+		.center-msg {padding:30% 10%;font-size:18px;color:#333333;line-height:30px;}
+		
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep();"></div>
+			<div class="top-bar-mid-title">提示</div>
+		</div>
+		<div class="input-area">
+			<center>
+			<div class="center-msg">$!msg</div>
+			</center>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	
+	$(document).ready(function(){
+	});
+	
+</script>
+
+</body></html>

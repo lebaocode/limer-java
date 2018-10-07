@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.btn-style {position:fixed;width:100%; color:#FFFFFF;font-size:18px; background-color:#FE6442; line-height:44px; height:44px;text-align:center;}
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.hint-color {color:#999999;}
+		.normal-color {color:#333333;}
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; right:10px;text-align:right;width:140px;}
+		.line1 { padding:10px;}
+		.line2 {border-top:1px solid #E0E0E0; padding:10px;}
+		.pos-submit {bottom:0px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/mem/addParent">
+		<input type="hidden" name="submitted" value="true" />
+	<div class="main">
+	
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep();"></div>
+			<div class="top-bar-mid-title">添加家长信息</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="line1"><div class="di">家长称呼</div><input id="inputName" class="input-text hint-color" type="text" value="请输入称呼" name="name" /></div>
+			<div class="line2"><div class="di">家长手机号</div><input id="inputMobile" class="input-text hint-color" type="text" value="请输入手机号" name="mobile" /></div>
+		</div>
+		
+		<div id="btn-submit" class="btn-style pos-submit" onclick="submitForm();">提交</div>
+
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	function submitForm(){
+		var m = $("#inputName").val();
+		if (m == "" || m == "请输入称呼") {
+			showWindowsToast("请输入家长称呼");
+			return;
+		}
+		
+		m = $("#inputMobile").val();
+		if (m == "" || m == "请输入手机号" || m.length != 11) {
+			showWindowsToast("请输入正确的手机号");
+			return;
+		}
+		
+		//判断mobile是否已注册过
+		$.ajax({
+			dataType:"json",
+			url: "/mem/exists",
+			data: {mobile: m, memName: $("#inputName").val() },
+			//headers: LEBAO_HEADERS,
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			if (data.memExists) {
+	    				showWindowsToast($("#inputName").val() +"已存在，请不要重复添加");
+		    			return;
+	    			} else {
+		    			if (data.isMem) {
+		    				if (data.isSelf){
+		    					showWindowsToast("不能添加自己的手机号！");
+		    					return;
+		    				}
+		    			
+		    				if (!confirm("用户" + m +"已注册过，是否放弃他/她之前创建的数据？")){
+		    					
+		    				} else {
+		    					$("#frm").submit();
+		    				}
+		    			} else {
+		    				$("#frm").submit();
+		    			}
+	    			}
+	    		} 
+	    	}
+		});
+		
+		
+	}
+
+	$(document).ready(function(){
+	
+		
+		//logAction("INDEX");
+		addAutoFocusEffect($("#inputName"), "请输入称呼", "#333333", "#999999");
+		addAutoFocusEffect($("#inputMobile"), "请输入手机号", "#333333", "#999999");
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

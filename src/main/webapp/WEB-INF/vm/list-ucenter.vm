@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		.block-area {width:100%;margin-top:10px;border:0px;background-color:#FFFFFF;font-size:16px;}
+		
+		.input-text {position:absolute;display:inline;border:0px;font-size:16px; right:10px;text-align:right;width:180px;}
+		.hint-color {color:#999999;}
+		
+		.line1 {border-bottom:1px solid #E0E0E0;  padding:10px;}
+		.line2 {padding:10px;}
+		
+		.half {left:50%;}
+		.third-one {left:33%;}
+		.third-two {left:67%;}
+		.width33 {width:33%;}
+		.width50 {width:50%;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="top-bar-mid-title">我</div>
+		</div>
+	
+		<div class="input-area">
+			<div class="line1" onclick="window.location='/ucenter/me';">我的信息</div>
+			#if ($!abc == "zanshipingbi")
+			<div class="line2" onclick="window.location='/mem/list';">家庭成员列表</div>
+			#end
+		</div>
+		
+		<div class="block-area">
+			<div class="line1"><div class="di">版本号</div><div id="app-version" class="input-text hint-color"></div></div>
+			<div class="line1" onclick="feedback();">反馈建议</div>
+			#if ($!mobile == "18601026360" || $!mobile == "13671189166")
+			<div class="line1" onclick="window.location='/test'">测试native方法</div>
+			#end
+			
+			#if ($!mobile.length() == 11)
+			<div class="line2" onclick="window.location='/logout'">退出此账号</div>
+			#end
+		</div>
+		
+		
+		<div class="bottom-bar">
+			#if ($user.getMobile() == "18601030171")
+			<div class="bottom-bar-item width33 bottom-fudao-bg-unselected" onclick="gotoTab('fudao');">学习辅导</div>
+			<div class="bottom-bar-item width33 bottom-cal-bg-unselected third-one"  onclick="gotoTab('cal')";>习惯培养</div>
+			<div class="bottom-bar-item width33 bottom-me-bg-selected third-two">我</div>
+			#else
+			<div class="bottom-bar-item width50 bottom-fudao-bg-unselected" onclick="gotoTab('fudao');">学习辅导</div>
+			<div class="bottom-bar-item width50 bottom-me-bg-selected half">我</div>
+			#end
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function feedback() {
+		showWindowsToast("您可以关注“乐宝亲子辅导”微信公众号，直接回复反馈建议");
+	}	
+
+	$(document).ready(function(){
+		setTimeout(function(){
+			if (typeof(NativeBridge) != "undefined") {
+		    	NativeBridge.getAppInfoWithCallback(function(data){
+		    		var o = JSON.parse(data);
+		    		$("#app-version").html(o.appVersion);
+			    });
+		    } else {
+		    	$("#app-version").html("0.1");
+		    }
+		
+			
+		}, 1000);
+		
+		
+		//logAction("INDEX");
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

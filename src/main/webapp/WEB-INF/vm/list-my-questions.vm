@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.input-area {width:100%;margin-top:60px;border:0px;font-size:16px;}
+		
+		.question-area {width:100%;}
+		.question-line {background-color:#FFFFFF;width:100%;margin:10px 0px;}
+		.question-content {color:#333333;font-size:16px;line-height:24px;padding:20px 20px 2px 20px;}
+		
+		.solved {color:#999999;}
+    	.unsolved {color:red;}
+    	.q-placename {color:#999999;font-size:12px;line-height:20px;padding:0px 20px 2px 20px;}
+    	.q-status {font-size:12px;line-height:20px;padding:0px 20px 20px 20px;}
+    	.q-time {margin-left:10px;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="window.location='/mq/index';"></div>
+			<div class="top-bar-mid-title">$page_title</div>
+		</div>
+	
+		<div class="input-area">
+					
+			#foreach ($q in $questions)
+			<div class="question-line" qid="$q.getQuestionId()" ispaied="$q.isPaied()" iswaitingpayresult="$q.isWaitingPayResult()">
+				<div class="question-content">$viewUtils.getHTMLValidText($q.getContentAbstract())</div>
+				#if ($q.isAnswered())
+					#set ($statusDesc = "已回答")
+					#set ($statusClass = "solved")
+				#else
+					#if ($q.isPaied())
+						#if ($q.isExpired())
+						#set ($statusDesc = "已过期，钱退回")
+						#else
+						#set ($statusDesc = "未回答")
+						#end
+					#else
+						#if ($q.isWaitingPayResult())
+						#set ($statusDesc = "等待支付结果")
+						#else
+						#set ($statusDesc = "未支付")
+						#end
+					#end
+					#set ($statusClass = "unsolved")
+				#end
+				<div class="q-placename">$viewUtils.getHTMLValidText($q.getPlaceName())<span class="q-time">$q.getDisplayAskTime()</span></div>
+				<div class="q-status $statusClass">$statusDesc</div>
+			</div>
+			#end
+		</div>
+	</div>
+	
+</div>
+
+<script type="text/javascript">
+	var req_data = {};
+
+	function startPay(questionId) {
+		$.ajax({
+			dataType:"json",
+			url: "/mq/startprepay",
+			data: {questionId: questionId, payReason:1},
+			success: function(data){
+	    		if (data.status == "ok") {
+	    			//可以发起支付
+	    			req_data = data.data;
+	    			startPayRequestWx();
+	    		} else {
+	    			showWindowsToast(data.msg);
+	    		}
+	    	}
+		});
+	}
+
+	function onBridgeReady(){
+	   WeixinJSBridge.invoke(
+	       'getBrandWCPayRequest', req_data,
+	       function(res){
+	           if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+	           	  //支付成功
+	           	  window.location = "/mq/listmyquestions";
+	           } else {
+	              //支付失败
+	              showWindowsToast("支付失败");
+	           }
+	       }
+	   ); 
+	}
+	
+	
+	function startPayRequestWx() {
+		if (typeof WeixinJSBridge == "undefined"){
+		   if( document.addEventListener ){
+		       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+		   }else if (document.attachEvent){
+		       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+		       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+		   }
+		}else{
+		   onBridgeReady();
+		}
+	}
+	
+	
+	$(document).ready(function(){
+	
+		$(".question-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var qId = $(this).attr("qid");
+				var isPaied = $(this).attr("ispaied");
+				var isWaitingPayResult = $(this).attr("iswaitingpayresult");
+				
+				if (isPaied == "false" && isWaitingPayResult == "true") {
+					showWindowsToast("请稍等，正在等待微信支付结果");
+					return;
+				}
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					if (isPaied == "false") {
+						startPay(qId);
+					} else {
+						window.location = "/mq/viewquestion?questionId=" + qId;
+					}
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+		
+		var host = window.location.host;
+		configWeixinShare("土著说", "附近最土著说的人都在这里", "http://" + host + "/images/qinzi5.jpg", "http://" + host + "/mq/nearby");
+	});
+	
+</script>
+
+</body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>土著说</title>
+    <style>
+		.logo-title {margin-top:20%;font-size:24px;font-weight:bold;line-height:36px;padding:16px 0px 16px 50px;
+			background:#EFEFF4 url(/images/tuzhushuo_shu.png) no-repeat;
+    		background-size:45px 105px;
+    		background-position:80px 0px;}
+    	.input-keyword {margin-top:80px;}
+    	.input-keyword input {padding:5px 10px 5px 40px;line-height:32px;font-size:16px;border:1px solid #999999;width:70%;
+    		background:#FFFFFF url(/images/search_icon.png) no-repeat;
+    		background-size:25px 25px;
+    		background-position:7px 8px;}
+    	
+    	.hint-color {color:#999999;}
+    	
+    	#mask {position:fixed;top:0px;left:0px;z-index:999;background-color:#EFEFF4;height:100%;width:100%;}
+    	#placeSuggestionArea {width:100%;z-index:1000001;background-color:#FFFFFF;position:fixed;top:0px;left:0px;}
+    	.ret-index {background:#FFFFFF url(/images/ret_arrow.png) no-repeat;
+    		background-size:25px 25px;
+    		background-position:12px 14px; width:48px;height:44px;position:fixed;left:0px;top:0px;}
+    	.input-keyword-real {padding:5px 20px 5px 50px;
+    		border-bottom:1px solid #CBCBCB;}
+    	.input-keyword-real input {padding:5px 10px 5px 40px;line-height:32px;color:#333333;font-size:16px;border:1px solid #CBCBCB;width:80%;
+	    	background:#FFFFFF url(/images/search_icon.png) no-repeat;
+    		background-size:25px 25px;
+    		background-position:7px 8px;}
+    	.suggestion-area {width:100%;position:fixed;top:55px;bottom:0px;overflow-y:scroll;overflow-x:hidden;margin:0px 0px 10px 0px;}
+    	
+    	.small-font {font-size:12px; color:#999999;line-height:16px;}
+    	.place-line {font-size:16px;color:#333333;line-height:24px;
+    		background:#FFFFFF url(/images/place.png) no-repeat;
+    		background-size:25px 25px;
+    		background-position:22px 14px;}
+    	.place-name {padding:10px 20px 10px 60px;}
+    	.border-top {border-top:1px solid #E0E0E0;}
+    	
+    	.recent-places {margin-top:20px;font-size:14px;color:#999999;}
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main2">
+		
+		<center>
+			<div class="logo-title">土著说的<br/>更靠谱</div>
+			<div class="input-keyword"><input id="keyword" class="hint-color" type="text" name="keyword" value="请输入一个$!place_title名" /></div>
+			<div class="recent-places" onclick="window.location='/mq/recentplaces';">最近访问</div>
+		</center>
+		
+	</div>
+	
+	<div id="mask" class="dn">
+	<div id="placeSuggestionArea" class="dn">
+		<div id="input-keyword-real" class="input-keyword-real">
+			<div class="ret-index" onclick="cancelSearch();"></div>
+			<input id="keywordreal" type="text" name="keywordreal" value="" />
+		</div>
+		<div class="suggestion-area"></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var lat = "";
+	var lng = "";
+	
+	function cancelSearch() {
+		$("#mask").addClass("dn");
+		$("#placeSuggestionArea").addClass("dn");
+		$("#keywordreal").val("");
+		$(".suggestion-area").html("");
+	}
+	
+	function updateSuggestionArea(dataArr) {
+		$(".suggestion-area").html("");
+		for (var i = 0; i < dataArr.length; i++){
+			var place = dataArr[i];
+			$(".suggestion-area").append("<div class=\"place-line "+ (i>0 ? "border-top" : "") +"\" placeuid=\""+ place.uid +"\"><div class=\"place-name\">"+ place.name +"<br/><span class=\"small-font\">"+ place.city + place.district +"</span></div></div>");
+		}
+		
+		$(".place-line").each(function(){
+			$(this).on("tap", function(){
+				event.preventDefault();
+				showDivHighlightMenu($(this));
+				var placeUid = $(this).attr("placeuid");
+				$("#keywordreal").blur();
+				
+				setTimeout(function(){
+					//hideDivHighlightMenu();
+					window.location = "/mq/viewplace?placeUid=" + placeUid;
+				}, 300);
+				
+				
+				//times++;
+			});
+		});
+	}
+	
+	function searchPlace() {
+		var s = $("#keywordreal").val();
+		if (s.length > 0 && lat.length > 0 && lng.length > 0) {
+			//showWindowsToast("开始请求" + s);
+			$.ajax({
+				dataType:"json",
+				url: "/mq/searchplace",
+				data: {placeType: "$!placeType", keyword: s, lat:lat, lng: lng},
+				success: function(data){
+		    		if (data.status == "ok") {
+		    			updateSuggestionArea(data.data);
+		    		} else {
+		    			//showWindowsToast(data.msg);
+		    		}
+		    	}
+			});
+		} else {
+			//showWindowsToast("坐标："+s + ","+lat + "," + lng);
+		}
+	}
+	
+	$(document).ready(function(){
+	
+		$("#keyword").on({
+			"focus": function(){
+				var ele = $("#keyword");
+				var hint = "请输入一个$!place_title名";
+				if (ele.val() == hint) {
+					ele.val("");
+				}
+				ele.css("color", "#333333");
+				
+				$("#mask").removeClass("dn");
+				$("#placeSuggestionArea").removeClass("dn");
+				$("#keywordreal").focus();
+			},
+			"blur": function(){
+				var ele = $("#keyword");
+				var hint = "请输入一个$!place_title名";
+				if (ele.val() == "") {
+					ele.val(hint);
+					ele.css("color", "#999999");
+				} 
+			}
+		});
+		
+		$("#keywordreal").bind("input propertychange",
+			function(){
+				searchPlace();
+			}
+		);
+		
+		var host = window.location.host;
+		configWeixinShare("土著说", "土著说的更靠谱", "http://" + host + "/images/tzs_logo.png", "http://" + host + "/mq/index",
+			function (res) {
+		        lat = res.latitude + ""; // 纬度，浮点数，范围为90 ~ -90
+		        lng = res.longitude + ""; // 经度，浮点数，范围为180 ~ -180。
+		        //showWindowsToast(lat + "," + lng);
+		    }
+		);
+	});
+	
+</script>
+
+</body></html>

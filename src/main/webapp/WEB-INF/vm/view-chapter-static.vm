@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+    	@font-face {
+		    /* font-properties */
+		    font-family: hanyupinyin;
+		    src:url('/css/GB-Pinyinok-B.ttf');
+		}
+		@font-face {
+		    /* font-properties */
+		    font-family: smallkaiti;
+		    src:url('/css/small-kaiti.ttf');
+		}
+    
+    	.input-area {width:100%;margin-top:60px;border:0px;background-color:#FFFFFF;color:#333333;font-size:16px;}
+    	.lp-line {width:100%;padding:20px 0px;}
+    	.lp-right {padding:0px 20px 0px 40px;line-height:24px;}
+    	.lp-no {position:absolute; left:20px;line-height:24px;font-weight:bold;}
+    	
+    	.lp-title {font-weight:bold;}
+    	.lp-goal {color:#999999;font-size:14px;line-height:20px;}
+    	
+    	
+    	.lp-item-line {margin-top:10px;}
+    	.lp-item-content {}
+    	.lp-item-mistakepoints {}
+    	
+    	.content-line {text-align:left;width:100%;}
+    	
+    	.goal-label {}
+    	.mistake-label {color:#FE6442;}
+    	
+    	.gushi-content {}
+    	.gushi-title {}
+    	.gushi-author {color:#666666;}
+    	
+    	.add-review-num {position:fixed;bottom:48px;right:8px;width:20px;height:20px;background-color:red;color:white;font-size:12px;text-align:center;line-height:20px;border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px;z-index:999;}
+    	.review-book {position:fixed;bottom:10px;right:10px;width:48px;height:48px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/book-green.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px;
+    z-index:998;
+    	}
+    	
+    	.add-review-icon {position:absolute;margin:-8px 0px 0px 42px;width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/add-icon-square.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;}
+	
+		.animate-review-icon {position:fixed;left:0px;top:0px; width:16px;height:16px;background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/add-icon-square.png);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:16px 16px;
+	z-index:999;
+		}
+    	
+    	.tianzige-zi {background-position:center center;
+	background-color:#FCFCFC;
+	background-image:url(/images/tianzige.jpg);
+	background-repeat:no-repeat;
+	background-attatchment:fixed;
+	background-size:48px 48px; width:48px;height:48px;font-size:40px; line-height:48px;text-align:center;
+	font-family:smallkaiti;}
+    	
+    	.hanzi-pinyin {line-height:24px;width:54px;text-align:center;font-size:16px;font-family:hanyupinyin;}
+    	
+    	.xiezi-pinyin {position:absolute;left:40px;}
+    	.xiezi-zi {position:absolute;left:40px;margin-top:24px;}
+    	    	
+    	.xiezi-bihua {padding:24px 0px 0px 60px;}
+    	.xiezi-jiegou {padding-left:60px;}
+    	.xiezi-bishun {padding-left:60px;}
+    	.xiezi-bishun img {height:16px; position:relative; top:3px;}
+    	.lp-item-mistakepoints {padding-left:58px;}
+    	
+    	.qinziketang-title {color:#FE6442;}
+    	
+    </style>
+</head>
+<body style="zoom: 1;">
+#parse("loading.vm")
+<div class="wrap" onselectstart="return false;">
+	<div class="main">
+		<div class="top-bar">
+			<div class="return-icon" onclick="lastStep()"></div>
+			<div class="top-bar-mid-title">$viewUtils.getHTMLValidText($chapter.getTitle())</div>
+		</div>
+		
+		<div class="input-area">
+		
+			<div class="lp-line">
+				<div class="lp-no">1.</div>
+				<div class="lp-right">
+					<div class="lp-title">写字</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>会写以下汉字及其拼音，并能够组词。</div>
+					
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin xiezi-pinyin">chūn</div>
+							<div class="tianzige-zi xiezi-zi">春</div>
+							
+							
+							<div class="xiezi-bihua">9画&nbsp;&nbsp;上下结构</div>
+							<div class="xiezi-bishun">笔顺：<img src="/images/bishun-chun.jpg" /></div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="2">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin xiezi-pinyin">fēng</div>
+							<div class="tianzige-zi xiezi-zi">风</div>
+							
+							
+							<div class="xiezi-bihua">4画&nbsp;&nbsp;半包围结构</div>
+							<div class="xiezi-bishun">笔顺：<img src="/images/bishun-feng.jpg" /></div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+							<div class="lp-item-mistakepoints"><span class="mistake-label">易错点：</span>第2画是横斜钩，不是横折弯钩。</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="lp-line">
+				<div class="lp-no">2.</div>
+				<div class="lp-right">
+					<div class="lp-title">识字</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>能认识以下汉字，并能正确发音。</div>
+					
+					<div class="lp-item-line" lpid="3">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">shuāng</div>
+							<div class="tianzige-zi shizi-zi">霜</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="4">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">chuī</div>
+							<div class="tianzige-zi shizi-zi">吹</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="5">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">luò</div>
+							<div class="tianzige-zi shizi-zi">落</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="6">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">jiàng</div>
+							<div class="tianzige-zi shizi-zi">降</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="7">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">piāo</div>
+							<div class="tianzige-zi shizi-zi">飘</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="8">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">yóu</div>
+							<div class="tianzige-zi shizi-zi">游</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="9">
+						<div class="lp-item-content">
+							<div class="hanzi-pinyin shizi-pinyin">chí</div>
+							<div class="tianzige-zi shizi-zi">池</div>
+							<div class="add-review-icon" onclick="addReview(this);"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="lp-line">
+				<div class="lp-no">3.</div>
+				<div class="lp-right">
+					<div class="lp-title">字义</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>了解以下字的含义，并会运用。</div>
+					
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="ziyi-zi">吹</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="2">
+						<div class="lp-item-content">
+							<div class="ziyi-zi">落</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="2">
+						<div class="lp-item-content">
+							<div class="ziyi-zi">降</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="2">
+						<div class="lp-item-content">
+							<div class="ziyi-zi">飘</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="lp-line">
+				<div class="lp-no">4.</div>
+				<div class="lp-right">
+					<div class="lp-title">关联古诗</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>了解和本课关联的古诗，培养孩子对古典传统文化的兴趣。</div>
+					
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="gushi-content">
+								<center>
+							 	<div class="content-line">
+							 	春晓
+							 	<br/>唐 孟浩然
+							 	<br/>春眠不觉晓，处处闻啼鸟。
+							 	<br/>夜来风雨声，花落知多少。
+							 	</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="gushi-content">
+								<center>
+							 	<div class="content-line">
+							 	春夜喜雨<br/>
+							 	唐 杜甫<br/>
+							 	好雨知时节，当春乃发生。<br/>
+							 	随风潜入夜，润物细无声。
+							 	</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="gushi-content">
+								<center>
+							 	<div class="content-line">咏柳
+							 	<br/>唐 贺知章
+							 	<br/>碧玉妆成一树高，万条垂下绿丝绦。
+							 	<br/>不知细叶谁裁出，二月春风似剪刀。</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="gushi-content">
+								<center>
+							 	<div class="content-line">晓出净慈寺送林子方
+							 	<br/>宋 杨万里
+							 	<br/>毕竟西湖六月中，风光不与四时同。
+							 	<br/>接天莲叶无穷碧，映日荷花别样红。</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="gushi-content">
+								<center>
+							 	<div class="content-line">江雪
+							 	<br/>唐 柳宗元
+							 	<br/>千山鸟飞绝，万径人踪灭。
+							 	<br/>孤舟蓑笠翁，独钓寒江雪。</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<div class="lp-line">
+				<div class="lp-no">5.</div>
+				<div class="lp-right">
+					<div class="lp-title">亲子课堂</div>
+					<div class="lp-goal"><span class="goal-label">学习目标：</span>通过有趣的互动，由家长引导，让孩子对本课关联知识产生兴趣，培养学习的乐趣。同时也增进亲子感情。</div>
+					
+					<div class="lp-item-line" lpid="1">
+						<div class="lp-item-content">
+							<div class="qinziketang-content">
+								<center>
+							 	<div class="qinziketang-title content-line">问题：引导孩子思考，四季是怎样划分的呢？</div>
+							 	<div class="content-line">四季是根据昼夜长短和太阳高度的变化来划分的。在四季的划分中，以太阳在黄道上的视位置为依据，以二分日、二至日或以四立日为界限。但是，东西方各国在划分四季时所采用的界限点是不完全相同的。
+<br/>
+<br/>第一种
+<br/>我国传统的四季划分方法，是以二十四节气中的四立作为四季的始点，以二分和二至作为中点的。如春季立春为始点，太阳黄经为315°，春分为中点，立夏为终点，太阳黄经变为45°，太阳在黄道上运行了90°。这是一种传统的，常见的方法。
+<br/>
+<br/>第二种
+<br/>天文学分类法（即西方分类法）四季划分更强调四季的气候意义，是以二分二至日作为四季的起始点的，如春季以春分为起始点，以夏至为终止点。这种四季比我国传统划分的四季分别迟了一个半月。
+<br/>
+<br/>第三种
+<br/>为了准确地反映各地的实际气候情况，划分四季常采用气候上的方法既近代学者张宝坤分类法，采用候平均气温划分四季。并且规定：候平均气温大于或等于22℃的时期为夏季，小于或等于10℃的时期为冬季，介于10℃～22℃之间的为春季或秋季。按此标准划分四季，中纬地区季节与气候相一致，低纬地区和极地附近春、夏、秋、冬的温度变化很不明显。同时，在中纬地区，各季的长度也不一样。这就是气候四季。例如，北京春季有55天，夏季103天，秋季50天，冬季157天。这种方法，可以结合各地的具体气候，农业，故运用较多。
+<br/>
+<br/>第四种
+<br/>气候统计法，因为一般以1月份为最冷月，因此，春季，为3,4,5月．夏季，为6,7,8月．秋季，为9,10,11月．冬季，为12,1,2月．这种四季分类法，比较适用四季分明的温带地区。</div>
+							 	</center>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+		</div>
+		
+		<div class="review-book"></div>
+		<div id="add-review-num" class="add-review-num dn">1</div>
+		<div id="animate-review-icon" class="animate-review-icon dn"></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var addReviewNum = 0;
+	var addSet = new Array();
+	
+	function addReview(e) {
+		var fromLeft = $(e).offset().left;
+		var fromTop = $(e).offset().top;
+		
+		var toLeft = $(window).width() - 48;
+		var toTop = $(window).height() - 68;
+		
+		$("#animate-review-icon").removeClass("dn");
+		$("#animate-review-icon").css("position", "fixed");
+		$("#animate-review-icon").css("height", "16px");
+		$("#animate-review-icon").css("width", "16px");
+		$("#animate-review-icon").offset({left:fromLeft, top:fromTop});
+		$("#animate-review-icon").animate({left: toLeft, top: toTop, height: 0,width:0 }, 500);
+		
+		var lpId = $(e).parent().parent().attr("lpid");
+		if ($.inArray(lpId, addSet) != -1) {
+			return;
+		}
+		addSet.push(lpId);
+		
+		if (addReviewNum == 0) {
+			addReviewNum = addReviewNum + 1;
+			$("#add-review-num").html(addReviewNum + "");
+			$("#add-review-num").removeClass("dn");
+		} else {
+			addReviewNum = addReviewNum + 1;
+			$("#add-review-num").html(addReviewNum + "");
+		}
+	}
+	
+	$(document).ready(function(){
+		if (addReviewNum > 0) {
+			$("#add-review-num").html(addReviewNum + "");
+			$("#add-review-num").removeClass("dn");
+		} 
+		
+	});
+	
+</script>
+
+</body></html>

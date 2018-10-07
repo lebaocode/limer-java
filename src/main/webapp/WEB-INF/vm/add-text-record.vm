@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head time="$!curTime">
+#parse("header.vm")
+	<title>乐宝亲子辅导</title>
+    <style>
+		.input-area {width:100%;top:44px;border:0px;background-color:#FFFFFF;font-size:16px;padding:10px;position:fixed;height:100%;}
+		.input-area textarea {border:0px solid #E0E0E0;font-size:16px;line-height:24px;height:100%;width:95%;}
+    	.normal-color {color:#333333;}
+    	.hint-color {color:#999999;}
+    </style>
+</head>
+<body style="zoom: 1;">
+<div class="wrap" onselectstart="return false;">
+	<form id="frm" method="get" action="/record/addText">
+		<input type="hidden" name="submitted" value="true" />
+		<input type="hidden" name="day" value="$!day" />
+		<input type="hidden" name="userPlanId" value="$!userPlanId" />
+	<div class="main">
+	
+		<div class="top-bar">
+			<div class="top-bar-left-action" onclick="lastStep()">取消</div>
+			<div class="top-bar-mid-title">添加记录</div>
+			<div class="top-bar-right-action" onclick="submitForm();">提交</div>
+		</div>
+	
+		<div class="input-area">
+			#if ($!content && $content != "")
+			<textarea name="content" id="content" class="normal-color">$content</textarea>
+			#else
+			<textarea name="content" id="content" class="hint-color">在这里记录...</textarea>
+			#end
+		</div>
+		
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	function submitForm(){
+		var m = $("#content").val();
+		if (m == "" || m == "在这里记录...") {
+			showWindowsToast("您尚未记录！");
+			return;
+		}
+		
+		if (m.length > 250) {
+			showWindowsToast("字数过多！超出" + (m.length - 250) + "个字");
+			return;
+		}
+		$("#frm").submit();
+	}
+
+	$(document).ready(function(){
+	
+		
+		//logAction("INDEX");
+		addAutoFocusEffect($("#content"), "在这里记录...", "#333333", "#999999");
+		
+		configWeixinDefault();
+	});
+	
+</script>
+
+</body></html>

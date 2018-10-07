@@ -45,9 +45,19 @@ public class LebaoCache {
 	int jedisMinIdle;
 	String jedisHost;
 	int jedisPort;
-	static String jedisPassword;
+	String jedisPassword;
 	
 	static JedisPool jedisPool;
+	
+	static LebaoCache _self;
+	
+	public LebaoCache() {
+		_self = this;
+	}
+	
+	public static LebaoCache getInstance() {
+		return _self;
+	}
 	
 	public void init() {
 		JedisPoolConfig c = new JedisPoolConfig();
@@ -61,7 +71,7 @@ public class LebaoCache {
 	
 	public static Jedis getJedis() {
 		Jedis jedis = jedisPool.getResource();
-		jedis.auth(jedisPassword);
+		jedis.auth(getInstance().jedisPassword);
 		return jedis;
 	}
 	
@@ -523,8 +533,8 @@ public class LebaoCache {
 		this.jedisPort = jedisPort;
 	}
 
-	public static void setJedisPassword(String jedisPassword) {
-		LebaoCache.jedisPassword = jedisPassword;
+	public void setJedisPassword(String jedisPassword) {
+		this.jedisPassword = jedisPassword;
 	}
 	
 }

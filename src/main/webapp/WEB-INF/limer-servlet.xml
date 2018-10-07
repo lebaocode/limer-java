@@ -75,16 +75,6 @@
     <property name="cache"><ref bean="lebaoCache"/></property>
 </bean>
 
-<bean id="wxController" class="com.lebaor.limer.web.WxController">
-    <property name="tomcatURLEncoding" value="${limer-servlet.tomcatURLEncoding}"/>
-    <property name="domain" value="${limer-servlet.domain}"/>
-    <property name="cache"><ref bean="mqCache"/></property>
-</bean>
-
-
-<bean id="wxAccessTokenUtil" class="com.lebaor.wx.WxAccessTokenUtil" init-method="start">
-</bean>
-
 <!-- UrlMapping                                                 -->
 <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     <property name="mappings">
@@ -92,15 +82,10 @@
             
             <prop key="json/*">jsonController</prop>
             
-            <prop key="wxcallback">wxController</prop>  
-            <prop key="wxgetcode">wxController</prop>
-            <prop key="wxsign">wxController</prop>
-            <prop key="wx/*">wxController</prop> 
             
             <prop key="error">errorPageController</prop>
             <prop key="errorpage">errorPageController</prop>
             
-            <prop key="/">entryController</prop>
        <!--      <prop key="/**/*">errorPageController</prop> -->
         </props>
     </property>

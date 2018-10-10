@@ -16,6 +16,7 @@ import com.lebaor.limer.data.LimerBookStatus;
 import com.lebaor.limer.db.LimerBookStatusDB;
 import com.lebaor.limer.web.data.WebBook;
 import com.lebaor.limer.web.data.WebBookDetail;
+import com.lebaor.limer.web.data.WebUser;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
 import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
 import com.lebaor.utils.LogUtil;
@@ -60,7 +61,47 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/wxsign")) {
 			wxSign(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/submitDonate")) {
+			submitDonate(req, res, model);
+			return;
 		} 
+	}
+	
+	public void submitDonate(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		
+		
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("submitDonate error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, "");
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		
+		JSONArray resArr = new JSONArray();
+		
+		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
+		JSONArray arr = new JSONArray(isbnArrJson);
+		for (int i = 0; i <arr.length(); i++) {
+			String isbn = arr.getString(i);
+			WebBookDetail wbd = cache.getDoubanBookInfo(isbn);
+			if (wbd == null) continue;
+			boolean success = cache.addDonateBook(wbd.getBookId(), curUserId);
+			
+			JSONObject ro = new JSONObject();
+			ro.put("isbn", isbn);
+			ro.put("result", success);
+			resArr.put(ro);
+		}
+		
+		this.setRetJson(model, resArr.toString());
 	}
 	
 	public void getBookDetailByIsbn(HttpServletRequest req, 
@@ -85,10 +126,11 @@ public class JsonController extends EntryController implements Runnable {
             throws Exception {
 		int start = this.getIntParameterValue(req, "start", 0);
 		int len = this.getIntParameterValue(req, "len", 10);
+		String tag = this.getParameterValue(req, "cat", "");
 		
 		JSONArray arr = new JSONArray();
 		
-		List<WebBook> list = cache.getRecentReadyBooks(start, len);
+		List<WebBook> list = cache.getRecentReadyBooks(tag, start, len);
 		for (WebBook wb : list) {
 			try {
 				arr.put(new JSONObject(wb.toJSON()));

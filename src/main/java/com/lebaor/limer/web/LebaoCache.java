@@ -163,7 +163,7 @@ public class LebaoCache {
 	}
 	
 	//访问频繁，只取缓存
-	public List<WebBook> getRecentReadyBooks(int start, int len) {
+	public List<WebBook> getRecentReadyBooks(String tag, int start, int len) {
 		List<WebBook> resultList = new LinkedList<WebBook>();
 		
 		//从jedis里取
@@ -176,6 +176,10 @@ public class LebaoCache {
 					for (LimerBookStatus lbs : lbsArr) {
 						WebBook wb = this.getWebBook(lbs.getBookId());
 						scoreMembers.put(wb.toJSON(), (double)lbs.getLimerBookId());
+						
+						for (String ct : wb.getTags()) {
+							getJedis().zadd(KEY_RECENT_BOOKS+"_" + ct, scoreMembers);
+						}
 					}
 					getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
 				}
@@ -185,7 +189,7 @@ public class LebaoCache {
 			}
 		}
 		
-		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS, start, len);
+		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+tag, start, len);
 		if (list == null || list.size() == 0) return resultList;
 		
 		for (String s: list) {
@@ -264,6 +268,11 @@ public class LebaoCache {
 				HashMap<String, Double> scoreMembers = new HashMap<String, Double>();
 				scoreMembers.put(wb.toJSON(), (double)lbi.getId());
 				getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
+				for (String tag: wb.getTags()) {
+					getJedis().zadd(KEY_RECENT_BOOKS+"_"+tag, scoreMembers);
+				}
+				
+				LogUtil.WEB_LOG.info("[DONATE_BOOK_SUCCESS] [bookId="+ bookId +"] [userId="+ userId +"]");
 				
 				return res;
 			} catch(Throwable t) {
@@ -315,6 +324,9 @@ public class LebaoCache {
 				if (inlibNum == 1) {
 					//说明此书已不能再借出了 TODO 但这时可能又有捐赠进来，会有问题
 					getJedis().zremrangeByScore(KEY_RECENT_BOOKS, one.getLimerBookId(), one.getLimerBookId());
+					for (String tag: wb.getTags()) {
+						getJedis().zremrangeByScore(KEY_RECENT_BOOKS+"_"+tag, one.getLimerBookId(), one.getLimerBookId());
+					}
 				}
 				
 				//减积分
@@ -459,6 +471,7 @@ public class LebaoCache {
 					u = userDB.getUserByName(userName);
 					userId = u.getId();
 					getJedis().hset(KEY_USER_INFO, Long.toString(userId), u.toJSON());
+					LogUtil.info("[CREATE_USER] [userId="+ userId +"] [userName="+ userName +"]");
 					
 					UserAuth ua = new UserAuth();
 					ua.setAppId(LimerConstants.MINIPROGRAM_APPID);
@@ -468,8 +481,10 @@ public class LebaoCache {
 					ua.setUserId(userId);
 					userAuthDB.addUserAuth(ua);
 					getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(userId));
+					LogUtil.info("[CREATE_USER_AUTH] [userId="+ userId +"] [unionId="+ unionId +"] [openId="+ openId+"] [appId="+ ua.getAppId() +"]");
 				} else {
 					u = this.getUserInfo(userId);
+					LogUtil.info("[OLD_USER_VISIT] [userId=" + userId + "] [unionId="+ unionId +"]");
 				}
 			} catch (Throwable t) {
 				LogUtil.WEB_LOG.warn("code2session check&createuser error: " + " code="+ code +", return json=" + json);

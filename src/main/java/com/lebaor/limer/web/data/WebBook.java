@@ -1,5 +1,6 @@
 package com.lebaor.limer.web.data;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -10,6 +11,8 @@ public class WebBook {
 	String title;
 	String subTitle;
 	String author;
+	String publisher;
+	String[] tags;
 	
 	public static WebBook parseJSON(JSONObject o) {
 		try {
@@ -20,6 +23,15 @@ public class WebBook {
 			n.title = o.getString("title");
 			n.subTitle = o.getString("subTitle");
 			n.author = o.getString("author");
+			n.publisher = o.getString("publisher");
+			JSONArray arr = o.getJSONArray("tags");
+			if (arr == null) n.tags = new String[0];
+			else {
+				n.tags = new String[arr.length()];
+				for (int i = 0; i < arr.length(); i++) {
+					n.tags[i] = arr.getJSONObject(i).getString("name");
+				}
+			}
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -43,6 +55,19 @@ public class WebBook {
 			o.put("title", title);
 			o.put("subTitle", subTitle);
 			o.put("author", author);
+			o.put("publisher", publisher);
+			
+			JSONArray arr = new JSONArray();
+			if (tags == null) {
+				o.put("tags", arr.toString());
+			} else {
+				for (String tag: tags) {
+					JSONObject jo = new JSONObject();
+					jo.put("name", tag);
+					arr.put(jo);
+				}
+			}
+			
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -55,6 +80,22 @@ public class WebBook {
 	}
 	
 	
+	public String getPublisher() {
+		return publisher;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
+
+	public String[] getTags() {
+		return tags;
+	}
+
+	public void setTags(String[] tags) {
+		this.tags = tags;
+	}
+
 	public long getBookId() {
 		return bookId;
 	}

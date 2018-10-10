@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import com.lebaor.limer.data.User;
 
 public class WebUser {
-	long id;
+	long userId;
 	String userName;
 	String userLogo;
 	String mobile;
@@ -31,13 +31,13 @@ public class WebUser {
 	public static WebUser create(User u, String unionId, String sessionKey) {
 		String ujson = u.toJSON();
 				
-		return parseJSON(ujson.substring(0, ujson.length() - 1) +", 'sessionKey': '" + sessionKey + "', 'unionId': '" + unionId + "'}");
+		return parseJSON(ujson.substring(0, ujson.length() - 1) +", 'sessionKey': '" + sessionKey + "', 'userId': '"+ u.getId() +"'"+", 'unionId': '" + unionId + "'}");
 	}
 	
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
-			o.put("id", id);
+			o.put("userId", Long.toString(userId));
 			o.put("userName", userName);
 			o.put("userLogo", userLogo);
 			o.put("mobile", mobile);
@@ -73,7 +73,7 @@ public class WebUser {
 	public static WebUser parseJSON(JSONObject o) {
 		try {
 			WebUser n = new WebUser();
-			n.id = o.getLong("id");
+			n.userId = Long.parseLong(o.getString("userId"));
 			n.userName = o.getString("userName");
 			n.userLogo = o.getString("userLogo");
 			n.mobile = o.getString("mobile");
@@ -101,12 +101,15 @@ public class WebUser {
 		return toJSON();
 	}
 	
-	public long getId() {
-		return id;
+	
+	public long getUserId() {
+		return userId;
 	}
-	public void setId(long id) {
-		this.id = id;
+
+	public void setUserId(long userId) {
+		this.userId = userId;
 	}
+
 	public String getUserName() {
 		return userName;
 	}

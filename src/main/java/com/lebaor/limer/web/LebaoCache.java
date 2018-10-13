@@ -52,6 +52,7 @@ public class LebaoCache {
 	String jedisPassword;
 	
 	static JedisPool jedisPool;
+	static Jedis globalJedis;
 	
 	static LebaoCache _self;
 	
@@ -63,6 +64,11 @@ public class LebaoCache {
 		return _self;
 	}
 	
+	public void release() {
+		if (globalJedis != null) globalJedis.close();
+		if (jedisPool != null) jedisPool.close();
+	}
+	
 	public void init() {
 		JedisPoolConfig c = new JedisPoolConfig();
 		c.setMaxIdle(jedisMaxIdle);
@@ -71,6 +77,12 @@ public class LebaoCache {
 		
 		jedisPool = new JedisPool(c, jedisHost, jedisPort);
 		LogUtil.WEB_LOG.info("JedisPool inited, host=" + jedisHost + ":" + jedisPort);
+		
+		globalJedis = jedisPool.getResource();
+		globalJedis.auth(getInstance().jedisPassword);
+		
+		//确认db连接已经ok
+		
 		
 		//从jedis里取
 		try {
@@ -97,16 +109,14 @@ public class LebaoCache {
 				LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
 			}
 		} catch(Exception t) {
-			LogUtil.WEB_LOG.warn("getRecentReadyBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
+			LogUtil.WEB_LOG.debug("getRecentReadyBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
 		}
 		
 		LogUtil.WEB_LOG.info("init Jedis recent_books success.");
 	}
 	
 	public static Jedis getJedis() {
-		Jedis jedis = jedisPool.getResource();
-		jedis.auth(getInstance().jedisPassword);
-		return jedis;
+		return globalJedis;
 	}
 	
 	public LimerBookInfo borrowOneBook(String isbn, long userId) {

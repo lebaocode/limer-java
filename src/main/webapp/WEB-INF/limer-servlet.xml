@@ -43,7 +43,7 @@
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
 
-<bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init">
+<bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init" destroy-method="release">
     <property name="userDB"><ref bean="userDB"/></property>
     <property name="userAuthDB"><ref bean="userAuthDB"/></property>
     <property name="bookDB"><ref bean="bookDB"/></property>

@@ -307,6 +307,7 @@ public abstract class GenericTemplateController implements Controller {
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
 		//TODO
+		LogUtil.WEB_LOG.debug("here");
 	}
 	
 	

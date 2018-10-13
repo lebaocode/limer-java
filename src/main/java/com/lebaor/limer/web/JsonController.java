@@ -49,7 +49,7 @@ public class JsonController extends EntryController implements Runnable {
             throws Exception {
 		
 		String uri = req.getRequestURI();
-		LogUtil.WEB_LOG.debug("receive request: " + uri);
+		LogUtil.WEB_LOG.info("receive request: " + uri);
 		
 		if (uri.startsWith("/json/smsreceiver")) {
 			smsReceiver(req, res, model);

@@ -71,6 +71,35 @@ public class LebaoCache {
 		
 		jedisPool = new JedisPool(c, jedisHost, jedisPort);
 		LogUtil.WEB_LOG.info("JedisPool inited, host=" + jedisHost + ":" + jedisPort);
+		
+		//从jedis里取
+		try {
+			if (!getJedis().exists(KEY_RECENT_BOOKS)) {
+				//最近1000本书籍状态
+				Map<String, Double> scoreMembers = new HashMap<String, Double>();
+				Book[] bookArr = bookDB.getBooks(0, KEY_RECENT_BOOKS_NUM);
+				LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from db:"+bookArr.length);
+				
+				for (Book b : bookArr) {
+					WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
+					
+					Map<String, Double> sm = new HashMap<String, Double>();
+					sm.put(wbd.toJSON(), (double)wbd.computeScore());
+					scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
+					
+					for (String t : wbd.getBook().getTagsString()) {
+						getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
+						LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+ KEY_RECENT_BOOKS+"_" +t+": "+ sm.size());
+					}
+				}
+				getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
+				LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
+			}
+		} catch(Throwable t) {
+			LogUtil.WEB_LOG.warn("getRecentReadyBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
+		}
+		
+		LogUtil.WEB_LOG.info("init Jedis recent_books success.");
 	}
 	
 	public static Jedis getJedis() {
@@ -359,38 +388,10 @@ public class LebaoCache {
 		return wbs;
 	}
 	
+	
+	
 	public List<WebBookDetail> getRecentBooks(String tag, int start, int len) {
 		List<WebBookDetail> resultList = new LinkedList<WebBookDetail>();
-		
-		//从jedis里取
-		synchronized (this) {
-			try {
-				if (!getJedis().exists(KEY_RECENT_BOOKS)) {
-					//最近1000本书籍状态
-					Map<String, Double> scoreMembers = new HashMap<String, Double>();
-					Book[] bookArr = bookDB.getBooks(0, KEY_RECENT_BOOKS_NUM);
-					LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from db:"+bookArr.length);
-					
-					for (Book b : bookArr) {
-						WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
-						
-						Map<String, Double> sm = new HashMap<String, Double>();
-						sm.put(wbd.toJSON(), (double)wbd.computeScore());
-						scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
-						
-						for (String t : wbd.getBook().getTagsString()) {
-							getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
-							LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+ KEY_RECENT_BOOKS+"_tag"+ sm.size());
-						}
-					}
-					getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
-					LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
-				}
-			} catch(Throwable t) {
-				LogUtil.WEB_LOG.warn("getRecentReadyBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
-				return resultList;
-			}
-		}
 		
 		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), start, len);
 		LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from redis: "+KEY_RECENT_BOOKS+ "_"+ tag +": "+list.size());

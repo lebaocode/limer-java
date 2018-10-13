@@ -16,6 +16,7 @@ import com.lebaor.limer.web.data.*;
 import com.lebaor.limer.web.data.WebOrder.WebOrderItem;
 import com.lebaor.limer.data.*;
 import com.lebaor.thirdpartyutils.DoubanUtil;
+import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
 import com.lebaor.webutils.HttpClientUtil;
@@ -584,10 +585,12 @@ public class LebaoCache {
 		String unionId = null;
 		try {
 			JSONObject o = new JSONObject(json);
-			String errCode = o.getString("errcode");
-			if (!errCode.equals("0")) {
-				LogUtil.WEB_LOG.warn("code2session error: " + " code="+ code +", return json=" + json);
-				return null;
+			if (!o.has("session_key")) {
+				String errCode = JSONUtil.getString(o, "errcode");
+				if (!errCode.equals("0")) {
+					LogUtil.WEB_LOG.warn("code2session error: " + " code="+ code +", return json=" + json);
+					return null;
+				}
 			}
 			
 			openId = o.getString("openid");

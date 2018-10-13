@@ -1,13 +1,10 @@
 package com.lebaor.utils;
 
-import java.sql.ResultSet;
 import java.util.LinkedList;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.lebaor.dbutils.ResultSetHandler;
-import com.lebaor.limer.data.User;
-import com.lebaor.limer.web.data.WebBook;
 
 public class DBJavaGenUtil {
 	public static void gen1(String[] lines, String className)throws Exception {
@@ -178,41 +175,31 @@ public class DBJavaGenUtil {
 		System.out.println();
 		System.out.println("\tpublic String toString() {\n" + 
 				"		return toJSON();\n" + 
-				"	}");
+				"	}\n");
 		System.out.println();
 		
+		System.out.println("\tpublic JSONObject toJSONObject() {\n" + 
+				"		try {\n" + 
+				"			return new JSONObject(toJSON());\n" + 
+				"		} catch (Exception e) {\n" + 
+				"			return new JSONObject();\n" + 
+				"		}\n" + 
+				"	}\n");
+		System.out.println();
 		
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long id;\n" + 
+		String s = "String orderTime;//下单时间\n" + 
+				"	int status;//状态\n" + 
+				"	String statusDesc;//状态描述\n" + 
+				"	String mchTradeNo;//订单号\n" + 
+				"	int totalFee;//原价\n" + 
+				"	int realFee;//实际价格\n" + 
+				"	JSONArray items; //itemsjson\n" + 
 				"	\n" + 
-				"	long limerBookId;//具体哪本书\n" + 
-				"	long borrowRecordId;//哪次借阅相关的物流\n" + 
-				"	String goodsName;//物流商品名称\n" + 
-				"	\n" + 
-				"	long fromUserId;\n" + 
-				"	String fromUserName;\n" + 
-				"	String fromUserAddress;\n" + 
-				"	String fromMobile;\n" + 
-				"	\n" + 
-				"	long toUserId;\n" + 
-				"	String toUserName;\n" + 
-				"	String toUserAddress;\n" + 
-				"	String toMobile;\n" + 
-				"	\n" + 
-				"	int status;//订单状态\n" + 
-				"	String statusDesc;\n" + 
-				"	\n" + 
-				"	int price;//运费（分）\n" + 
-				"	\n" + 
-				"	int logisCompany;//物流公司\n" + 
-				"	String logisOrderId;//物流公司订单编号\n" + 
-				"	\n" + 
-				"	long createTime;\n" + 
-				"	long lastUpdateTime;\n" + 
-				"	String orderDetail;//订单详细流程";
-		String className = "Logistics";
+				"	String remainTimeDesc;//剩余借阅时间描述";
+		String className = "WebOrder";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

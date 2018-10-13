@@ -39,8 +39,8 @@
             </dependencies>  
               
             <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
+                <source>1.8</source>
+                <target>1.8</target>
                 <encoding>UTF-8</encoding>
                 <compilerArguments>
       				<extdirs>libs</extdirs>

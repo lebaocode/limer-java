@@ -58,13 +58,14 @@ public class BorrowRecordDB {
 		BorrowRecord o = new BorrowRecord();
 		o.setId(rs.getLong(1));
 		o.setUserId(rs.getLong(2));
-		o.setLimerBookId(rs.getLong(3));
-		o.setStatus(rs.getInt(4));
-		d = rs.getTimestamp(5);
-		o.setBorrowTime(d != null ? d.getTime() : 0);
+		o.setIsbn(rs.getString(3));
+		o.setLimerBookId(rs.getLong(4));
+		o.setStatus(rs.getInt(5));
 		d = rs.getTimestamp(6);
-		o.setReturnTime(d != null ? d.getTime() : 0);
+		o.setBorrowTime(d != null ? d.getTime() : 0);
 		d = rs.getTimestamp(7);
+		o.setReturnTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(8);
 		o.setPunishTime(d != null ? d.getTime() : 0);
 		return o;
 
@@ -129,10 +130,27 @@ public class BorrowRecordDB {
 		
 	}
 	
-	public BorrowRecord[] getBorrowRecordByBookId(long bookId) {
+	public BorrowRecord[] getBorrowRecordByIsbn(String isbn) {
+		String sql = "SELECT * FROM " + TABLENAME + " "
+				+ " WHERE isbn=? ";
+		BorrowRecord[] BorrowRecordArr = (BorrowRecord[])dbUtils.executeQuery(sql, new Object[]{isbn}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				LinkedList<BorrowRecord> list = new LinkedList<BorrowRecord>(); 
+				while (rs.next()) {
+					BorrowRecord u = readOneRow(rs);
+					list.add(u);
+				}
+				return list.toArray(new BorrowRecord[0]);
+			}
+		});
+		return BorrowRecordArr;
+		
+	}
+	
+	public BorrowRecord[] getBorrowRecordByLimerBookId(long limerBookId) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
 				+ " WHERE limer_book_id=? ";
-		BorrowRecord[] BorrowRecordArr = (BorrowRecord[])dbUtils.executeQuery(sql, new Object[]{bookId}, new ResultSetHandler(){
+		BorrowRecord[] BorrowRecordArr = (BorrowRecord[])dbUtils.executeQuery(sql, new Object[]{limerBookId}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<BorrowRecord> list = new LinkedList<BorrowRecord>(); 
 				while (rs.next()) {
@@ -157,6 +175,7 @@ public class BorrowRecordDB {
 		String sql = DBUtils.genAddRowSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
 				o.getUserId(),
+				o.getIsbn(),
 				o.getLimerBookId(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getBorrowTime()),
@@ -175,6 +194,7 @@ public class BorrowRecordDB {
 		return dbUtils.executeUpdate(sql, new Object[]{
 				
 				o.getUserId(),
+				o.getIsbn(),
 				o.getLimerBookId(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getBorrowTime()),
@@ -185,7 +205,7 @@ public class BorrowRecordDB {
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "user_id", "limer_book_id", "status", 
+	private static final String[] COL_NAMES = {"id", "user_id", "isbn", "limer_book_id", "status", 
 		"borrow_time", "return_time", "punish_time"};
 	
 	
@@ -194,6 +214,7 @@ public class BorrowRecordDB {
 		String sql = "  CREATE TABLE `"+ TABLENAME.toLowerCase() +"` (\r\n" + 
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
 				"  `user_id` bigint(20) NOT NULL,\r\n" +
+				"  `isbn` varchar(255) NOT NULL,\r\n" +
 				"  `limer_book_id` bigint(20) NOT NULL,\r\n" +
 				"  `status` smallint(2) default 0,\r\n" +
 				"  `borrow_time` datetime default NULL,\r\n" +
@@ -208,7 +229,11 @@ public class BorrowRecordDB {
 					" ON "+ TABLENAME +" (user_id)";
 			dbUtils.executeSql(sql, null);
 			
-			sql = " CREATE INDEX index_"+ TABLENAME +"_bookid" + 
+			sql = " CREATE INDEX index_"+ TABLENAME +"_isbn" + 
+					" ON "+ TABLENAME +" (isbn)";
+			dbUtils.executeSql(sql, null);
+			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_limerbookid" + 
 					" ON "+ TABLENAME +" (limer_book_id)";
 			dbUtils.executeSql(sql, null);
 			

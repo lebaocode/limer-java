@@ -3,6 +3,8 @@ package com.lebaor.limer.data;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.lebaor.utils.JSONUtil;
+
 
 /**
  * 豆瓣等其他地方拿到的书籍信息，不含本产品相关信息
@@ -23,27 +25,47 @@ public class Book {
 	JSONArray authors;//json数组 ["[美] 伊恩·古德费洛","[加] 约书亚·本吉奥","[加] 亚伦·库维尔"]
 	JSONArray tags;//json数组 [{"count":464,"name":"机器学习","title":"机器学习"},{"count":241,"name":"计算机","title":"计算机"}]
 	
+	JSONArray translators;
 	String publisher;
 	String publishDate;//出版日期
 	int price;//分
 	String coverUrl;//https://img1.doubanio.com\/view\/subject\/m\/public\/s29518349.jpg
 	
-	String bookId;//豆瓣的id
+	String doubanBookId;//豆瓣的id
 	int pageNum;
 	String authorIntro;
 	String summary;
 	String catalog;
 	
-	public void setIsbn10(String isbn10) {
-		this.isbn10 = isbn10;
+	int raterNum;//评价人数
+	String rating;//分数
+	
+	String seriesId;//所属系列id(doubanid)
+	String seriesTitle; //所属系列标题
+	
+	public String getAuthorAsString() {
+		
+		if (authors == null) return "";
+		
+		String s = "";
+		try {
+			for (int i =0;i < authors.length(); i++) {
+				String a = authors.getString(i);
+				if (s.length() > 0) s += ", ";
+				s += a;
+			}
+			return s;
+		} catch (Exception e) {
+			return s;
+		}
 	}
-
-	public void setIsbn13(String isbn13) {
-		this.isbn13 = isbn13;
-	}
-
+	
 	public void setBookFrom(String bookFrom) {
 		this.bookFrom = bookFrom;
+	}
+	
+	public String getIsbn() {
+		return getIsbn13();
 	}
 
 	public long getId() {
@@ -57,33 +79,62 @@ public class Book {
 	public String getJson() {
 		return json;
 	}
+	
+	public static Book parseFromDoubanJSON(String json) {
+		Book b = new Book();
+		b.setDoubanJson(json);
+		return b;
+	}
+	
+	public String toDoubanJSON() {
+		try {
+			return this.json;
+		} catch(Exception e) {
+			return "{}";
+		}
+	}
 
-	public void setJson(String json) {
+	public void setDoubanJson(String json) {
 		this.json = json;
 		try {
 			this.obj = new JSONObject(json);
-			this.isbn10 = this.obj.getString("isbn10");
-			this.isbn13 = this.obj.getString("isbn13");
-			this.title = this.obj.getString("title");
-			this.subTitle = this.obj.getString("alt_title");
-			this.authors = this.obj.getJSONArray("author");
-			this.tags = this.obj.getJSONArray("tags");
-			this.publisher = this.obj.getString("publisher");
-			this.publishDate = this.obj.getString("pubdate");
-			this.bookId = this.obj.getString("id");
-			this.authorIntro = this.obj.getString("author_intro");
-			this.summary = this.obj.getString("summary");
-			this.catalog = this.obj.getString("catalog");
-			this.coverUrl = this.obj.getJSONObject("images").getString("large");
-			this.pageNum = Integer.parseInt(this.obj.getString("pages"));
-			this.price = (int)(Float.parseFloat(this.obj.getString("price"))*100);
+			this.isbn10 = JSONUtil.getString(this.obj, "isbn10");
+			this.isbn13 = JSONUtil.getString(this.obj, "isbn13");
+			this.title = JSONUtil.getString(this.obj, "title");
+			this.subTitle = JSONUtil.getString(this.obj, "alt_title");
+			this.authors = JSONUtil.getJSONArray(this.obj, "author");
+			this.translators = JSONUtil.getJSONArray(this.obj, "translator");
+			this.tags = JSONUtil.getJSONArray(this.obj, "tags");
+			this.publisher = JSONUtil.getString(this.obj, "publisher");
+			this.publishDate = JSONUtil.getString(this.obj, "pubdate");
+			this.doubanBookId = JSONUtil.getString(this.obj, "id");
+			this.authorIntro = JSONUtil.getString(this.obj, "author_intro");
+			this.summary = JSONUtil.getString(this.obj, "summary");
+			this.catalog = JSONUtil.getString(this.obj, "catalog");
+			this.coverUrl =  JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "images"), "large");
+			this.pageNum = JSONUtil.getStringInt(this.obj, "pages");
+			String priceStr = JSONUtil.getString(this.obj, "price").trim();
+			if (priceStr.endsWith("元")) priceStr = priceStr.substring(0, priceStr.length() - 1).trim();
+			if (priceStr.endsWith("新臺幣")) priceStr = priceStr.substring(0, priceStr.length() - 3).trim();
+			if (priceStr.startsWith("CNY ")) priceStr = priceStr.substring(4).trim();
+			if (priceStr.length() == 0) priceStr = "0";
+			if (priceStr.startsWith("USD ")) this.price = (int)(Float.parseFloat(priceStr.substring(4).trim())* 690);
+			else {
+				this.price = (int)(Float.parseFloat(priceStr)*100);
+			}
+			
+			this.raterNum = JSONUtil.getInt(JSONUtil.getJSONObject(this.obj, "rating"), "numRaters");
+			this.rating = JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "rating"), "average");
+			this.seriesId = JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "series"), "id");
+			this.seriesTitle = JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "series"), "title");
+			
+			this.setCreateTime(System.currentTimeMillis());
 		} catch (Exception e) {
+			e.printStackTrace();
 			this.obj = null;
 		}
 	}
 	
-	
-
 	public String getAuthorIntro() {
 		return authorIntro;
 	}
@@ -128,6 +179,20 @@ public class Book {
 	public JSONArray getTags() {
 		return tags;
 	}
+	
+	public String[] getTagsString() {
+		if (tags == null) return new String[0];
+		try {
+			String[] arr = new String[tags.length()];
+			for (int i = 0; i < tags.length(); i++) {
+				arr[i] = JSONUtil.getString(tags.getJSONObject(i), "title");
+			}
+			return arr;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new String[0];
+		}
+	}
 
 	public String getPublisher() {
 		return publisher;
@@ -144,17 +209,37 @@ public class Book {
 	public String getCoverUrl() {
 		return coverUrl;
 	}
-
-	public String getBookId() {
-		return bookId;
-	}
-
+	
 	public String getBookFrom() {
 		return bookFrom;
 	}
 
 	public int getPageNum() {
 		return pageNum;
+	}
+
+	public int getRaterNum() {
+		return raterNum;
+	}
+
+	public String getRating() {
+		return rating;
+	}
+
+	public String getSeriesId() {
+		return seriesId;
+	}
+
+	public String getSeriesTitle() {
+		return seriesTitle;
+	}
+
+	public JSONArray getTranslators() {
+		return translators;
+	}
+
+	public String getDoubanBookId() {
+		return doubanBookId;
 	}
 	
 	

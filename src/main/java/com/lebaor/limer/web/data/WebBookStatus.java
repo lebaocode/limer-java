@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class WebBookStatus {
-	long bookId;
+	String isbn;
 
 	int status;//状态
 	int inlibNum;//库存数量
@@ -13,7 +13,7 @@ public class WebBookStatus {
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
-			o.put("bookId", bookId);
+			o.put("isbn", isbn);
 			o.put("status", status);
 			o.put("inlibNum", inlibNum);
 			
@@ -43,7 +43,7 @@ public class WebBookStatus {
 	public static WebBookStatus parseJSON(JSONObject o) {
 		try {
 			WebBookStatus n = new WebBookStatus();
-			n.bookId = o.getLong("bookId");
+			n.isbn = o.getString("isbn");
 			n.status = o.getInt("status");
 			n.inlibNum = o.getInt("inlibNum");
 			JSONArray arr  = o.getJSONArray("limerBookIds");
@@ -64,12 +64,14 @@ public class WebBookStatus {
 		return toJSON();
 	}
 	
-	public long getBookId() {
-		return bookId;
+	public String getIsbn() {
+		return isbn;
 	}
-	public void setBookId(long bookId) {
-		this.bookId = bookId;
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
+
 	public int getStatus() {
 		return status;
 	}

@@ -27,10 +27,10 @@
 <bean id="lbiDB" class="com.lebaor.limer.db.LimerBookInfoDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
-<bean id="lbsDB" class="com.lebaor.limer.db.LimerBookStatusDB" init-method="init">
+<bean id="bookDB" class="com.lebaor.limer.db.BookDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
-<bean id="bookDB" class="com.lebaor.limer.db.BookDB" init-method="init">
+<bean id="orderDB" class="com.lebaor.limer.db.OrderDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
 <bean id="userScoreDB" class="com.lebaor.limer.db.UserScoreDB" init-method="init">
@@ -46,12 +46,12 @@
 <bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init">
     <property name="userDB"><ref bean="userDB"/></property>
     <property name="userAuthDB"><ref bean="userAuthDB"/></property>
-    <property name="lbsDB"><ref bean="lbsDB"/></property>
     <property name="bookDB"><ref bean="bookDB"/></property>
     <property name="lbiDB"><ref bean="lbiDB"/></property>
     <property name="userScoreDB"><ref bean="userScoreDB"/></property>
     <property name="brDB"><ref bean="brDB"/></property>
     <property name="ltDB"><ref bean="ltDB"/></property>
+    <property name="orderDB"><ref bean="orderDB"/></property>
     
     <property name="jedisHost" value="${limer-servlet.jedisHost}"/>
     <property name="jedisPort" value="${limer-servlet.jedisPort}"/>

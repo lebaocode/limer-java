@@ -5,11 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
 
 import com.lebaor.utils.LogUtil;
 
-public class DBUtils implements Runnable {
+public class DBUtils {
 	Connection conn = null;
     String dbUrl;
     String dbUser;
@@ -17,19 +16,10 @@ public class DBUtils implements Runnable {
     String dbName;
     String charset;
     
-    Thread t;
-    boolean isRunning = false;
-    private static long ONE_HOUR = 1* 60 * 60 * 1000L; //1小时
-    
-    
     protected static DBUtils singleton;
     	
 	public DBUtils() {
 		singleton = this;
-		t = new Thread(this, "db-valid-check-thread");
-		this.isRunning = true;
-		t.setDaemon(true);
-		t.start();
 	}
 	
 	public static DBUtils getInstance() {
@@ -51,22 +41,6 @@ public class DBUtils implements Runnable {
     public void close() throws Exception {
     	if (conn != null) {
     		conn.close();
-    	}
-    }
-    
-    public void run() {
-    	//每天检查一次，在凌晨3-6点间检查。如果连接失效了，则重连连接。
-    	while (this.isRunning) {
-	    	try {
-	    		Thread.sleep(ONE_HOUR);//1小时
-	    		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-	    		if (hour < 6 && hour > 3) {
-	    			checkConnectionValid();
-	    			Thread.sleep(4* ONE_HOUR);
-	    		}
-	    	} catch (Exception e) {
-	    		break;
-	    	}
     	}
     }
     

@@ -9,6 +9,7 @@ package com.lebaor.limer.data;
 public class BorrowRecord {
 	long id;
 	long userId;
+	String isbn;
 	long limerBookId;
 	int status;
 	long borrowTime;//借书时间
@@ -20,6 +21,13 @@ public class BorrowRecord {
 	}
 	public void setId(long id) {
 		this.id = id;
+	}
+	
+	public String getIsbn() {
+		return isbn;
+	}
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
 	public long getUserId() {
 		return userId;

@@ -57,10 +57,13 @@ public class LimerBookInfoDB {
 		java.sql.Timestamp d;
 		LimerBookInfo o = new LimerBookInfo();
 		o.setId(rs.getLong(1));
-		o.setBookId(rs.getLong(2));
+		o.setIsbn(rs.getString(2));
 		o.setDonateUserId(rs.getLong(3));
-		d = rs.getTimestamp(4);
+		o.setStatus(rs.getInt(4));
+		d = rs.getTimestamp(5);
 		o.setDonateTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(6);
+		o.setLastUpdateTime(d != null ? d.getTime() : 0);
 		return o;
 	}
 	
@@ -96,10 +99,10 @@ public class LimerBookInfoDB {
 		
 	}
 	
-	public LimerBookInfo getRecentDonateBook(long bookId, long userId) {
+	public LimerBookInfo getRecentDonateBook(String isbn, long userId) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE book_id=? and user_id=?";
-		LimerBookInfo[] LimerBookInfoArr = (LimerBookInfo[])dbUtils.executeQuery(sql, new Object[]{bookId, userId}, new ResultSetHandler(){
+				+ " WHERE isbn=? and user_id=?";
+		LimerBookInfo[] LimerBookInfoArr = (LimerBookInfo[])dbUtils.executeQuery(sql, new Object[]{isbn, userId}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<LimerBookInfo> list = new LinkedList<LimerBookInfo>(); 
 				while (rs.next()) {
@@ -123,10 +126,10 @@ public class LimerBookInfoDB {
 		
 	}
 	
-	public LimerBookInfo[] getLimerBooksByBookId(long bookId) {
+	public LimerBookInfo[] getLimerBooksByIsbn(String isbn) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE book_id=? ";
-		LimerBookInfo[] LimerBookInfoArr = (LimerBookInfo[])dbUtils.executeQuery(sql, new Object[]{bookId}, new ResultSetHandler(){
+				+ " WHERE isbn=? ";
+		LimerBookInfo[] LimerBookInfoArr = (LimerBookInfo[])dbUtils.executeQuery(sql, new Object[]{isbn}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<LimerBookInfo> list = new LinkedList<LimerBookInfo>(); 
 				while (rs.next()) {
@@ -151,9 +154,11 @@ public class LimerBookInfoDB {
 		String sql = DBUtils.genAddRowSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
 				
-				o.getBookId(),
+				o.getIsbn(),
 				o.getDonateUserId(),
-				TextUtil.formatTime(o.getDonateTime())
+				o.getStatus(),
+				TextUtil.formatTime(o.getDonateTime()),
+				TextUtil.formatTime(o.getLastUpdateTime()),
 		});
 	}
 	
@@ -166,24 +171,29 @@ public class LimerBookInfoDB {
 		String sql = DBUtils.genUpdateTableSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
 				
-				o.getBookId(),
+				o.getIsbn(),
 				o.getDonateUserId(),
+				o.getStatus(),
 				TextUtil.formatTime(o.getDonateTime()),
+				TextUtil.formatTime(o.getLastUpdateTime()),
 				o.getId(),
 				});
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "book_id", "donate_user_id", "donate_time"};
+	private static final String[] COL_NAMES = {"id", "isbn", "donate_user_id", "status", "donate_time", "last_update_time"};
 	
 	
 	private void createLimerBookInfoDBTable() {
 
 		String sql = "  CREATE TABLE `"+ TABLENAME.toLowerCase() +"` (\r\n" + 
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
-				"  `book_id` bigint(20) NOT NULL,\r\n" +
+				"  `isbn` varchar(255) NOT NULL,\r\n" +
 				"  `donate_user_id` bigint(20) NOT NULL,\r\n" +
+				"  `status` smallint(2) default 0,\r\n" +
 				"  `donate_time` datetime default NULL,\r\n" +
+				"  `last_update_time` datetime default NULL,\r\n" +
+				
 				
 				"  PRIMARY KEY  (`ID`)\r\n" + 
 				") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
@@ -193,8 +203,8 @@ public class LimerBookInfoDB {
 					" ON "+ TABLENAME +" (donate_user_id)";
 			dbUtils.executeSql(sql, null);
 			
-			sql = " CREATE INDEX index_"+ TABLENAME +"_bookid" + 
-					" ON "+ TABLENAME +" (book_id)";
+			sql = " CREATE INDEX index_"+ TABLENAME +"_isbn" + 
+					" ON "+ TABLENAME +" (isbn)";
 			dbUtils.executeSql(sql, null);
 			
 		}

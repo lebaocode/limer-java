@@ -1,5 +1,7 @@
 package com.lebaor.wx.msg;
 
+import java.util.HashMap;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -38,7 +40,7 @@ public class WxMsgUtil {
 		
 		String params = o.toString();
 		
-		String resp = HttpClientUtil.doPost(SINGLE_POST_URL + accessToken, params);
+		String resp = HttpClientUtil.doPost(SINGLE_POST_URL + accessToken, params, new HashMap<String, String>());
 		return WxError.isSuccess(resp);
 	}
 	

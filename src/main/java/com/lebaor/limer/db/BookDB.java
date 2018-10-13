@@ -1,12 +1,20 @@
 package com.lebaor.limer.db;
 
+import java.io.File;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.LinkedList;
 
 import com.lebaor.dbutils.DBUtils;
 import com.lebaor.dbutils.ResultSetHandler;
 import com.lebaor.limer.data.Book;
+import com.lebaor.utils.FileUtil;
+import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 
 public class BookDB {
 
@@ -58,9 +66,7 @@ public class BookDB {
 		java.sql.Timestamp d;
 		Book o = new Book();
 		o.setId(rs.getLong(1));
-		o.setIsbn10(rs.getString(2));
-		o.setIsbn13(rs.getString(3));
-		o.setJson(rs.getString(4));
+		o.setDoubanJson(rs.getString(4));
 		d = rs.getTimestamp(5);
 		o.setCreateTime(d != null ? d.getTime() : 0);
 		o.setBookFrom(rs.getString(6));
@@ -185,5 +191,55 @@ public class BookDB {
 
 	public void setDbUtils(DBUtils dbUtils) {
 		this.dbUtils = dbUtils;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		Connection conn = null;
+		try {
+			DBUtils dbUtils = new DBUtils();
+			dbUtils.setDbUrl("jdbc:mysql://cd-cdb-bh931mgw.sql.tencentcdb.com:63600/lebao?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8");
+			dbUtils.setCharset("utf-8");
+			dbUtils.setDbName("lebao");
+			dbUtils.setDbPassword("d3tIrGk32");
+			dbUtils.setDbUser("root");
+			
+			dbUtils.connect();
+			conn = dbUtils.getConnection();
+			if (conn == null) {
+				System.out.println("conn is null");
+				return;
+			}
+			
+			BookDB db = new BookDB();
+			db.setDbUtils(dbUtils);
+			
+			File d = new File("douban_tag");
+			for (File f : d.listFiles()) {
+				if (!f.getName().endsWith(".json")) continue;
+				String jsonArr = FileUtil.readFromFile(f.getAbsolutePath());
+				LogUtil.WEB_LOG.info("begin parse json: " + f.getName());
+				
+				JSONArray arr = new JSONArray(jsonArr);
+				for (int i = 0; i < arr.length(); i++) {
+					Book b = new Book();
+					b.setCreateTime(System.currentTimeMillis());
+					JSONObject jo = arr.getJSONObject(i);
+					b.setDoubanJson(jo.toString());
+					
+					Book oldB = db.getBookByIsbn(b.getIsbn13());
+					if (oldB != null) {
+						LogUtil.WEB_LOG.info("[book_exists] ["+ b.getDoubanBookId() +"]");
+						continue;
+					}
+					
+					boolean success = db.addBook(b);
+					LogUtil.WEB_LOG.info("[insert_book] ["+ b.getDoubanBookId() +"] ["+ (success? "success" : "failed") +"]");
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) conn.close();
+		}
 	}
 }

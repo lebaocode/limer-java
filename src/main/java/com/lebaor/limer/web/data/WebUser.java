@@ -49,9 +49,9 @@ public class WebUser {
 			o.put("city", city);
 			o.put("district", district);
 			o.put("status", status);
-			o.put("createTime", createTime);
-			o.put("lastUpdateTime", lastUpdateTime);
-			o.put("lastLoginTime", lastLoginTime);
+			o.put("createTime", Long.toString(createTime));
+			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
+			o.put("lastLoginTime", Long.toString(lastLoginTime));
 			o.put("unionId", unionId);
 			o.put("sessionKey", sessionKey);
 			return o.toString();
@@ -85,9 +85,9 @@ public class WebUser {
 			n.city = o.getString("city");
 			n.district = o.getString("district");
 			n.status = o.getInt("status");
-			n.createTime = o.getLong("createTime");
-			n.lastUpdateTime = o.getLong("lastUpdateTime");
-			n.lastLoginTime = o.getLong("lastLoginTime");
+			n.createTime = Long.parseLong(o.getString("createTime"));
+			n.lastUpdateTime = Long.parseLong(o.getString("lastUpdateTime"));
+			n.lastLoginTime = Long.parseLong(o.getString("lastLoginTime"));
 			n.unionId = o.getString("unionId");
 			n.sessionKey = o.getString("sessionKey");
 			return n;

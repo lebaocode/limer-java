@@ -12,11 +12,17 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONString;
 
-import com.lebaor.limer.data.LimerBookStatus;
+import com.lebaor.limer.data.LimerConstants;
 import com.lebaor.limer.db.LimerBookStatusDB;
-import com.lebaor.limer.web.data.WebBook;
 import com.lebaor.limer.web.data.WebBookDetail;
+import com.lebaor.limer.web.data.WebBookStatus;
+import com.lebaor.limer.web.data.WebBorrowBook;
+import com.lebaor.limer.web.data.WebDonateBook;
+import com.lebaor.limer.web.data.WebJSONArray;
+import com.lebaor.limer.web.data.WebJSONObject;
+import com.lebaor.limer.web.data.WebOrder;
 import com.lebaor.limer.web.data.WebUser;
+import com.lebaor.limer.web.data.WebUserCenterInfo;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
 import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
 import com.lebaor.utils.LogUtil;
@@ -64,8 +70,227 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/submitDonate")) {
 			submitDonate(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getUserCenterInfo")) {
+			getUserCenterInfo(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getBookDetail")) {
+			getBookDetailByIsbn(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getMyBorrowBooks")) {
+			getMyBorrowBooks(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getMyDonateBooks")) {
+			getMyDonateBooks(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/borrowBooks")) {
+			borrowBooks(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/returnBook")) {
+			returnBook(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/isBookDonated")) {
+			isBookDonated(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getMyOrders")) {
+			getMyOrders(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getLogisticsFee")) {
+			getLogisticsFee(req, res, model);
+			return;
 		} 
+		
 	}
+	
+	public void getMyOrders(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		WebOrder[] wos = cache.getMyOrders(wu.getUserId());
+		JSONArray ja = new JSONArray();
+		for (int i = 0; i < wos.length; i++) {
+			ja.put(wos[i].toJSONObject());
+		}
+		
+		WebJSONArray wja = new WebJSONArray(ja.toString());
+		
+		this.setRetJson(model, wja.toJSON());
+	}
+	
+	public void borrowBooks(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		
+		//用户一次借n本书
+		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
+		
+		JSONArray jArr = new JSONArray(isbnArrJson);
+		String[] isbnArr = new String[jArr.length()];
+		for (int i = 0; i <  jArr.length(); i++) {
+			String isbn = jArr.getString(i);
+			isbnArr[i] = isbn;
+		}
+		
+		String ip = this.getUserIp(req);
+		WebJSONArray wja = cache.borrowBooks(isbnArr, wu, ip);
+		
+		this.setRetJson(model, wja.toJSON());
+	}
+	
+	public void isBookDonated(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		JSONObject o = new JSONObject();
+		
+		String isbn = this.getParameterValue(req, "isbn", "");
+		WebBookDetail wbd = cache.getBookInfo(isbn);
+		if (wbd == null) {
+			o.put("donated", false);
+			this.setRetJson(model, o.toString());
+			return;
+		} 
+		
+		boolean isDonated = cache.isDonatedBook(curUserId, isbn);
+		o.put("donated", isDonated);
+		
+		WebJSONObject wjo = new WebJSONObject(o.toString());
+		this.setRetJson(model, wjo.toString());
+	}
+	
+	public void returnBook(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		
+		long limerBookId = this.getLongParameterValue(req, "limerBookId", 0L);
+		boolean result = cache.returnBook(curUserId, limerBookId);
+		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+		
+		this.setRetJson(model, o.toString());
+	}
+	
+	
+	public void getMyDonateBooks(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		
+		WebDonateBook[] bArr = cache.getMyDonateBooks(curUserId);
+		JSONArray arr = new JSONArray();
+		for (int i = 0; i < bArr.length; i++) {
+			arr.put(new JSONObject(bArr[i].toJSON()));
+		}
+		
+		this.setRetJson(model, new WebJSONArray(arr.toString()).toJSON());
+	}
+	
+	public void getMyBorrowBooks(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getMyBorrowBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		
+		WebBorrowBook[] bArr = cache.getMyBorrowBooks(curUserId);
+		JSONArray arr = new JSONArray();
+		for (int i = 0; i < bArr.length; i++) {
+			arr.put(new JSONObject(bArr[i].toJSON()));
+		}
+		
+		this.setRetJson(model, new WebJSONArray(arr.toString()).toJSON());
+	}
+	
+	public void getUserCenterInfo(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		
+		
+		//获取用户id
+		String userName = this.getParameterValue(req, "userName", "");
+		String userLogo = this.getParameterValue(req, "userLogo", "");
+		String code = this.getParameterValue(req, "code", "");
+		WebUser wu = cache.code2Session(userName, userLogo, code);
+		if (wu == null) {
+			LogUtil.WEB_LOG.warn("getUserCenterInfo error, no user: [code=]" + code + " [userName="+ userName +"]");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		long curUserId = wu.getUserId();
+		WebUserCenterInfo wuci = cache.getWebUserCenterInfo(curUserId, wu.getUnionId());
+		
+		if (wuci == null) {
+			WebJSONObject wjo = new WebJSONObject(false, "没有该用户信息", WebJSONObject.DEFAULT_DATA);
+			this.setRetJson(model, wjo.toJSON());
+			return;
+		}
+		
+		this.setRetJson(model, wuci.toString());
+	}
+	
 	
 	public void submitDonate(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
@@ -91,34 +316,57 @@ public class JsonController extends EntryController implements Runnable {
 		JSONArray arr = new JSONArray(isbnArrJson);
 		for (int i = 0; i <arr.length(); i++) {
 			String isbn = arr.getString(i);
-			WebBookDetail wbd = cache.getDoubanBookInfo(isbn);
-			if (wbd == null) continue;
-			boolean success = cache.addDonateBook(wbd.getBookId(), curUserId);
+			WebBookDetail wbd = cache.getBookInfo(isbn);
 			
-			JSONObject ro = new JSONObject();
-			ro.put("isbn", isbn);
-			ro.put("result", success);
-			resArr.put(ro);
+			
+			JSONObject data = new JSONObject();
+			data.put("isbn", isbn);
+			if (wbd == null) {
+				WebJSONObject ro = new WebJSONObject(false, "没有isbn="+isbn+"对应的书籍", data.toString());
+				resArr.put(ro.toJSONObject());
+				continue;
+			}
+			boolean success = cache.addDonateBook(isbn, curUserId);
+			WebJSONObject ro = new WebJSONObject(success, success ? "成功" : "失败", data.toString());
+			resArr.put(ro.toJSONObject());
 		}
 		
-		this.setRetJson(model, resArr.toString());
+		WebJSONArray resJson = new WebJSONArray(resArr.toString());
+		this.setRetJson(model, resJson.toJSON());
+	}
+	
+	public void getLogisticsFee(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		
+		int pn = this.getIntParameterValue(req, "pageNum", 0);
+		
+		int fee = LimerConstants.computeLogisticsFee(pn);
+		JSONObject jo = new JSONObject();
+		jo.put("fee", fee);
+		this.setRetJson(model, new WebJSONObject(jo.toString()).toJSON()) ;
 	}
 	
 	public void getBookDetailByIsbn(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		JSONObject o = new JSONObject();
 		
 		String isbn = this.getParameterValue(req, "isbn", "");
-		WebBookDetail wbd = cache.getDoubanBookInfo(isbn);
+		WebBookDetail wbd = cache.getBookInfo(isbn);
 		if (wbd == null) {
-			o.put("result", "error");
-			o.put("msg", "找不到isbn="+ isbn+"的书");
-			this.setRetJson(model, o.toString());
+			WebJSONObject data = new WebJSONObject(false, "找不到isbn="+ isbn+"的书", "{}");
+			this.setRetJson(model, data.toJSON());
 			return;
 		}
 		
-		this.setRetJson(model, wbd.toJSON());
+		//加入该书状态，是否可借阅
+		WebBookStatus wbs = cache.getWebBookStatus(isbn);
+		
+		JSONObject jo = wbd.toJSONObject();
+		jo.put("status", wbs.getStatus());
+		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
+		
+		this.setRetJson(model, new WebJSONObject(jo.toString()).toJSON());
 	}
 	
 	public void getRecentBooks(HttpServletRequest req, 
@@ -126,20 +374,22 @@ public class JsonController extends EntryController implements Runnable {
             throws Exception {
 		int start = this.getIntParameterValue(req, "start", 0);
 		int len = this.getIntParameterValue(req, "len", 10);
-		String tag = this.getParameterValue(req, "cat", "");
+		String tag = this.getParameterValue(req, "tag", "");
 		
 		JSONArray arr = new JSONArray();
 		
-		List<WebBook> list = cache.getRecentReadyBooks(tag, start, len);
-		for (WebBook wb : list) {
+		List<WebBookDetail> list = cache.getRecentBooks(tag, start, len);
+		for (WebBookDetail wb : list) {
 			try {
 				arr.put(new JSONObject(wb.toJSON()));
 			} catch (Exception e) {
-				LogUtil.WEB_LOG.warn("In getRecentBooks, WebBook toJson error: isbn=" + wb.getIsbn() + " title="+ wb.getTitle(), e);
+				LogUtil.WEB_LOG.warn("In getRecentBooks, WebBookDetail toJson error: isbn=" + wb.getBook().getIsbn13() 
+						+ " title="+ wb.getBook().getTitle(), e);
 			}
 		}
 		
-		this.setRetJson(model, arr.toString());
+		WebJSONArray wja = new WebJSONArray(arr.toString());
+		this.setRetJson(model, wja.toJSON());
 	}
 	
 	public void wxSign(HttpServletRequest req, 

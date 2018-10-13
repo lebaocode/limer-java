@@ -374,8 +374,8 @@ public class LebaoCache {
 						WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
 						scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
 						
-						for (String ct : wbd.getBook().getTagsString()) {
-							getJedis().zadd(KEY_RECENT_BOOKS+"_" + ct, scoreMembers);
+						for (String t : wbd.getBook().getTagsString()) {
+							getJedis().zadd(KEY_RECENT_BOOKS+"_" + t, scoreMembers);
 						}
 					}
 					getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
@@ -389,6 +389,7 @@ public class LebaoCache {
 		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+tag, start, len);
 		if (list == null || list.size() == 0) return resultList;
 		
+		LogUtil.WEB_LOG.debug("getRecentBooks("+tag+","+start+","+len+"), return "+ list.size());
 		for (String s: list) {
 			WebBookDetail wb = new WebBookDetail();
 			wb.setBook(Book.parseFromDoubanJSON(s));

@@ -10,10 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONString;
 
 import com.lebaor.limer.data.LimerConstants;
-import com.lebaor.limer.db.LimerBookStatusDB;
 import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.limer.web.data.WebBookStatus;
 import com.lebaor.limer.web.data.WebBorrowBook;
@@ -26,7 +24,6 @@ import com.lebaor.limer.web.data.WebUserCenterInfo;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
 import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
 import com.lebaor.utils.LogUtil;
-import com.lebaor.webutils.GenericTemplateController;
 import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
 
@@ -35,9 +32,7 @@ public class JsonController extends EntryController implements Runnable {
 	ConcurrentHashMap<String, SmsCode> smsCodeMap = new ConcurrentHashMap<String, SmsCode>();//key:mobile, value:smsCode
 	ConcurrentHashMap<String, SmsCode> smsIdCodeMap = new ConcurrentHashMap<String, SmsCode>();//key:id, value:smsCode
 	Thread t;
-	
-	LimerBookStatusDB lbsDB;
-	
+		
 	public void init() {
 		t= new Thread("clear-smscode-thread");
 		t.setDaemon(true);

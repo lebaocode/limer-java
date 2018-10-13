@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -366,7 +367,7 @@ public class LebaoCache {
 			try {
 				if (!getJedis().exists(KEY_RECENT_BOOKS)) {
 					//最近1000本书籍状态
-					HashMap<String, Double> scoreMembers = new HashMap<String, Double>();
+					Map<String, Double> scoreMembers = new HashMap<String, Double>();
 					LimerBookInfo[] lbsArr = lbiDB.getLimerBookInfos(0, KEY_RECENT_BOOKS_NUM);
 					for (LimerBookInfo lbs : lbsArr) {
 						WebBookDetail wbd = this.getBookInfo(lbs.getIsbn());
@@ -430,7 +431,7 @@ public class LebaoCache {
 		getJedis().hset(KEY_BOOK_DETAIL, isbn, wbd.toJSON());
 		
 		//更新最近书籍缓存
-		HashMap<String, Double> scoreMembers = new HashMap<String, Double>();
+		Map<String, Double> scoreMembers = new HashMap<String, Double>();
 		scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
 		getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
 		for (String tag: wbd.getBook().getTagsString()) {

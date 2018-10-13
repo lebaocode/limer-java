@@ -49,6 +49,8 @@ public class JsonController extends EntryController implements Runnable {
             throws Exception {
 		
 		String uri = req.getRequestURI();
+		LogUtil.WEB_LOG.debug("receive request: " + uri);
+		
 		if (uri.startsWith("/json/smsreceiver")) {
 			smsReceiver(req, res, model);
 			return;
@@ -373,7 +375,7 @@ public class JsonController extends EntryController implements Runnable {
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
 		int start = this.getIntParameterValue(req, "start", 0);
-		int len = this.getIntParameterValue(req, "len", 10);
+		int len = this.getIntParameterValue(req, "len", 20);
 		String tag = this.getParameterValue(req, "tag", "");
 		
 		JSONArray arr = new JSONArray();

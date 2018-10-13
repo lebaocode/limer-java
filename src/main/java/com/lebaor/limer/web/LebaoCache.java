@@ -372,10 +372,13 @@ public class LebaoCache {
 					
 					for (Book b : bookArr) {
 						WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
+						
+						Map<String, Double> sm = new HashMap<String, Double>();
+						sm.put(wbd.toJSON(), (double)wbd.computeScore());
 						scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
 						
 						for (String t : wbd.getBook().getTagsString()) {
-							getJedis().zadd(KEY_RECENT_BOOKS+"_" + t, scoreMembers);
+							getJedis().zadd(KEY_RECENT_BOOKS+"_" + t, sm);
 						}
 					}
 					getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);

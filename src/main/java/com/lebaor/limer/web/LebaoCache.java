@@ -368,9 +368,10 @@ public class LebaoCache {
 				if (!getJedis().exists(KEY_RECENT_BOOKS)) {
 					//最近1000本书籍状态
 					Map<String, Double> scoreMembers = new HashMap<String, Double>();
-					LimerBookInfo[] lbsArr = lbiDB.getLimerBookInfos(0, KEY_RECENT_BOOKS_NUM);
-					for (LimerBookInfo lbs : lbsArr) {
-						WebBookDetail wbd = this.getBookInfo(lbs.getIsbn());
+					Book[] bookArr = bookDB.getBooks(0, KEY_RECENT_BOOKS_NUM);
+					
+					for (Book b : bookArr) {
+						WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
 						scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
 						
 						for (String ct : wbd.getBook().getTagsString()) {

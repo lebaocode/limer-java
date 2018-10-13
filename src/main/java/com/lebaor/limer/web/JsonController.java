@@ -57,9 +57,6 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getRecentBooks")) {//所有可借阅书籍列表
 			getRecentBooks(req, res, model);
 			return;
-		} else if (uri.startsWith("/json/getBookDetailByIsbn")) {//所有可借阅书籍列表
-			getBookDetailByIsbn(req, res, model);
-			return;
 		} else if (uri.startsWith("/json/wxsign")) {
 			wxSign(req, res, model);
 			return;

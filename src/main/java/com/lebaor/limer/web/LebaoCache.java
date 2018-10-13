@@ -420,7 +420,7 @@ public class LebaoCache {
 	public List<WebBookDetail> getRecentBooks(String tag, int start, int len) {
 		List<WebBookDetail> resultList = new LinkedList<WebBookDetail>();
 		
-		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), start, len);
+		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), start, start+len-1);
 		LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from redis: "+KEY_RECENT_BOOKS+ "_"+ tag +": "+list.size());
 		if (list == null || list.size() == 0) return resultList;
 		

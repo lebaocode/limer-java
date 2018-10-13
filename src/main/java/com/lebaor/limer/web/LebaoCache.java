@@ -81,9 +81,6 @@ public class LebaoCache {
 		globalJedis = jedisPool.getResource();
 		globalJedis.auth(getInstance().jedisPassword);
 		
-		//确认db连接已经ok
-		
-		
 		//从jedis里取
 		try {
 			if (!getJedis().exists(KEY_RECENT_BOOKS)) {
@@ -461,6 +458,11 @@ public class LebaoCache {
 			b = new Book();
 			b.setCreateTime(System.currentTimeMillis());
 			b.setDoubanJson(json);
+			if (b.getIsbn13() == null || b.getIsbn13().length() != 13 || b.getIsbn10() == null || b.getIsbn10().length() != 10) {
+				LogUtil.WEB_LOG.info("[DOUBAN_BOOK_JSON_ERROR] ["+ isbn +"]");
+				//json有问题
+				return null;
+			}
 			bookDB.addBook(b);
 		}
 		

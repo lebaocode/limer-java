@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lebaor.utils.JSONUtil;
+import com.lebaor.utils.LogUtil;
 
 
 /**
@@ -99,7 +100,6 @@ public class Book {
 			JSONObject o = new JSONObject();
 			o.put("isbn10", isbn10);
 			o.put("isbn13", isbn13);
-			o.put("createTime", createTime);
 			o.put("title", title);
 			o.put("subTitle", subTitle);
 			o.put("author", this.getAuthorAsString());
@@ -126,6 +126,7 @@ public class Book {
 			o.put("limerFee", String.format("%.2f", limerFee/100));
 			return o.toString();
 		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("Book.toJSON() error for isbn=" + isbn13, e);
 			return "{error: 'format error.'}";
 		}
 		

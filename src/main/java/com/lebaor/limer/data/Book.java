@@ -124,6 +124,7 @@ public class Book {
 				limerFee = (int)(this.price * 0.3);
 			}
 			o.put("limerFee", String.format("%.2f", limerFee/100));
+			o.put("price", String.format("%.2f", price));
 			return o.toString();
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("Book.toJSON() error for isbn=" + isbn13, e);
@@ -181,7 +182,7 @@ public class Book {
 			
 			this.setCreateTime(System.currentTimeMillis());
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogUtil.WEB_LOG.warn("Book.setDoubanJson() error for isbn=" + json, e);
 			this.obj = null;
 		}
 	}

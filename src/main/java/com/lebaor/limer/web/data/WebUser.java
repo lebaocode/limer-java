@@ -5,55 +5,26 @@ import org.json.JSONObject;
 import com.lebaor.limer.data.User;
 
 public class WebUser {
-	long userId;
-	String userName;
-	String userLogo;
-	String mobile;
-	String address;
-	String email;
-	
-	int sex;
-	String birthday;
-	String province;
-	String city;
-	String district;
-	
-	int status;
-	
-	long createTime;
-	long lastUpdateTime;
-	long lastLoginTime;
+	User user;
 	
 	String unionId;
+	String openId;
 	
-	String sessionKey;
-	
-	public static WebUser create(User u, String unionId, String sessionKey) {
+	public static WebUser create(User u, String unionId, String openId) {
 		String ujson = u.toJSON();
 				
-		return parseJSON(ujson.substring(0, ujson.length() - 1) +", 'sessionKey': '" + sessionKey + "', 'userId': '"+ u.getId() +"'"+", 'unionId': '" + unionId + "'}");
+		return parseJSON(ujson.substring(0, ujson.length() - 1) +", 'openId': '" + openId + "', 'unionId': '" + unionId + "'}");
+	}
+	
+	public long getUserId() {
+		return user != null ? user.getId() : 0;
 	}
 	
 	public String toJSON() {
 		try {
-			JSONObject o = new JSONObject();
-			o.put("userId", Long.toString(userId));
-			o.put("userName", userName);
-			o.put("userLogo", userLogo);
-			o.put("mobile", mobile);
-			o.put("address", address);
-			o.put("email", email);
-			o.put("sex", sex);
-			o.put("birthday", birthday);
-			o.put("province", province);
-			o.put("city", city);
-			o.put("district", district);
-			o.put("status", status);
-			o.put("createTime", Long.toString(createTime));
-			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
-			o.put("lastLoginTime", Long.toString(lastLoginTime));
+			JSONObject o = new JSONObject(user.toJSON());
 			o.put("unionId", unionId);
-			o.put("sessionKey", sessionKey);
+			o.put("openId", openId);
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -69,27 +40,12 @@ public class WebUser {
 		}
 	}
 
-
 	public static WebUser parseJSON(JSONObject o) {
 		try {
 			WebUser n = new WebUser();
-			n.userId = Long.parseLong(o.getString("userId"));
-			n.userName = o.getString("userName");
-			n.userLogo = o.getString("userLogo");
-			n.mobile = o.getString("mobile");
-			n.address = o.getString("address");
-			n.email = o.getString("email");
-			n.sex = o.getInt("sex");
-			n.birthday = o.getString("birthday");
-			n.province = o.getString("province");
-			n.city = o.getString("city");
-			n.district = o.getString("district");
-			n.status = o.getInt("status");
-			n.createTime = Long.parseLong(o.getString("createTime"));
-			n.lastUpdateTime = Long.parseLong(o.getString("lastUpdateTime"));
-			n.lastLoginTime = Long.parseLong(o.getString("lastLoginTime"));
+			n.user = User.parseJSON(o);
 			n.unionId = o.getString("unionId");
-			n.sessionKey = o.getString("sessionKey");
+			n.openId = o.getString("openId");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -102,99 +58,14 @@ public class WebUser {
 	}
 	
 	
-	public long getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(long userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-	public String getUserLogo() {
-		return userLogo;
-	}
-	public void setUserLogo(String userLogo) {
-		this.userLogo = userLogo;
-	}
-	public String getMobile() {
-		return mobile;
-	}
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public int getSex() {
-		return sex;
-	}
-	public void setSex(int sex) {
-		this.sex = sex;
-	}
-	public String getBirthday() {
-		return birthday;
-	}
-	public void setBirthday(String birthday) {
-		this.birthday = birthday;
-	}
-	public String getProvince() {
-		return province;
-	}
-	public void setProvince(String province) {
-		this.province = province;
-	}
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
-	public String getDistrict() {
-		return district;
-	}
-	public void setDistrict(String district) {
-		this.district = district;
-	}
-	public int getStatus() {
-		return status;
-	}
-	public void setStatus(int status) {
-		this.status = status;
-	}
-	public long getCreateTime() {
-		return createTime;
-	}
-	public void setCreateTime(long createTime) {
-		this.createTime = createTime;
-	}
-	public long getLastUpdateTime() {
-		return lastUpdateTime;
-	}
-	public void setLastUpdateTime(long lastUpdateTime) {
-		this.lastUpdateTime = lastUpdateTime;
-	}
-	public long getLastLoginTime() {
-		return lastLoginTime;
-	}
-	public void setLastLoginTime(long lastLoginTime) {
-		this.lastLoginTime = lastLoginTime;
-	}
-	
 	public String getUnionId() {
 		return unionId;
 	}
@@ -202,13 +73,14 @@ public class WebUser {
 		this.unionId = unionId;
 	}
 
-	public String getSessionKey() {
-		return sessionKey;
+	public String getOpenId() {
+		return openId;
 	}
 
-	public void setSessionKey(String sessionKey) {
-		this.sessionKey = sessionKey;
+	public void setOpenId(String openId) {
+		this.openId = openId;
 	}
+
 	
 	
 }

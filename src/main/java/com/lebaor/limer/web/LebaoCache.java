@@ -20,6 +20,7 @@ import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
 import com.lebaor.webutils.HttpClientUtil;
+import com.lebaor.wx.WxMiniProgramUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -574,32 +575,7 @@ public class LebaoCache {
 		return res;
 	}
 	
-	public WebUser code2Session(String userName, String userLogo, String code) {
-		String json = HttpClientUtil.doGet(LimerConstants.CODE2SESSION_URL + "?appid=" + LimerConstants.MINIPROGRAM_APPID
-				+ "&secret=" + LimerConstants.MINIPROGRAM_APPSECRET 
-				+ "&js_code=" + code
-				+ "&grant_type=authorization_code");
-		
-		String openId = null;
-		String sessionKey = null;
-		String unionId = null;
-		try {
-			JSONObject o = new JSONObject(json);
-			if (!o.has("session_key")) {
-				String errCode = JSONUtil.getString(o, "errcode");
-				if (!errCode.equals("0")) {
-					LogUtil.WEB_LOG.warn("code2session error: " + " code="+ code +", return json=" + json);
-					return null;
-				}
-			}
-			
-			openId = o.getString("openid");
-			sessionKey = o.getString("session_key");
-			unionId = o.getString("unionid");
-		} catch (Exception e ) {
-			LogUtil.WEB_LOG.warn("code2session error: " + " code="+ code +", return json=" + json, e);
-			return null;
-		}
+	public WebUser getWebUser(String userName, String userLogo, String openId, String unionId) {
 		
 		long userId = 0;
 		User u = null;
@@ -630,18 +606,18 @@ public class LebaoCache {
 					ua.setUserId(userId);
 					userAuthDB.addUserAuth(ua);
 					getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(userId));
-					LogUtil.info("[CREATE_USER_AUTH] [userId="+ userId +"] [unionId="+ unionId +"] [openId="+ openId+"] [appId="+ ua.getAppId() +"]");
+					LogUtil.info("[CREATE_USER_AUTH] [userId="+ userId +"] [unionId="+ unionId +"] [appId="+ ua.getAppId() +"]");
 				} else {
 					u = this.getUserInfo(userId);
 					LogUtil.info("[OLD_USER_VISIT] [userId=" + userId + "] [unionId="+ unionId +"]");
 				}
 			} catch (Throwable t) {
-				LogUtil.WEB_LOG.warn("code2session check&createuser error: " + " code="+ code +", return json=" + json);
+				LogUtil.WEB_LOG.warn("code2session check&createuser error: " + " unionId="+ unionId, t);
 				return null;
 			}
 		}
 		
-		WebUser wu = WebUser.create(u, unionId, sessionKey);
+		WebUser wu = WebUser.create(u, unionId, openId);
 		return wu;
 	}
 

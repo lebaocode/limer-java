@@ -119,9 +119,16 @@ public class Book {
 			o.put("seriesId", seriesId);
 			o.put("seriesTitle", seriesTitle);
 			
+			if (this.price < 680) {
+				this.price = 680;
+			}
+			
 			int limerFee = LimerConstants.computeLogisticsFee(this.pageNum);
 			if (limerFee > this.price * 0.3) {
 				limerFee = (int)(this.price * 0.3);
+			}
+			if (limerFee < this.price * 0.05) {
+				limerFee = (int)(this.price * 0.05);
 			}
 			o.put("limerFee", String.format("%.1f", (float)limerFee/100) + "0");
 			o.put("price", String.format("%.1f", (float)price/100) + "0");

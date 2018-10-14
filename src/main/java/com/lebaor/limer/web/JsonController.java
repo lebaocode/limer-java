@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lebaor.limer.data.LimerConstants;
+import com.lebaor.limer.data.User;
 import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.limer.web.data.WebBookStatus;
 import com.lebaor.limer.web.data.WebBorrowBook;
@@ -26,6 +27,7 @@ import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
+import com.lebaor.wx.WxMiniProgramUtil;
 
 
 public class JsonController extends EntryController implements Runnable {
@@ -60,6 +62,9 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/wxsign")) {
 			wxSign(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/code2Session")) {
+			code2Session(req, res, model);
+			return;
 		} else if (uri.startsWith("/json/submitDonate")) {
 			submitDonate(req, res, model);
 			return;
@@ -68,6 +73,9 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		} else if (uri.startsWith("/json/getBookDetail")) {
 			getBookDetailByIsbn(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/decryptUserInfo")) {
+			decryptUserInfo(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/getMyBorrowBooks")) {
 			getMyBorrowBooks(req, res, model);
@@ -93,17 +101,53 @@ public class JsonController extends EntryController implements Runnable {
 		} 
 		
 	}
+	public void code2Session(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		String code = this.getParameterValue(req, "code", "");
+		
+		JSONObject jo = WxMiniProgramUtil.code2Session(code);
+		this.setRetJson(model, jo.toString());
+	}
+	
+	public void decryptUserInfo(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		String encryptedData = this.getParameterValue(req, "encryptedData", "");
+		String sessionKey = this.getParameterValue(req, "sessionKey", "");
+		String iv = this.getParameterValue(req, "iv", "");
+				
+		LogUtil.WEB_LOG.debug("begin decryptUserInfo(encryptedData=["+ encryptedData +"], sessionKey=["+ sessionKey +"], iv=["+  iv +"])");
+		JSONObject jo = WxMiniProgramUtil.getUserInfo(encryptedData, sessionKey, iv);
+		this.setRetJson(model, jo.toString());
+	}
+	
+	public WebUser getUser(HttpServletRequest req) {
+		String openId = this.getParameterValue(req, "openId", "");
+		String unionId = this.getParameterValue(req, "unionId", "");
+		if (unionId.trim().length() == 0) {
+			//没有unionId
+			LogUtil.WEB_LOG.warn("getUser error, no user: [unionId=]");
+			return null;
+		}
+		
+		long userId = cache.getUserIdByUnionId(unionId);
+		if (userId <= 0) {
+			//没有unionId
+			LogUtil.WEB_LOG.warn("getUser error, no user: [unionId="+ unionId +"] userId=" + userId);
+			return null;
+		}
+		
+		User user = cache.getUserInfo(userId);
+		return WebUser.create(user, unionId, openId);
+		
+	}
 	
 	public void getMyOrders(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -122,13 +166,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void borrowBooks(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -153,13 +192,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void isBookDonated(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -185,13 +219,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void returnBook(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -209,13 +238,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void getMyDonateBooks(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyDonateBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -234,13 +258,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void getMyBorrowBooks(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getMyBorrowBooks error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -259,15 +278,8 @@ public class JsonController extends EntryController implements Runnable {
 	public void getUserCenterInfo(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		
-		
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("getUserCenterInfo error, no user: [code=]" + code + " [userName="+ userName +"]");
 			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
@@ -288,16 +300,9 @@ public class JsonController extends EntryController implements Runnable {
 	public void submitDonate(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
-		
-		
-		//获取用户id
-		String userName = this.getParameterValue(req, "userName", "");
-		String userLogo = this.getParameterValue(req, "userLogo", "");
-		String code = this.getParameterValue(req, "code", "");
-		WebUser wu = cache.code2Session(userName, userLogo, code);
+		WebUser wu = this.getUser(req);
 		if (wu == null) {
-			LogUtil.WEB_LOG.warn("submitDonate error, no user: [code=]" + code + " [userName="+ userName +"]");
-			this.setRetJson(model, "");
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
 			return;
 		}
 		

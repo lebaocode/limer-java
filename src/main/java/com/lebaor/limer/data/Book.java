@@ -123,8 +123,8 @@ public class Book {
 			if (limerFee > this.price * 0.3) {
 				limerFee = (int)(this.price * 0.3);
 			}
-			o.put("limerFee", String.format("%.2f", limerFee/100));
-			o.put("price", String.format("%.2f", price));
+			o.put("limerFee", String.format("%.1f", (float)limerFee/100) + "0");
+			o.put("price", String.format("%.2f", (float)price));
 			return o.toString();
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("Book.toJSON() error for isbn=" + isbn13, e);

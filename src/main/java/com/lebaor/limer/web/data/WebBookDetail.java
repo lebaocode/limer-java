@@ -23,7 +23,7 @@ public class WebBookDetail {
 	
 	public String toJSON() {
 		if (book == null) return "{}";
-		return book.toDoubanJSON();
+		return book.toJSON();
 		
 	}
 

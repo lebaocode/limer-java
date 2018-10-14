@@ -51,7 +51,7 @@ public class Book {
 		try {
 			for (int i =0;i < authors.length(); i++) {
 				String a = authors.getString(i);
-				if (s.length() > 0) s += ", ";
+				if (s.length() > 0) s += "，";
 				s += a;
 			}
 			return s;
@@ -93,6 +93,38 @@ public class Book {
 			return "{}";
 		}
 	}
+	
+	public String toJSON() {
+		try {
+			JSONObject o = new JSONObject();
+			o.put("isbn10", isbn10);
+			o.put("isbn13", isbn13);
+			o.put("createTime", createTime);
+			o.put("title", title);
+			o.put("subTitle", subTitle);
+			o.put("author", this.getAuthorAsString());
+			o.put("tags", tags);
+			o.put("translators", translators);
+			o.put("publisher", publisher);
+			o.put("publishDate", publishDate);
+			o.put("price", price);
+			o.put("coverUrl", coverUrl);
+			o.put("doubanBookId", doubanBookId);
+			o.put("pageNum", pageNum);
+			o.put("authorIntro", authorIntro);
+			o.put("summary", summary);
+			o.put("catalog", catalog);
+			o.put("raterNum", raterNum);
+			o.put("rating", rating);
+			o.put("seriesId", seriesId);
+			o.put("seriesTitle", seriesTitle);
+			o.put("limerFee", LimerConstants.computeLogisticsFee(this.pageNum));
+			return o.toString();
+		} catch (Exception e) {
+			return "{error: 'format error.'}";
+		}
+		
+	}
 
 	public void setDoubanJson(String json) {
 		this.json = json;
@@ -112,15 +144,28 @@ public class Book {
 			this.summary = JSONUtil.getString(this.obj, "summary");
 			this.catalog = JSONUtil.getString(this.obj, "catalog");
 			this.coverUrl =  JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "images"), "large");
-			this.pageNum = JSONUtil.getStringInt(this.obj, "pages");
+			
+			String pageStr = JSONUtil.getString(this.obj, "pages");
+			if (pageStr.endsWith("页")) pageStr = pageStr.substring(0, pageStr.length() - 1).trim();
+			try {
+				this.pageNum = Integer.parseInt(pageStr);
+			} catch (Exception ex) {
+				this.pageNum = 0;
+			}
+			
 			String priceStr = JSONUtil.getString(this.obj, "price").trim();
 			if (priceStr.endsWith("元")) priceStr = priceStr.substring(0, priceStr.length() - 1).trim();
 			if (priceStr.endsWith("新臺幣")) priceStr = priceStr.substring(0, priceStr.length() - 3).trim();
-			if (priceStr.startsWith("CNY ")) priceStr = priceStr.substring(4).trim();
+			if (priceStr.startsWith("CNY")) priceStr = priceStr.substring(4).trim();
 			if (priceStr.length() == 0) priceStr = "0";
-			if (priceStr.startsWith("USD ")) this.price = (int)(Float.parseFloat(priceStr.substring(4).trim())* 690);
-			else {
-				this.price = (int)(Float.parseFloat(priceStr)*100);
+			try {
+				if (priceStr.startsWith("USD")) {
+					this.price = (int)(Float.parseFloat(priceStr.substring(4).trim())* 690);
+				} else {
+					this.price = (int)(Float.parseFloat(priceStr)*100);
+				}
+			} catch (Exception ex) {
+				this.price = 0;
 			}
 			
 			this.raterNum = JSONUtil.getInt(JSONUtil.getJSONObject(this.obj, "rating"), "numRaters");

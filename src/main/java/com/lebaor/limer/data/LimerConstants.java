@@ -57,6 +57,6 @@ public class LimerConstants {
 	public final static String CODE2SESSION_URL = "https://api.weixin.qq.com/sns/jscode2session";
 	
 	public static int computeLogisticsFee(int pageNum) {
-		return 2 + (pageNum/100);
+		return pageNum <= 30 ? 210 : pageNum* 7;
 	}
 }

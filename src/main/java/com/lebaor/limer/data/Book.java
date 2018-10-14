@@ -118,7 +118,12 @@ public class Book {
 			o.put("rating", rating);
 			o.put("seriesId", seriesId);
 			o.put("seriesTitle", seriesTitle);
-			o.put("limerFee", LimerConstants.computeLogisticsFee(this.pageNum));
+			
+			int limerFee = LimerConstants.computeLogisticsFee(this.pageNum);
+			if (limerFee > this.price * 0.3) {
+				limerFee = (int)(this.price * 0.3);
+			}
+			o.put("limerFee", String.format("%.2f", limerFee/100));
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";

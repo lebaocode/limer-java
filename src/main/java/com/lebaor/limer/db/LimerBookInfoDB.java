@@ -101,7 +101,7 @@ public class LimerBookInfoDB {
 	
 	public LimerBookInfo getRecentDonateBook(String isbn, long userId) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE isbn=? and user_id=?";
+				+ " WHERE isbn=? and donate_user_id=?";
 		LimerBookInfo[] LimerBookInfoArr = (LimerBookInfo[])dbUtils.executeQuery(sql, new Object[]{isbn, userId}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<LimerBookInfo> list = new LinkedList<LimerBookInfo>(); 

@@ -27,7 +27,7 @@ public class User {
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
-			o.put("id", id);
+			o.put("id", Long.toString(id));
 			o.put("userName", userName);
 			o.put("userLogo", userLogo);
 			o.put("mobile", mobile);

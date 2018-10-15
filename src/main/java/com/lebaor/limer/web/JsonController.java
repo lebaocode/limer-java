@@ -329,6 +329,7 @@ public class JsonController extends EntryController implements Runnable {
 				resArr.put(ro.toJSONObject());
 				continue;
 			}
+			LogUtil.WEB_LOG.debug("begin addDonateBook("+ isbn +", "+ curUserId +")");
 			boolean success = cache.addDonateBook(isbn, curUserId);
 			WebJSONObject ro = new WebJSONObject(success, success ? "成功" : "失败", data.toString());
 			resArr.put(ro.toJSONObject());

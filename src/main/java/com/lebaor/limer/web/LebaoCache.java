@@ -564,7 +564,7 @@ public class LebaoCache {
 					return false;
 				}
 				
-				LogUtil.STAT_LOG.info("[DONATE_BOOK] [isbn="+ isbn +"] [userId="+ userId +"]");
+				LogUtil.STAT_LOG.info("[DONATE_BOOK] ["+ isbn +"] ["+ userId +"]");
 
 				//更新缓存
 				lbi = lbiDB.getRecentDonateBook(isbn, userId);

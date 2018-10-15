@@ -10,7 +10,7 @@ import com.lebaor.utils.TextUtil;
 
 public class OrderDB {
 
-	public static final String TABLENAME = "bookstatus";
+	public static final String TABLENAME = "orders";
 	DBUtils dbUtils;
 	
 	public Order[] getOrders(int start, int length) {

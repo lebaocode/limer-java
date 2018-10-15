@@ -45,6 +45,8 @@ public class LimerConstants {
 	public final static int ORDER_STATUS_PAY_FAILED = 3;//支付失败
 	public final static int ORDER_STATUS_PAY_EXPIRED = 4;//时间过期
 	
+	public final static int USER_STATUS_NORMAL = 0;//正常
+	
 	public static String explainOrderStatus(int s) {
 		if (s == 2) return "支付成功";
 		else if (s == 3) return "支付失败";

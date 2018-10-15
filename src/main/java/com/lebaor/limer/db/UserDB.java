@@ -68,11 +68,12 @@ public class UserDB {
 		o.setProvince(rs.getString(9));
 		o.setCity(rs.getString(10));
 		o.setDistrict(rs.getString(11));
-		d = rs.getTimestamp(12);
-		o.setCreateTime(d != null ? d.getTime() : 0);
+		o.setStatus(rs.getInt(12));
 		d = rs.getTimestamp(13);
-		o.setLastUpdateTime(d != null ? d.getTime() : 0);
+		o.setCreateTime(d != null ? d.getTime() : 0);
 		d = rs.getTimestamp(14);
+		o.setLastUpdateTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(15);
 		o.setLastLoginTime(d != null ? d.getTime() : 0);
 		return o;
 	}
@@ -135,6 +136,7 @@ public class UserDB {
 				o.getProvince(),
 				o.getCity(),
 				o.getDistrict(),
+				o.getStatus(),
 				TextUtil.formatTime(o.getCreateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
 				TextUtil.formatTime(o.getLastLoginTime()),
@@ -159,6 +161,7 @@ public class UserDB {
 				o.getProvince(),
 				o.getCity(),
 				o.getDistrict(),
+				o.getStatus(),
 				TextUtil.formatTime(o.getCreateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
 				TextUtil.formatTime(o.getLastLoginTime()),
@@ -169,7 +172,7 @@ public class UserDB {
 	
 	private static final String[] COL_NAMES = {"id", "user_name", "user_logo", "mobile", 
 		"address", "email", "sex", "birthday", 
-		"province", "city", "district", "create_time", 
+		"province", "city", "district", "status", "create_time", 
 		"last_update_time", "last_login_time"};
 	
 	/**

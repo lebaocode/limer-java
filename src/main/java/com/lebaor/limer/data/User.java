@@ -2,6 +2,8 @@ package com.lebaor.limer.data;
 
 import org.json.JSONObject;
 
+import com.lebaor.utils.JSONUtil;
+
 public class User {
 	long id;
 	String userName;
@@ -37,9 +39,9 @@ public class User {
 			o.put("city", city);
 			o.put("district", district);
 			o.put("status", status);
-			o.put("createTime", createTime);
-			o.put("lastUpdateTime", lastUpdateTime);
-			o.put("lastLoginTime", lastLoginTime);
+			o.put("createTime", Long.toString(createTime));
+			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
+			o.put("lastLoginTime", Long.toString(lastLoginTime));
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -59,21 +61,21 @@ public class User {
 	public static User parseJSON(JSONObject o) {
 		try {
 			User n = new User();
-			n.id = o.getLong("id");
-			n.userName = o.getString("userName");
-			n.userLogo = o.getString("userLogo");
-			n.mobile = o.getString("mobile");
-			n.address = o.getString("address");
-			n.email = o.getString("email");
-			n.sex = o.getInt("sex");
-			n.birthday = o.getString("birthday");
-			n.province = o.getString("province");
-			n.city = o.getString("city");
-			n.district = o.getString("district");
-			n.status = o.getInt("status");
-			n.createTime = o.getLong("createTime");
-			n.lastUpdateTime = o.getLong("lastUpdateTime");
-			n.lastLoginTime = o.getLong("lastLoginTime");
+			n.id = JSONUtil.getLong(o, "id");
+			n.userName = JSONUtil.getString(o, "userName");
+			n.userLogo = JSONUtil.getString(o, "userLogo");
+			n.mobile = JSONUtil.getString(o, "mobile");
+			n.address = JSONUtil.getString(o, "address");
+			n.email = JSONUtil.getString(o, "email");
+			n.sex = JSONUtil.getInt(o, "sex");
+			n.birthday = JSONUtil.getString(o, "birthday");
+			n.province = JSONUtil.getString(o, "province");
+			n.city = JSONUtil.getString(o, "city");
+			n.district = JSONUtil.getString(o, "district");
+			n.status = JSONUtil.getInt(o, "status");
+			n.createTime = JSONUtil.getLong(o, "createTime");
+			n.lastUpdateTime = JSONUtil.getLong(o, "lastUpdateTime");
+			n.lastLoginTime = JSONUtil.getLong(o, "lastLoginTime");
 			return n;
 		} catch (Exception e) {
 			return null;

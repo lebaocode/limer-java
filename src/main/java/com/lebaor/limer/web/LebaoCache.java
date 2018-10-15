@@ -194,6 +194,52 @@ public class LebaoCache {
 		return myOrderList.toArray(new WebOrder[0]);
 	}
 	
+	public void createUserIfNotExist(JSONObject o) {
+
+		//判断用户是否存在，如果不存在，则创建用户
+		String unionId = JSONUtil.getString(o, "unionId");
+		String avatarUrl = JSONUtil.getString(o, "avatarUrl");
+		String nickName = JSONUtil.getString(o, "nickName");
+		String openId = JSONUtil.getString(o, "openId");
+		String province = JSONUtil.getString(o, "province");
+		String city = JSONUtil.getString(o, "city");
+		int gender = JSONUtil.getInt(o, "gender");
+		
+		if (unionId.length() == 0) return;
+		
+		long userId = getUserIdByUnionId(unionId);
+		if (userId > 0) return;
+		
+		//创建用户
+		User user = new User();
+		user.setCity(city);
+		user.setCreateTime(System.currentTimeMillis());
+		user.setLastLoginTime(System.currentTimeMillis());
+		user.setLastUpdateTime(System.currentTimeMillis());
+		user.setProvince(province);
+		user.setSex(gender);
+		user.setUserLogo(avatarUrl);
+		user.setUserName(nickName);
+		userDB.addUser(user);
+		
+		User lastU = userDB.getUserByName(nickName);
+		user.setId(lastU.getId());
+		//更新缓存
+		getJedis().hset(KEY_USER_INFO, Long.toString(lastU.getId()), lastU.toJSON());
+		
+		UserAuth ua = new UserAuth();
+		ua.setAppId(LimerConstants.MINIPROGRAM_APPID);
+		ua.setCreateTime(System.currentTimeMillis());
+		ua.setOpenId(openId);
+		ua.setUnionId(unionId);
+		ua.setUserId(user.getId());
+		userAuthDB.addUserAuth(ua);
+		getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(lastU.getId()));
+		
+		LogUtil.STAT_LOG.info("[CREATE_URSER] ["+ lastU.getId() +"] ["+ nickName +"] ["+ openId +"] ["+ unionId +"]");
+		
+	}
+	
 	public WebJSONArray borrowBooks(String[] isbnArr, WebUser u, String ip) {
 		if (isbnArr == null ||  isbnArr.length == 0 || u == null) return null;
 		
@@ -252,10 +298,10 @@ public class LebaoCache {
 	
 	public User getUserInfo(long userId) {
 		//先从jedis取
-		String bookJson = getJedis().hget(KEY_USER_INFO, Long.toString(userId));
-		if (bookJson != null) {
+		String json = getJedis().hget(KEY_USER_INFO, Long.toString(userId));
+		if (json != null) {
 			try {
-				JSONObject o = new JSONObject(bookJson);
+				JSONObject o = new JSONObject(json);
 				if (o != null && !o.has("error")) {
 					return User.parseJSON(o);
 				}

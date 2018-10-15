@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import com.lebaor.limer.data.LimerConstants;
 import com.lebaor.limer.data.User;
+import com.lebaor.limer.data.UserAuth;
 import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.limer.web.data.WebBookStatus;
 import com.lebaor.limer.web.data.WebBorrowBook;
@@ -24,6 +25,7 @@ import com.lebaor.limer.web.data.WebUser;
 import com.lebaor.limer.web.data.WebUserCenterInfo;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
 import com.lebaor.thirdpartyutils.SmsCodeUtil.SmsCode;
+import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
@@ -118,8 +120,10 @@ public class JsonController extends EntryController implements Runnable {
 		String iv = this.getParameterValue(req, "iv", "");
 				
 		LogUtil.WEB_LOG.debug("begin decryptUserInfo(encryptedData=["+ encryptedData +"], sessionKey=["+ sessionKey +"], iv=["+  iv +"])");
-		JSONObject jo = WxMiniProgramUtil.getUserInfo(encryptedData, sessionKey, iv);
-		this.setRetJson(model, jo.toString());
+		JSONObject o = WxMiniProgramUtil.getUserInfo(encryptedData, sessionKey, iv);
+		cache.createUserIfNotExist(o);
+		
+		this.setRetJson(model, o.toString());
 	}
 	
 	public WebUser getUser(HttpServletRequest req) {
@@ -139,6 +143,7 @@ public class JsonController extends EntryController implements Runnable {
 		}
 		
 		User user = cache.getUserInfo(userId);
+		LogUtil.STAT_LOG.info("[USER_VISIT] ["+ userId +"] ["+ unionId +"] ["+ req.getRequestURI() +"] ["+ req.getQueryString() +"]");
 		return WebUser.create(user, unionId, openId);
 		
 	}

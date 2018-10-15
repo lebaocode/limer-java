@@ -559,9 +559,12 @@ public class LebaoCache {
 				lbi.setDonateTime(System.currentTimeMillis());
 				lbi.setLastUpdateTime(System.currentTimeMillis());
 				boolean res = lbiDB.addLimerBookInfo(lbi);
-				if (!res) return false;
+				if (!res) {
+					LogUtil.WEB_LOG.debug("add book info failed: " + lbi);
+					return false;
+				}
 				
-				LogUtil.WEB_LOG.info("[DONATE_BOOK_SUCCESS] [isbn="+ isbn +"] [userId="+ userId +"]");
+				LogUtil.STAT_LOG.info("[DONATE_BOOK] [isbn="+ isbn +"] [userId="+ userId +"]");
 
 				//更新缓存
 				lbi = lbiDB.getRecentDonateBook(isbn, userId);

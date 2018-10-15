@@ -162,7 +162,7 @@ public class DBJavaGenUtil {
 		n = 0;
 		for (String s : varNameList) {
 			String type = typeList.get(n);
-			System.out.println("\t\t\tn."+ s +" = o.get"+ type.substring(0,1).toUpperCase() + type.substring(1) +"(\""+ s +"\");");
+			System.out.println("\t\t\tn."+ s +" = JSONUtil.get"+ type.substring(0,1).toUpperCase() + type.substring(1) +"(o, \""+ s +"\");");
 			n++;
 		}
 		System.out.println(

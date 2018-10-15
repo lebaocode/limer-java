@@ -306,13 +306,17 @@ public class LebaoCache {
 					return User.parseJSON(o);
 				}
 			} catch (Exception e) {
+				LogUtil.WEB_LOG.warn("jedis hget User error, userId=" + userId + ":" + json);
 				return null;
 			}
 		}
 		
 		//去数据库里获取
 		User b = userDB.getUserById(userId);
-		if (b == null) return null;
+		if (b == null) {
+			LogUtil.WEB_LOG.warn("read from UserDB error,no userId=" + userId);
+			return null;
+		}
 		
 		//存入jedis
 		getJedis().hset(KEY_USER_INFO, Long.toString(userId), b.toJSON());

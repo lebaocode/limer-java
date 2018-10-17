@@ -15,6 +15,7 @@ import com.lebaor.limer.data.LimerConstants;
 import com.lebaor.limer.data.User;
 import com.lebaor.limer.data.UserAuth;
 import com.lebaor.limer.web.data.WebBookDetail;
+import com.lebaor.limer.web.data.WebBookList;
 import com.lebaor.limer.web.data.WebBookStatus;
 import com.lebaor.limer.web.data.WebBorrowBook;
 import com.lebaor.limer.web.data.WebDonateBook;
@@ -60,6 +61,9 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		} else if (uri.startsWith("/json/getRecentBooks")) {//所有可借阅书籍列表
 			getRecentBooks(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getRecentBookLists")) {//所有书单
+			getRecentBookLists(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/wxsign")) {
 			wxSign(req, res, model);
@@ -371,6 +375,28 @@ public class JsonController extends EntryController implements Runnable {
 		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
 		
 		this.setRetJson(model, new WebJSONObject(jo.toString()).toJSON());
+	}
+	
+	public void getRecentBookLists(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		int start = this.getIntParameterValue(req, "start", 0);
+		int len = this.getIntParameterValue(req, "len", 20);
+		String tag = this.getParameterValue(req, "tag", "");
+		
+		JSONArray arr = new JSONArray();
+		
+		List<WebBookList> list = cache.getRecentBookLists(tag, start, len);
+		for (WebBookList wb : list) {
+			try {
+				arr.put(new JSONObject(wb.toJSON()));
+			} catch (Exception e) {
+				LogUtil.WEB_LOG.warn("In getRecentBookLists, WebBookDetail toJson error: WebBookList=" + wb.getTitle(), e);
+			}
+		}
+		
+		WebJSONArray wja = new WebJSONArray(arr.toString());
+		this.setRetJson(model, wja.toJSON());
 	}
 	
 	public void getRecentBooks(HttpServletRequest req, 

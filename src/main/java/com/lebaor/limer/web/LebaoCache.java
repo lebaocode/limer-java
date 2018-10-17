@@ -35,9 +35,12 @@ public class LebaoCache {
 	UserAuthDB userAuthDB;
 	LogisticsDB ltDB;
 	OrderDB orderDB;
+	BookListDB bookListDB;
 	
 	private static final String KEY_RECENT_BOOKS = "recent_books"; //最近所有的书籍。WebBookDetail json list, 评分高的在前，缓存前1000个。
 	private static final int KEY_RECENT_BOOKS_NUM = 1000;
+	private static final String KEY_RECENT_BOOKLISTS = "recent_booklists"; //最近所有的书单。WebBookList json list，创建时间新的在前。
+	private static final int KEY_RECENT_BOOKLISTS_NUM = 20;
 	
 	private static final String KEY_BOOK_DETAIL = "book_detail";//key,value key=isbn, value=book 缓存里不保证是全部的数据
 	private static final String KEY_BOOK_STATUS = "book_status";//key,value key=limerBookId, value=limerbookInfo 缓存里不保证是全部的数据
@@ -89,7 +92,7 @@ public class LebaoCache {
 				//最近1000本书籍状态
 				Map<String, Double> scoreMembers = new HashMap<String, Double>();
 				Book[] bookArr = bookDB.getBooks(0, KEY_RECENT_BOOKS_NUM);
-				LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from db:"+bookArr.length);
+				LogUtil.WEB_LOG.debug("getRecentBooks() read from db:"+bookArr.length);
 				
 				for (Book b : bookArr) {
 					WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
@@ -101,17 +104,59 @@ public class LebaoCache {
 					
 					for (String t : wbd.getBook().getTagsString()) {
 						getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
-						LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+ KEY_RECENT_BOOKS+"_" +t+": "+ sm.size());
+						LogUtil.WEB_LOG.debug("getRecentBooks() write to redis: "+ KEY_RECENT_BOOKS+"_" +t+": "+ sm.size());
 					}
 				}
 				getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
-				LogUtil.WEB_LOG.debug("getRecentReadyBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
+				LogUtil.WEB_LOG.debug("getRecentBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
 			}
 		} catch(Exception t) {
-			LogUtil.WEB_LOG.debug("getRecentReadyBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
+			LogUtil.WEB_LOG.debug("getRecentBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
 		}
 		
 		LogUtil.WEB_LOG.info("init Jedis recent_books success.");
+		
+		try {
+			if (!getJedis().exists(KEY_RECENT_BOOKLISTS)) {
+				//最近1000本书籍状态
+				Map<String, Double> scoreMembers = new HashMap<String, Double>();
+				BookList[] bookArr = bookListDB.getBookLists(0, KEY_RECENT_BOOKLISTS_NUM);
+				LogUtil.WEB_LOG.debug("getRecentBookLists() read from db:"+bookArr.length);
+				
+				for (BookList b : bookArr) {
+					WebBookListDetail wb = new WebBookListDetail();
+					wb.setDesc(b.getDesc());
+					wb.setId(b.getId());
+					wb.setSubTitle(b.getSubTitle());
+					wb.setTitle(b.getTitle());
+					wb.setType(b.getType());
+					
+					String[] isbns = b.getBookIsbns();
+					Book[] books = new Book[isbns.length];
+					int i = 0;
+					for (String isbn : isbns) {
+						WebBookDetail bd = this.getBookInfo(isbn);
+						books[i] = bd.getBook();
+						i++;
+					}
+					wb.setBooks(books);
+					
+					if (b.getType() != null && b.getType().trim().length() > 0) {
+						Map<String, Double> sm = new HashMap<String, Double>();
+						sm.put(b.toJSON(), (double)b.getCreateTime());
+						getJedis().zadd(KEY_RECENT_BOOKLISTS + "_"+ TextUtil.MD5(b.getType()), sm);
+					}
+					
+					scoreMembers.put(b.toJSON(), (double)b.getCreateTime());
+				}
+				getJedis().zadd(KEY_RECENT_BOOKLISTS, scoreMembers);
+				LogUtil.WEB_LOG.debug("getRecentBookLists() write to redis: "+KEY_RECENT_BOOKLISTS+ " "+scoreMembers.size());
+			}
+		} catch(Exception t) {
+			LogUtil.WEB_LOG.debug("getRecentBookLists(0,"+KEY_RECENT_BOOKLISTS_NUM+") error", t);
+		}
+		
+		LogUtil.WEB_LOG.info("init Jedis recent_booklists success.");
 	}
 	
 	public static Jedis getJedis() {
@@ -473,13 +518,28 @@ public class LebaoCache {
 		List<WebBookDetail> resultList = new LinkedList<WebBookDetail>();
 		
 		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), start, start+len-1);
-		LogUtil.WEB_LOG.debug("getRecentReadyBooks() read from redis: "+KEY_RECENT_BOOKS+ "_"+ tag +": "+list.size());
+		LogUtil.WEB_LOG.debug("getRecentBooks() read from redis: "+KEY_RECENT_BOOKS+ "_"+ tag +": "+list.size());
 		if (list == null || list.size() == 0) return resultList;
 		
 		LogUtil.WEB_LOG.debug("getRecentBooks("+tag+","+start+","+len+"), return "+ list.size());
 		for (String s: list) {
 			WebBookDetail wb = new WebBookDetail();
 			wb.setBook(Book.parseFromDoubanJSON(s));
+			resultList.add(wb);
+		}
+		return resultList;
+	}
+	
+	public List<WebBookList> getRecentBookLists(String tag, int start, int len) {
+		List<WebBookList> resultList = new LinkedList<WebBookList>();
+		
+		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKLISTS+ (tag.length() > 0 ? "_" : "") +TextUtil.MD5(tag), start, start+len-1);
+		LogUtil.WEB_LOG.debug("getRecentBookLists() read from redis: "+KEY_RECENT_BOOKLISTS + (tag.length() > 0 ? "_" : "")+ tag +": "+list.size());
+		if (list == null || list.size() == 0) return resultList;
+		
+		LogUtil.WEB_LOG.debug("getRecentBookLists("+tag+","+start+","+len+"), return "+ list.size());
+		for (String s: list) {
+			WebBookList wb = WebBookList.parseJSON(s);
 			resultList.add(wb);
 		}
 		return resultList;
@@ -728,6 +788,10 @@ public class LebaoCache {
 
 	public void setOrderDB(OrderDB orderDB) {
 		this.orderDB = orderDB;
+	}
+
+	public void setBookListDB(BookListDB bookListDB) {
+		this.bookListDB = bookListDB;
 	}
 	
 }

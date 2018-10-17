@@ -190,36 +190,11 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "String isbn10;\n" + 
-				"	String isbn13;\n" + 
-				"	String json;//json数组\n" + 
-				"	long createTime;\n" + 
-				"	String bookFrom = \"douban\";//谁提供的书籍信息，比如豆瓣\n" + 
-				"	\n" + 
-				"	JSONObject obj;\n" + 
+		String s = "long id;\n" + 
 				"	String title;\n" + 
 				"	String subTitle;\n" + 
-				"	JSONArray authors;//json数组 [\"[美] 伊恩·古德费洛\",\"[加] 约书亚·本吉奥\",\"[加] 亚伦·库维尔\"]\n" + 
-				"	JSONArray tags;//json数组 [{\"count\":464,\"name\":\"机器学习\",\"title\":\"机器学习\"},{\"count\":241,\"name\":\"计算机\",\"title\":\"计算机\"}]\n" + 
-				"	\n" + 
-				"	JSONArray translators;\n" + 
-				"	String publisher;\n" + 
-				"	String publishDate;//出版日期\n" + 
-				"	int price;//分\n" + 
-				"	String coverUrl;//https://img1.doubanio.com\\/view\\/subject\\/m\\/public\\/s29518349.jpg\n" + 
-				"	\n" + 
-				"	String doubanBookId;//豆瓣的id\n" + 
-				"	int pageNum;\n" + 
-				"	String authorIntro;\n" + 
-				"	String summary;\n" + 
-				"	String catalog;\n" + 
-				"	\n" + 
-				"	int raterNum;//评价人数\n" + 
-				"	String rating;//分数\n" + 
-				"	\n" + 
-				"	String seriesId;//所属系列id(doubanid)\n" + 
-				"	String seriesTitle; //所属系列标题";
-		String className = "Book";
+				"	JSONArray topBookCoverUrls;";
+		String className = "WebBookList";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

@@ -30,6 +30,9 @@
 <bean id="bookDB" class="com.lebaor.limer.db.BookDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
+<bean id="bookListDB" class="com.lebaor.limer.db.BookListDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
 <bean id="orderDB" class="com.lebaor.limer.db.OrderDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
@@ -47,6 +50,7 @@
     <property name="userDB"><ref bean="userDB"/></property>
     <property name="userAuthDB"><ref bean="userAuthDB"/></property>
     <property name="bookDB"><ref bean="bookDB"/></property>
+    <property name="bookListDB"><ref bean="bookListDB"/></property>
     <property name="lbiDB"><ref bean="lbiDB"/></property>
     <property name="userScoreDB"><ref bean="userScoreDB"/></property>
     <property name="brDB"><ref bean="brDB"/></property>

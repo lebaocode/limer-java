@@ -134,7 +134,7 @@ public class BookListDB {
 				"  `title` varchar(255) NOT NULL,\r\n" +
 				"  `sub_title` varchar(255) default NULL,\r\n" +
 				"  `desc` TEXT default NULL,\r\n" +
-				"  `book_isbns_json` varchar(255) NOT NULL,\r\n" +
+				"  `book_isbns_json` TEXT NOT NULL,\r\n" +
 				"  `create_time` datetime default NULL,\r\n" +
 				
 				"  PRIMARY KEY  (`ID`)\r\n" + 

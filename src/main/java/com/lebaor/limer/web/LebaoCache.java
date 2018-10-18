@@ -141,11 +141,11 @@ public class LebaoCache {
 					
 					if (b.getType() != null && b.getType().trim().length() > 0) {
 						Map<String, Double> sm = new HashMap<String, Double>();
-						sm.put(b.toJSON(), (double)b.getCreateTime());
-						getJedis().zadd(KEY_RECENT_BOOKLISTS + "_"+ TextUtil.MD5(b.getType()), sm);
+						sm.put(wb.toJSON(), (double)b.getCreateTime());
+						getJedis().zadd(KEY_RECENT_BOOKLISTS + "_"+ TextUtil.MD5(wb.getType()), sm);
 					}
 					
-					scoreMembers.put(b.toJSON(), (double)b.getCreateTime());
+					scoreMembers.put(wb.toJSON(), (double)b.getCreateTime());
 				}
 				getJedis().zadd(KEY_RECENT_BOOKLISTS, scoreMembers);
 				LogUtil.WEB_LOG.debug("getRecentBookLists() write to redis: "+KEY_RECENT_BOOKLISTS+ " "+scoreMembers.size());

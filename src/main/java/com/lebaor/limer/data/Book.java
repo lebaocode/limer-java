@@ -81,6 +81,7 @@ public class Book {
 		return json;
 	}
 	
+	
 	public static Book parseFromDoubanJSON(String json) {
 		Book b = new Book();
 		b.setDoubanJson(json);
@@ -157,7 +158,7 @@ public class Book {
 			this.authorIntro = JSONUtil.getString(this.obj, "author_intro");
 			this.summary = JSONUtil.getString(this.obj, "summary");
 			this.catalog = JSONUtil.getString(this.obj, "catalog");
-			this.coverUrl =  JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "images"), "large");
+			this.coverUrl =  JSONUtil.getString(JSONUtil.getJSONObject(this.obj, "images"), "medium");
 			
 			String pageStr = JSONUtil.getString(this.obj, "pages");
 			if (pageStr.endsWith("页")) pageStr = pageStr.substring(0, pageStr.length() - 1).trim();

@@ -13,22 +13,28 @@ public class WebBookDetail {
 		else return (float)(Float.parseFloat(book.getRating())*4/5);
 	}
 	
-	public JSONObject toJSONObject() {
+	public JSONObject toWebJSONObject() {
 		try {
-			return new JSONObject(toJSON());
+			return new JSONObject(toWebJSON());
 		} catch (Exception e) {
 			return new JSONObject();
 		}
 	}
 	
-	public String toJSON() {
+	public String toWebJSON() {
 		if (book == null) return "{}";
 		return book.toJSON();
 		
 	}
+	
+	public String toDoubanJSON() {
+		if (book == null) return "{}";
+		return book.getJson();
+		
+	}
 
 	public String toString() {
-		return toJSON();
+		return toWebJSON();
 	}
 
 	public Book getBook() {

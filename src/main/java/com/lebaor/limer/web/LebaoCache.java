@@ -99,8 +99,8 @@ public class LebaoCache {
 					LogUtil.WEB_LOG.debug("getBookInfo finished: " + b.getIsbn13());
 					
 					Map<String, Double> sm = new HashMap<String, Double>();
-					sm.put(wbd.toJSON(), (double)wbd.computeScore());
-					scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
+					sm.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
+					scoreMembers.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
 					
 					for (String t : wbd.getBook().getTagsString()) {
 						getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
@@ -135,7 +135,7 @@ public class LebaoCache {
 					String[] isbns = b.getBookIsbns();
 					for (String isbn : isbns) {
 						WebBookDetail bd = this.getBookInfo(isbn);
-						bookJsonArr.put(new JSONObject(bd.toJSON()));
+						bookJsonArr.put(new JSONObject(bd.toWebJSON()));
 					}
 					wb.setBooks(bookJsonArr);
 					
@@ -580,11 +580,11 @@ public class LebaoCache {
 		wbd.setBook(b);
 		
 		//更新缓存
-		getJedis().hset(KEY_BOOK_DETAIL, isbn, wbd.toJSON());
+		getJedis().hset(KEY_BOOK_DETAIL, isbn, wbd.toDoubanJSON());
 		
 		//更新最近书籍缓存
 		Map<String, Double> scoreMembers = new HashMap<String, Double>();
-		scoreMembers.put(wbd.toJSON(), (double)wbd.computeScore());
+		scoreMembers.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
 		getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
 		for (String tag: wbd.getBook().getTagsString()) {
 			getJedis().zadd(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), scoreMembers);

@@ -371,7 +371,7 @@ public class JsonController extends EntryController implements Runnable {
 		//加入该书状态，是否可借阅
 		WebBookStatus wbs = cache.getWebBookStatus(isbn);
 		
-		JSONObject jo = wbd.toJSONObject();
+		JSONObject jo = wbd.toWebJSONObject();
 		jo.put("status", wbs.getStatus());
 		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
 		
@@ -412,7 +412,7 @@ public class JsonController extends EntryController implements Runnable {
 		List<WebBookDetail> list = cache.getRecentBooks(tag, start, len);
 		for (WebBookDetail wb : list) {
 			try {
-				arr.put(new JSONObject(wb.toJSON()));
+				arr.put(new JSONObject(wb.toWebJSON()));
 			} catch (Exception e) {
 				LogUtil.WEB_LOG.warn("In getRecentBooks, WebBookDetail toJson error: isbn=" + wb.getBook().getIsbn13() 
 						+ " title="+ wb.getBook().getTitle(), e);

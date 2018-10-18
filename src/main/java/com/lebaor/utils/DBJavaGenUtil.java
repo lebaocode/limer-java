@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.lebaor.limer.data.Book;
+
 
 public class DBJavaGenUtil {
 	public static void gen1(String[] lines, String className)throws Exception {
@@ -191,10 +193,13 @@ public class DBJavaGenUtil {
 	
 	public static void main(String[] args) throws Exception {
 		String s = "long id;\n" + 
+				"	String type;\n" + 
 				"	String title;\n" + 
 				"	String subTitle;\n" + 
-				"	JSONArray topBookCoverUrls;";
-		String className = "WebBookList";
+				"	String desc;\n" + 
+				"	\n" + 
+				"	Book[] books;";
+		String className = "WebBookListDetail";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

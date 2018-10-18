@@ -131,15 +131,13 @@ public class LebaoCache {
 					wb.setTitle(b.getTitle());
 					wb.setType(b.getType());
 					
+					JSONArray bookJsonArr = new JSONArray();
 					String[] isbns = b.getBookIsbns();
-					Book[] books = new Book[isbns.length];
-					int i = 0;
 					for (String isbn : isbns) {
 						WebBookDetail bd = this.getBookInfo(isbn);
-						books[i] = bd.getBook();
-						i++;
+						bookJsonArr.put(new JSONObject(bd.toJSON()));
 					}
-					wb.setBooks(books);
+					wb.setBooks(bookJsonArr);
 					
 					if (b.getType() != null && b.getType().trim().length() > 0) {
 						Map<String, Double> sm = new HashMap<String, Double>();
@@ -530,8 +528,8 @@ public class LebaoCache {
 		return resultList;
 	}
 	
-	public List<WebBookList> getRecentBookLists(String tag, int start, int len) {
-		List<WebBookList> resultList = new LinkedList<WebBookList>();
+	public List<WebBookListDetail> getRecentBookLists(String tag, int start, int len) {
+		List<WebBookListDetail> resultList = new LinkedList<WebBookListDetail>();
 		
 		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKLISTS+ (tag.length() > 0 ? ("_" +TextUtil.MD5(tag)) : ""), start, start+len-1);
 		LogUtil.WEB_LOG.debug("getRecentBookLists() read from redis: "+KEY_RECENT_BOOKLISTS + (tag.length() > 0 ? "_" : "")+ tag +": "+list.size());
@@ -539,7 +537,7 @@ public class LebaoCache {
 		
 		LogUtil.WEB_LOG.debug("getRecentBookLists("+tag+","+start+","+len+"), return "+ list.size());
 		for (String s: list) {
-			WebBookList wb = WebBookList.parseJSON(s);
+			WebBookListDetail wb = WebBookListDetail.parseJSON(s);
 			resultList.add(wb);
 		}
 		return resultList;

@@ -16,6 +16,7 @@ import com.lebaor.limer.data.User;
 import com.lebaor.limer.data.UserAuth;
 import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.limer.web.data.WebBookList;
+import com.lebaor.limer.web.data.WebBookListDetail;
 import com.lebaor.limer.web.data.WebBookStatus;
 import com.lebaor.limer.web.data.WebBorrowBook;
 import com.lebaor.limer.web.data.WebDonateBook;
@@ -386,8 +387,8 @@ public class JsonController extends EntryController implements Runnable {
 		
 		JSONArray arr = new JSONArray();
 		
-		List<WebBookList> list = cache.getRecentBookLists(tag, start, len);
-		for (WebBookList wb : list) {
+		List<WebBookListDetail> list = cache.getRecentBookLists(tag, start, len);
+		for (WebBookListDetail wb : list) {
 			try {
 				arr.put(new JSONObject(wb.toJSON()));
 			} catch (Exception e) {

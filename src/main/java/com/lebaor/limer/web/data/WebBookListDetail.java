@@ -1,8 +1,9 @@
 package com.lebaor.limer.web.data;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
-import com.lebaor.limer.data.Book;
+import com.lebaor.utils.JSONUtil;
 
 
 public class WebBookListDetail {
@@ -12,9 +13,61 @@ public class WebBookListDetail {
 	String subTitle;
 	String desc;
 	
-	Book[] books;
+	JSONArray books;
 	
-	
+	public String toJSON() {
+		try {
+			JSONObject o = new JSONObject();
+			o.put("id", Long.toString(id));
+			o.put("type", type);
+			o.put("title", title);
+			o.put("subTitle", subTitle);
+			o.put("desc", desc);
+			o.put("books", books);
+			return o.toString();
+		} catch (Exception e) {
+			return "{error: 'format error.'}";
+		}
+		
+	}
+
+	public static WebBookListDetail parseJSON(String s) {
+		try {
+			return parseJSON(new JSONObject(s));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+
+	public static WebBookListDetail parseJSON(JSONObject o) {
+		try {
+			WebBookListDetail n = new WebBookListDetail();
+			n.id = JSONUtil.getLong(o, "id");
+			n.type = JSONUtil.getString(o, "type");
+			n.title = JSONUtil.getString(o, "title");
+			n.subTitle = JSONUtil.getString(o, "subTitle");
+			n.desc = JSONUtil.getString(o, "desc");
+			n.books = JSONUtil.getJSONArray(o, "books");
+			return n;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+
+	public String toString() {
+		return toJSON();
+	}
+
+
+	public JSONObject toJSONObject() {
+		try {
+			return new JSONObject(toJSON());
+		} catch (Exception e) {
+			return new JSONObject();
+		}
+	}
 
 	public long getId() {
 		return id;
@@ -56,12 +109,14 @@ public class WebBookListDetail {
 		this.desc = desc;
 	}
 
-	public Book[] getBooks() {
+	public JSONArray getBooks() {
 		return books;
 	}
 
-	public void setBooks(Book[] books) {
+	public void setBooks(JSONArray books) {
 		this.books = books;
 	}
+
+	
 
 }

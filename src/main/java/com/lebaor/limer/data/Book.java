@@ -130,7 +130,7 @@ public class Book {
 			if (limerFee < this.price * 0.05) {
 				limerFee = (int)(this.price * 0.05);
 			}
-			if (limerFee < 200) limerFee = 200;
+			if (limerFee < 300) limerFee = 300;
 			o.put("limerFee", limerFee/100 + ".00");
 			o.put("price", String.format("%.2f", (float)price/100));
 			return o.toString();

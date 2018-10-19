@@ -543,6 +543,34 @@ public class LebaoCache {
 		return resultList;
 	}
 	
+	public WebBookListDetail getBookListDetail(long id) {
+		if (id <= 0) return null;
+		
+		//直接从数据库取
+		BookList b = bookListDB.getBookListById(id);
+		if (b == null) return null;
+		
+		WebBookListDetail wb = new WebBookListDetail();
+		wb.setDesc(b.getDesc());
+		wb.setId(b.getId());
+		wb.setSubTitle(b.getSubTitle());
+		wb.setTitle(b.getTitle());
+		wb.setType(b.getType());
+
+		JSONArray bookJsonArr = new JSONArray();
+		try {
+			String[] isbns = b.getBookIsbns();
+			for (String isbn : isbns) {
+				WebBookDetail bd = this.getBookInfo(isbn);
+				bookJsonArr.put(new JSONObject(bd.toWebJSON()));
+			}
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("getBookListDetail("+id+") exception", e);
+		}
+		wb.setBooks(bookJsonArr);
+		return wb;
+	}
+	
 	public WebBookDetail getBookInfo(String isbn) {
 		if (isbn == null || isbn.trim().length() == 0) return null;
 		if (isbn.length() != 10 && isbn.length() != 13) return null;

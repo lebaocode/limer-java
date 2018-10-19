@@ -81,6 +81,9 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getBookDetail")) {
 			getBookDetailByIsbn(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getBookListDetail")) {
+			getBookDetailByIsbn(req, res, model);
+			return;
 		} else if (uri.startsWith("/json/decryptUserInfo")) {
 			decryptUserInfo(req, res, model);
 			return;
@@ -376,6 +379,22 @@ public class JsonController extends EntryController implements Runnable {
 		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
 		
 		this.setRetJson(model, new WebJSONObject(jo.toString()).toJSON());
+	}
+	
+	public void getBookListDetail(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		
+		long id = this.getLongParameterValue(req, "id", 0);
+		
+		WebBookListDetail wbd = cache.getBookListDetail(id);
+		if (wbd == null) {
+			WebJSONObject data = new WebJSONObject(false, "找不到id="+ id+"的书单", "{}");
+			this.setRetJson(model, data.toJSON());
+			return;
+		}
+		
+		this.setRetJson(model, new WebJSONObject(wbd.toJSON()).toJSON());
 	}
 	
 	public void getRecentBookLists(HttpServletRequest req, 

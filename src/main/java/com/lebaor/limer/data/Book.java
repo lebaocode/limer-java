@@ -81,7 +81,6 @@ public class Book {
 		return json;
 	}
 	
-	
 	public static Book parseFromDoubanJSON(String json) {
 		Book b = new Book();
 		b.setDoubanJson(json);

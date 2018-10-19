@@ -2,6 +2,8 @@ package com.lebaor.limer.data;
 
 import org.json.JSONObject;
 
+import com.lebaor.utils.JSONUtil;
+
 /**
  * 书籍本身信息在Book里，这里只包含本产品相关的书籍信息，比如书籍内部编号，由谁捐赠等。
  * 同一本书（isbn相同）有可能被多人捐赠。
@@ -18,18 +20,20 @@ public class LimerBookInfo {
 	String isbn;
 	long donateUserId;//捐赠人id
 	int status;
+	int degree = 80;//书籍新旧程度
 	long donateTime;//捐赠时间
 	long lastUpdateTime;
 	
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
-			o.put("id", id);
+			o.put("id", Long.toString(id));
 			o.put("isbn", isbn);
 			o.put("donateUserId", donateUserId);
 			o.put("status", status);
-			o.put("donateTime", donateTime);
-			o.put("lastUpdateTime", lastUpdateTime);
+			o.put("degree", degree);
+			o.put("donateTime", Long.toString(donateTime));
+			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -49,12 +53,13 @@ public class LimerBookInfo {
 	public static LimerBookInfo parseJSON(JSONObject o) {
 		try {
 			LimerBookInfo n = new LimerBookInfo();
-			n.id = o.getLong("id");
-			n.isbn = o.getString("isbn");
-			n.donateUserId = o.getLong("donateUserId");
-			n.status = o.getInt("status");
-			n.donateTime = o.getLong("donateTime");
-			n.lastUpdateTime = o.getLong("lastUpdateTime");
+			n.id = JSONUtil.getLong(o, "id");
+			n.isbn = JSONUtil.getString(o, "isbn");
+			n.donateUserId = JSONUtil.getLong(o, "donateUserId");
+			n.status = JSONUtil.getInt(o, "status");
+			n.degree = JSONUtil.getInt(o, "degee");
+			n.donateTime = JSONUtil.getLong(o, "donateTime");
+			n.lastUpdateTime = JSONUtil.getLong(o, "lastUpdateTime");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -102,6 +107,14 @@ public class LimerBookInfo {
 	}
 	public void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	public int getDegree() {
+		return degree;
+	}
+
+	public void setDegree(int degree) {
+		this.degree = degree;
 	}
 	
 	

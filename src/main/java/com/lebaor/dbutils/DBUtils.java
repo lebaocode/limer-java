@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 import com.lebaor.utils.LogUtil;
 
-public class DBUtils {
+public class DBUtils implements Runnable {
 	Connection conn = null;
     String dbUrl;
     String dbUser;
@@ -16,10 +16,16 @@ public class DBUtils {
     String dbName;
     String charset;
     
+    Thread t;
+    boolean isRunning = false;
+    
     protected static DBUtils singleton;
     	
 	public DBUtils() {
 		singleton = this;
+		t= new Thread(this, "DBCheckThread");
+		isRunning = true;
+		t.start();
 	}
 	
 	public static DBUtils getInstance() {
@@ -36,6 +42,17 @@ public class DBUtils {
                 dbPassword);
         
         LogUtil.WEB_LOG.debug("db init success!");
+    }
+    
+    public void run() {
+    	while (isRunning) {
+    		try {
+	    		Thread.sleep(1710000L);//<30分钟
+	    		this.checkConnectionValid();
+    		} catch (Exception e) {
+    			break;
+    		}
+    	}
     }
     
     public void close() throws Exception {

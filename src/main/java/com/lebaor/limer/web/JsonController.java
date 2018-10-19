@@ -82,7 +82,7 @@ public class JsonController extends EntryController implements Runnable {
 			getBookDetailByIsbn(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/getBookListDetail")) {
-			getBookDetailByIsbn(req, res, model);
+			getBookListDetail(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/decryptUserInfo")) {
 			decryptUserInfo(req, res, model);

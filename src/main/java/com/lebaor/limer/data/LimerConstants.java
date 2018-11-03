@@ -61,4 +61,77 @@ public class LimerConstants {
 	public static int computeLogisticsFee(int pageNum) {
 		return pageNum <= 30 ? 210 : pageNum* 7;
 	}
+	
+	public final static int ACTIVITY_STATUS_NOTPUBLISHED = 0;//未发布
+	public final static int ACTIVITY_STATUS_DOING = 0;//进行中
+	public final static int ACTIVITY_STATUS_END = 0;//已结束
+	
+	public final static String[] BOOKLIST_TYPE_ARRAY = new String[] {
+		"人文积淀 1.1.1",
+		"人文情怀	1.1.2",
+		"审美情趣	1.1.3",
+		"理性思维	1.2.1",
+		"批判质疑	1.2.2",
+		"勇于探究	1.2.3",
+		"物体认知	1.3.1",
+		"语言认知	1.3.2",
+		"社会认知	1.3.3",
+		"乐学善学	2.1.1",
+		"勤于反思	2.1.2",
+		"信息意识	2.1.3",
+		"珍爱生命	2.2.1",
+		"健全人格	2.2.2",
+		"自我管理	2.2.3",
+		"社会责任	3.1.1",
+		"国家认同	3.1.2",
+		"国际理解	3.1.3",
+		"劳动意识	3.2.1",
+		"问题解决	3.2.2",
+		"技术运用	3.2.3",
+		"其它	0.0.0"
+	};
+	
+	public static String getBookListTypeDesc(String code) {
+		if (code != null) {
+			for (int i = 0; i < BOOKLIST_TYPE_ARRAY.length; i++) {
+				String[] arr = BOOKLIST_TYPE_ARRAY[i].split("\\s+");
+				if (arr[1].equals(code)) {
+					return arr[0];
+				}
+			}
+		}
+		return "其它";
+	}
+	
+	public static String parseBookListTypeFromTag(String tag) {
+		if (tag != null) {
+			for (int i = 0; i < BOOKLIST_TYPE_ARRAY.length; i++) {
+				String[] arr = BOOKLIST_TYPE_ARRAY[i].split("\\s+");
+				if (arr[0].equals(tag)) {
+					return arr[1];
+				}
+			}
+		}
+		return "其它";
+	}
+	
+	public static void main(String[] args) {
+		for (int i =11 ;i <100; i++  ) {
+			for (int j = 11;j<100;j++) {
+				int n = i*j;
+				
+				if (n % 2 == 1
+						&& (i % 2 == 1)
+						&& (j % 2 == 1)
+						&& (i/10 % 2 == 1)
+						&& (j/10 % 2 == 1)
+						&& (n/10 % 2 == 1)
+						&& (n/100 % 2 == 1)
+						&& (n/1000 % 2 == 1)
+						) {
+					System.out.println(i+"x" + j +"=" + n);
+				}
+			}
+		}
+	}
 }

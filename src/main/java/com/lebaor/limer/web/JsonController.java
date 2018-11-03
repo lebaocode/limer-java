@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import com.lebaor.limer.data.LimerConstants;
 import com.lebaor.limer.data.User;
 import com.lebaor.limer.data.UserAuth;
+import com.lebaor.limer.web.data.WebBookComment;
 import com.lebaor.limer.web.data.WebBookDetail;
 import com.lebaor.limer.web.data.WebBookList;
 import com.lebaor.limer.web.data.WebBookListDetail;
@@ -108,9 +109,70 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getLogisticsFee")) {
 			getLogisticsFee(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getBookComment")) {
+			getBookComment(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getBookComments")) {
+			getBookComments(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getUserBookComments")) {
+			getUserBookComments(req, res, model);
+			return;
 		} 
 		
 	}
+	
+	public void getBookComment(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		long commentId = this.getLongParameterValue(req, "id", 0);
+		WebBookComment wbc = cache.getWebBookComment(commentId);
+		
+		if (wbc == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有找到对应书评").toJSON());
+			return;
+		}
+		
+		this.setRetJson(model, new WebJSONObject(wbc.toJSON()).toJSON());
+	}
+	
+	public void getBookComments(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		long bookId = this.getLongParameterValue(req, "bookId", 0);
+		int start = this.getIntParameterValue(req, "start", 0);
+		int length = this.getIntParameterValue(req, "len", 10);
+		
+		WebBookComment[] wbcs = cache.getBookComments(bookId, start, length);
+		JSONArray arr = new JSONArray();
+		for (WebBookComment wbc : wbcs) {
+			try {
+				arr.put(new JSONObject(wbc.toJSON()));
+			} catch (Exception e) {
+				LogUtil.WEB_LOG.warn("getBookComments exception", e);
+			}
+		}
+		
+		this.setRetJson(model, new WebJSONObject(arr.toString()).toJSON());
+	}
+	
+	public void getUserBookComments(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		long userId = this.getLongParameterValue(req, "userId", 0);
+		int start = this.getIntParameterValue(req, "start", 0);
+		int length = this.getIntParameterValue(req, "len", 10);
+		
+		WebBookComment[] wbcs = cache.getUserBookComments(userId, start, length);
+		JSONArray arr = new JSONArray();
+		for (WebBookComment wbc : wbcs) {
+			try {
+				arr.put(new JSONObject(wbc.toJSON()));
+			} catch (Exception e) {
+				LogUtil.WEB_LOG.warn("getBookComments exception", e);
+			}
+		}
+		
+		this.setRetJson(model, new WebJSONObject(arr.toString()).toJSON());
+	}
+	
 	public void code2Session(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
             throws Exception {
@@ -406,7 +468,8 @@ public class JsonController extends EntryController implements Runnable {
 		
 		JSONArray arr = new JSONArray();
 		
-		List<WebBookListDetail> list = cache.getRecentBookLists(tag, start, len);
+		String type = LimerConstants.parseBookListTypeFromTag(tag);
+		List<WebBookListDetail> list = cache.getRecentBookLists(type, start, len);
 		for (WebBookListDetail wb : list) {
 			try {
 				arr.put(new JSONObject(wb.toJSON()));

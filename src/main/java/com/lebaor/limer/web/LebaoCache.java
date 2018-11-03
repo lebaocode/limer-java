@@ -36,6 +36,8 @@ public class LebaoCache {
 	LogisticsDB ltDB;
 	OrderDB orderDB;
 	BookListDB bookListDB;
+	ActivityDB activityDB;
+	BookCommentDB commentDB;
 	
 	private static final String KEY_RECENT_BOOKS = "recent_books"; //最近所有的书籍。WebBookDetail json list, 评分高的在前，缓存前1000个。
 	private static final int KEY_RECENT_BOOKS_NUM = 1000;
@@ -142,7 +144,7 @@ public class LebaoCache {
 					if (b.getType() != null && b.getType().trim().length() > 0) {
 						Map<String, Double> sm = new HashMap<String, Double>();
 						sm.put(wb.toJSON(), (double)b.getCreateTime());
-						getJedis().zadd(KEY_RECENT_BOOKLISTS + "_"+ TextUtil.MD5(wb.getType()), sm);
+						getJedis().zadd(KEY_RECENT_BOOKLISTS + "_"+ wb.getType(), sm);
 					}
 					
 					scoreMembers.put(wb.toJSON(), (double)b.getCreateTime());
@@ -159,6 +161,68 @@ public class LebaoCache {
 	
 	public static Jedis getJedis() {
 		return globalJedis;
+	}
+	
+	private WebBookComment toWebBookComment(BookComment bc) {
+		if (bc == null) return null;
+		
+		WebBookComment wbc = new WebBookComment();
+		wbc.setBookId(bc.getBookId());
+		
+		Book b = bookDB.getBookById(bc.getBookId());//TODO 待优化
+		if (b == null) return null;
+		wbc.setBookImg(b.getCoverUrl());
+		wbc.setBookTitle(b.getTitle());
+		wbc.setContent(bc.getContent());
+		wbc.setCreateTimeDisplay(TextUtil.formatDay2(bc.getCreateTime()));
+		try {
+			wbc.setImgUrls(new JSONArray(bc.getImgUrlsJson()));
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("toWebBookComment [commentId="+ bc.getId() +"] exception", e);
+		}
+		wbc.setIsbn(b.getIsbn());
+		wbc.setLikeNum(bc.getLikeNum());
+		wbc.setUserId(bc.getUserId());
+		
+		User u = this.getUserInfo(bc.getUserId());
+		if (u == null) return null;
+		wbc.setUserLogo(u.getUserLogo());
+		wbc.setUserName(u.getUserName());
+		
+		return wbc;
+	}
+	
+	public WebBookComment getWebBookComment(long commentId) {
+		if (commentId <= 0) return null;
+		
+		BookComment bc = commentDB.getBookCommentById(commentId);
+		return this.toWebBookComment(bc);
+	}
+	
+	//得到一本书的对应数量的书评
+	public WebBookComment[] getBookComments(long bookId, int start, int length) {
+		BookComment[] bcs = commentDB.getBookCommentsByBook(bookId, start, length);
+		
+		LinkedList<WebBookComment> list = new LinkedList<WebBookComment>();
+		for (BookComment bc : bcs) {
+			WebBookComment wbc = this.toWebBookComment(bc);
+			if (wbc == null) continue;
+			list.add(wbc);
+		}
+		return list.toArray(new WebBookComment[0]);
+	}
+	
+	//得到一本书的对应数量的书评
+	public WebBookComment[] getUserBookComments(long userId, int start, int length) {
+		BookComment[] bcs = commentDB.getBookCommentsByBook(userId, start, length);
+		
+		LinkedList<WebBookComment> list = new LinkedList<WebBookComment>();
+		for (BookComment bc : bcs) {
+			WebBookComment wbc = this.toWebBookComment(bc);
+			if (wbc == null) continue;
+			list.add(wbc);
+		}
+		return list.toArray(new WebBookComment[0]);
 	}
 	
 	public LimerBookInfo borrowOneBook(String isbn, long userId) {
@@ -531,7 +595,7 @@ public class LebaoCache {
 	public List<WebBookListDetail> getRecentBookLists(String tag, int start, int len) {
 		List<WebBookListDetail> resultList = new LinkedList<WebBookListDetail>();
 		
-		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKLISTS+ (tag.length() > 0 ? ("_" +TextUtil.MD5(tag)) : ""), start, start+len-1);
+		Set<String> list = getJedis().zrevrange(KEY_RECENT_BOOKLISTS+ (tag.length() > 0 ? ("_" +tag) : ""), start, start+len-1);
 		LogUtil.WEB_LOG.debug("getRecentBookLists() read from redis: "+KEY_RECENT_BOOKLISTS + (tag.length() > 0 ? "_" : "")+ tag +": "+list.size());
 		if (list == null || list.size() == 0) return resultList;
 		
@@ -818,6 +882,14 @@ public class LebaoCache {
 
 	public void setBookListDB(BookListDB bookListDB) {
 		this.bookListDB = bookListDB;
+	}
+
+	public void setActivityDB(ActivityDB activityDB) {
+		this.activityDB = activityDB;
+	}
+
+	public void setCommentDB(BookCommentDB commentDB) {
+		this.commentDB = commentDB;
 	}
 	
 }

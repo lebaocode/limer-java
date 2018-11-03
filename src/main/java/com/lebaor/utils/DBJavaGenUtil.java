@@ -138,7 +138,13 @@ public class DBJavaGenUtil {
 		
 		n=0;
 		for (String s : varNameList) {
-			System.out.println("\t\t\to.put(\""+ s +"\", "+ s +");");
+			String typeStr = typeList.get(n);
+			if (typeStr.equalsIgnoreCase("long")) {
+				System.out.println("\t\t\to.put(\""+ s +"\", Long.toString("+ s +"));");
+			} else {
+				System.out.println("\t\t\to.put(\""+ s +"\", "+ s +");");
+			}
+			n++;
 		}
 		
 		System.out.println(
@@ -192,14 +198,20 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long id;\n" + 
-				"	String type;\n" + 
-				"	String title;\n" + 
-				"	String subTitle;\n" + 
-				"	String desc;\n" + 
+		String s = "long userId;\n" + 
+				"	String userLogo;\n" + 
+				"	String userName;\n" + 
+				"	String createTimeDisplay;\n" + 
 				"	\n" + 
-				"	Book[] books;";
-		String className = "WebBookListDetail";
+				"	String content;\n" + 
+				"	JSONArray imgUrls;\n" + 
+				"	int likeNum;\n" + 
+				"	\n" + 
+				"	long bookId;\n" + 
+				"	String isbn;\n" + 
+				"	String bookImg;\n" + 
+				"	String bookTitle;";
+		String className = "WebBookComment";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

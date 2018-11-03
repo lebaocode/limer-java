@@ -45,6 +45,12 @@
 <bean id="userDB" class="com.lebaor.limer.db.UserDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
+<bean id="activityDB" class="com.lebaor.limer.db.ActivityDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
+<bean id="commentDB" class="com.lebaor.limer.db.BookCommentDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
 
 <bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init" destroy-method="release">
     <property name="userDB"><ref bean="userDB"/></property>
@@ -56,6 +62,8 @@
     <property name="brDB"><ref bean="brDB"/></property>
     <property name="ltDB"><ref bean="ltDB"/></property>
     <property name="orderDB"><ref bean="orderDB"/></property>
+    <property name="activityDB"><ref bean="activityDB"/></property>
+    <property name="commentDB"><ref bean="commentDB"/></property>
     
     <property name="jedisHost" value="${limer-servlet.jedisHost}"/>
     <property name="jedisPort" value="${limer-servlet.jedisPort}"/>

@@ -215,13 +215,14 @@ public class JsonController extends EntryController implements Runnable {
 		JSONArray arr = new JSONArray();
 		for (WebBookComment wbc : wbcs) {
 			try {
+				LogUtil.WEB_LOG.debug(wbc.toJSON());
 				arr.put(new JSONObject(wbc.toJSON()));
 			} catch (Exception e) {
 				LogUtil.WEB_LOG.warn("getBookComments exception", e);
 			}
 		}
 		
-		this.setRetJson(model, new WebJSONObject(arr.toString()).toJSON());
+		this.setRetJson(model, new WebJSONArray(arr.toString()).toJSON());
 	}
 	
 	public void getUserBookComments(HttpServletRequest req, 

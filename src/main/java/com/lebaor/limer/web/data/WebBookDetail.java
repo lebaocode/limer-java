@@ -6,6 +6,8 @@ import com.lebaor.limer.data.Book;
 
 public class WebBookDetail {
 	Book book;
+	int commentNum;
+	int likeNum;
 	
 	public float computeScore() {
 		if (book == null) return 0;
@@ -15,24 +17,25 @@ public class WebBookDetail {
 	
 	public JSONObject toWebJSONObject() {
 		try {
-			return new JSONObject(toWebJSON());
+			JSONObject o;
+			if (book != null) {
+				o = new JSONObject(book.toWebJSON());
+			} else {
+				o = new JSONObject();
+			}
+			o.put("commentNum", commentNum);
+			o.put("likeNum", likeNum);
+			
+			return o;
 		} catch (Exception e) {
 			return new JSONObject();
 		}
 	}
 	
 	public String toWebJSON() {
-		if (book == null) return "{}";
-		return book.toJSON();
-		
+		return this.toWebJSONObject().toString();
 	}
 	
-	public String toDoubanJSON() {
-		if (book == null) return "{}";
-		return book.getJson();
-		
-	}
-
 	public String toString() {
 		return toWebJSON();
 	}
@@ -43,6 +46,22 @@ public class WebBookDetail {
 
 	public void setBook(Book book) {
 		this.book = book;
+	}
+
+	public int getCommentNum() {
+		return commentNum;
+	}
+
+	public void setCommentNum(int commentNum) {
+		this.commentNum = commentNum;
+	}
+
+	public int getLikeNum() {
+		return likeNum;
+	}
+
+	public void setLikeNum(int likeNum) {
+		this.likeNum = likeNum;
 	}
 	
 	

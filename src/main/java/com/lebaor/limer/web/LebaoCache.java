@@ -52,6 +52,12 @@ public class LebaoCache {
 	private static final String KEY_BOOK_PREFIX = "bk:";//key,value key=bk:isbn, value=bookObject
 	private static final int KEY_BOOK_EXPIRE = 3600*72;//3天
 	
+	private static final String KEY_COMMENTNUM_PREFIX = "cmn:";//key,value key=cmn:isbn, value=书评数
+	private static final int KEY_COMMENTNUM_EXPIRE = 3600*720;//30天
+	
+	private static final String KEY_COMMENTLIKENUM_PREFIX = "cmagree:";//key,value key=cmagree:isbn, value=点赞数
+	private static final int KEY_COMMENTLIKENUM_EXPIRE = 3600*720;//30天
+	
 	private static final String KEY_BOOK_STATUS = "book_status";//key,value key=limerBookId, value=limerbookInfo 缓存里不保证是全部的数据
 	
 	private static final String KEY_USER_PREFIX = "user:";//key,value key=user:userId value=userprofileObject json 缓存里不保证是全部的数据
@@ -110,8 +116,8 @@ public class LebaoCache {
 					LogUtil.WEB_LOG.debug("getBookInfo finished: " + b.getIsbn13());
 					
 					Map<String, Double> sm = new HashMap<String, Double>();
-					sm.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
-					scoreMembers.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
+					sm.put(wbd.getBook().toDoubanJSON(), (double)wbd.computeScore());
+					scoreMembers.put(wbd.getBook().toDoubanJSON(), (double)wbd.computeScore());
 					
 					for (String t : wbd.getBook().getTagsString()) {
 						getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
@@ -221,9 +227,12 @@ public class LebaoCache {
 		return wbc;
 	}
 	
-	public boolean agreeBookComment(long commentId, long userId) {
+	public boolean agreeBookComment(long commentId, long userId, String isbn) {
 		getJedis().incr(KEY_COMMENT_PREFIX + commentId);
 		getJedis().expire(KEY_COMMENT_PREFIX + commentId, KEY_COMMENT_EXPIRE);
+		
+		getJedis().incr(KEY_COMMENTLIKENUM_PREFIX+ isbn);
+		getJedis().expire(KEY_COMMENTLIKENUM_PREFIX+ isbn, KEY_COMMENTLIKENUM_EXPIRE);
 		return true;
 	}
 	
@@ -249,9 +258,38 @@ public class LebaoCache {
 			
 			result =  commentDB.addBookComment(bc);
 			bc = commentDB.getBookCommentByUserBook(isbn, userId);
+			
+			getJedis().incr(KEY_COMMENTNUM_PREFIX+ isbn);
+			getJedis().expire(KEY_COMMENTNUM_PREFIX+ isbn, KEY_COMMENTNUM_EXPIRE);
 		}
 		
 		return result;
+	}
+	
+	private int getBookCommentNum(String isbn) {
+		String nStr = getJedis().get(KEY_COMMENTNUM_PREFIX+isbn);
+		if (nStr != null) {
+			return Integer.parseInt(nStr);
+		}
+		
+		//从数据库里获取
+		int n = commentDB.getBookCommentNumByBook(isbn);
+		getJedis().set(KEY_COMMENTNUM_PREFIX+isbn, Integer.toString(n));
+		getJedis().expire(KEY_COMMENTNUM_PREFIX+isbn, KEY_COMMENTNUM_EXPIRE);
+		return n;
+	}
+	
+	private int getBookLikeNum(String isbn) {
+		String nStr = getJedis().get(KEY_COMMENTLIKENUM_PREFIX+isbn);
+		if (nStr != null) {
+			return Integer.parseInt(nStr);
+		}
+		
+		//从数据库里获取
+		int n = commentDB.getBookLikeNumByBook(isbn);
+		getJedis().set(KEY_COMMENTLIKENUM_PREFIX+isbn, Integer.toString(n));
+		getJedis().expire(KEY_COMMENTLIKENUM_PREFIX+isbn, KEY_COMMENTLIKENUM_EXPIRE);
+		return n;
 	}
 	
 	public WebBookComment getWebBookComment(long commentId) {
@@ -711,6 +749,11 @@ public class LebaoCache {
 			WebBookDetail wbd = new WebBookDetail();
 			Book book = Book.parseFromDoubanJSON(bookJson);
 			wbd.setBook(book);
+			
+			int commentNum = this.getBookCommentNum(isbn);
+			wbd.setCommentNum(commentNum);
+			int likeNum = this.getBookLikeNum(isbn);
+			wbd.setLikeNum(likeNum);
 			return wbd;
 		}
 		
@@ -737,13 +780,18 @@ public class LebaoCache {
 		WebBookDetail wbd = new WebBookDetail();
 		wbd.setBook(b);
 		
+		int commentNum = this.getBookCommentNum(isbn);
+		wbd.setCommentNum(commentNum);
+		int likeNum = this.getBookLikeNum(isbn);
+		wbd.setLikeNum(likeNum);
+		
 		//更新缓存
-		getJedis().set(KEY_BOOK_PREFIX+ isbn, wbd.toDoubanJSON());
+		getJedis().set(KEY_BOOK_PREFIX+ isbn, wbd.getBook().toDoubanJSON());
 		getJedis().expire(KEY_BOOK_PREFIX+ isbn, KEY_BOOK_EXPIRE);
 		
 		//更新最近书籍缓存
 		Map<String, Double> scoreMembers = new HashMap<String, Double>();
-		scoreMembers.put(wbd.toDoubanJSON(), (double)wbd.computeScore());
+		scoreMembers.put(wbd.getBook().toDoubanJSON(), (double)wbd.computeScore());
 		getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
 		for (String tag: wbd.getBook().getTagsString()) {
 			getJedis().zadd(KEY_RECENT_BOOKS+"_"+TextUtil.MD5(tag), scoreMembers);

@@ -53,6 +53,34 @@ public class BookCommentDB {
 		return BookCommentArr;
 	}
 	
+	public int getBookCommentNumByBook(String isbn) {
+		String sql = "SELECT count(*) FROM " + TABLENAME + " "
+				+" WHERE isbn=?";
+		Integer n = (Integer)dbUtils.executeQuery(sql, new Object[]{isbn}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				if (rs.next()) {
+					return  (Integer)rs.getInt(1);
+				}
+				return (Integer)0;
+			}
+		});
+		return n;
+	}
+	
+	public int getBookLikeNumByBook(String isbn) {
+		String sql = "SELECT sum(like_num) FROM " + TABLENAME + " "
+				+" WHERE isbn=?";
+		Integer n = (Integer)dbUtils.executeQuery(sql, new Object[]{isbn}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				if (rs.next()) {
+					return  (Integer)rs.getInt(1);
+				}
+				return (Integer)0;
+			}
+		});
+		return n;
+	}
+	
 	public BookComment[] getBookCommentsByBook(String isbn, int start, int length) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
 				+" WHERE isbn=? LIMIT ?,?";

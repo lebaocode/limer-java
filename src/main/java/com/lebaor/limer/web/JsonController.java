@@ -133,6 +133,7 @@ public class JsonController extends EntryController implements Runnable {
 	public void agreeBookComment(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		long commentId = this.getLongParameterValue(req, "commentId", 0);
+		String isbn = this.getParameterValue(req, "isbn", "");
 		WebUser wu = this.getUser(req);
 		
 		if (wu == null) {
@@ -140,7 +141,7 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		boolean result = cache.agreeBookComment(commentId, wu.getUserId());
+		boolean result = cache.agreeBookComment(commentId, wu.getUserId(), isbn);
 		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
 		
 		this.setRetJson(model, o.toString());

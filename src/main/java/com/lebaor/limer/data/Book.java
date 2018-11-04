@@ -95,7 +95,7 @@ public class Book {
 		}
 	}
 	
-	public String toJSON() {
+	public String toWebJSON() {
 		try {
 			JSONObject o = new JSONObject();
 			o.put("isbn10", isbn10);

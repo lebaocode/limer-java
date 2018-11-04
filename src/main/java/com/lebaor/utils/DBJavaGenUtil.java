@@ -198,20 +198,12 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long userId;\n" + 
-				"	String userLogo;\n" + 
-				"	String userName;\n" + 
-				"	String createTimeDisplay;\n" + 
-				"	\n" + 
-				"	String content;\n" + 
-				"	JSONArray imgUrls;\n" + 
-				"	int likeNum;\n" + 
-				"	\n" + 
-				"	long bookId;\n" + 
-				"	String isbn;\n" + 
-				"	String bookImg;\n" + 
-				"	String bookTitle;";
-		String className = "WebBookComment";
+		String s = "long bookListId;//书单id\n" + 
+				"	long userId;//哪位用户贡献的 0表示系统管理员加的\n" + 
+				"	long bookId;//哪本书\n" + 
+				"\n" + 
+				"	long createTime;//添加时间";
+		String className = "BookListItem";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

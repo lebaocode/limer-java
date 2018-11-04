@@ -118,8 +118,67 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getUserBookComments")) {
 			getUserBookComments(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/addBookComment")) {
+			addBookComment(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/addBookToBookList")) {
+			addBookToBookList(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/agreeBookComment")) {
+			agreeBookComment(req, res, model);
+			return;
 		} 
+	}
+	
+	public void agreeBookComment(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		long commentId = this.getLongParameterValue(req, "commentId", 0);
+		WebUser wu = this.getUser(req);
 		
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		boolean result = cache.agreeBookComment(commentId, wu.getUserId());
+		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+		
+		this.setRetJson(model, o.toString());
+	}
+	
+	public void addBookToBookList(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		String isbn = this.getParameterValue(req, "isbn", "");
+		long booklistId = this.getLongParameterValue(req, "booklistId", 0);
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		boolean result = cache.addBookToBookList(booklistId, isbn, wu.getUserId());
+		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+		
+		this.setRetJson(model, o.toString());
+	}
+	
+	public void addBookComment(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		String isbn = this.getParameterValue(req, "isbn", "");
+		String content = this.getParameterValue(req, "content", "");
+		String imgUrls = this.getParameterValue(req, "imgUrls", "");
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		boolean result = cache.addBookComment(content, wu.getUserId(), isbn, imgUrls);
+		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+		
+		this.setRetJson(model, o.toString());
 	}
 	
 	public void getBookComment(HttpServletRequest req, 
@@ -137,11 +196,11 @@ public class JsonController extends EntryController implements Runnable {
 	
 	public void getBookComments(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
-		long bookId = this.getLongParameterValue(req, "bookId", 0);
+		String isbn = this.getParameterValue(req, "isbn", "");
 		int start = this.getIntParameterValue(req, "start", 0);
 		int length = this.getIntParameterValue(req, "len", 10);
 		
-		WebBookComment[] wbcs = cache.getBookComments(bookId, start, length);
+		WebBookComment[] wbcs = cache.getBookComments(isbn, start, length);
 		JSONArray arr = new JSONArray();
 		for (WebBookComment wbc : wbcs) {
 			try {
@@ -156,11 +215,17 @@ public class JsonController extends EntryController implements Runnable {
 	
 	public void getUserBookComments(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
-		long userId = this.getLongParameterValue(req, "userId", 0);
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
 		int start = this.getIntParameterValue(req, "start", 0);
 		int length = this.getIntParameterValue(req, "len", 10);
 		
-		WebBookComment[] wbcs = cache.getUserBookComments(userId, start, length);
+		WebBookComment[] wbcs = cache.getUserBookComments(wu.getUserId(), start, length);
 		JSONArray arr = new JSONArray();
 		for (WebBookComment wbc : wbcs) {
 			try {

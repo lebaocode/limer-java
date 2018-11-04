@@ -7,7 +7,7 @@ import com.lebaor.utils.JSONUtil;
 
 public class BookComment {
 	long id;
-	long bookId;
+	String isbn;
 	long userId;
 	String content;
 	String imgUrlsJson = "[]";
@@ -20,7 +20,7 @@ public class BookComment {
 		try {
 			JSONObject o = new JSONObject();
 			o.put("id", Long.toString(id));
-			o.put("bookId", Long.toString(bookId));
+			o.put("isbn", isbn);
 			o.put("userId", Long.toString(userId));
 			o.put("content", content);
 			o.put("imgUrlsJson", new JSONArray(imgUrlsJson));
@@ -47,7 +47,7 @@ public class BookComment {
 		try {
 			BookComment n = new BookComment();
 			n.id = JSONUtil.getLong(o, "id");
-			n.bookId = JSONUtil.getLong(o, "bookId");
+			n.isbn = JSONUtil.getString(o, "isbn");
 			n.userId = JSONUtil.getLong(o, "userId");
 			n.content = JSONUtil.getString(o, "content");
 			n.imgUrlsJson = JSONUtil.getJSONArray(o, "imgUrlsJson").toString();
@@ -80,12 +80,15 @@ public class BookComment {
 	public void setId(long id) {
 		this.id = id;
 	}
-	public long getBookId() {
-		return bookId;
+	
+	public String getIsbn() {
+		return isbn;
 	}
-	public void setBookId(long bookId) {
-		this.bookId = bookId;
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
+
 	public long getUserId() {
 		return userId;
 	}

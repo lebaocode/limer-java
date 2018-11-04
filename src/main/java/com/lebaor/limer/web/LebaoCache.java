@@ -38,18 +38,27 @@ public class LebaoCache {
 	BookListDB bookListDB;
 	ActivityDB activityDB;
 	BookCommentDB commentDB;
+	BookListItemDB booklistItemDB;
 	
+	//TODO 未考虑缓存的大小问题？
 	private static final String KEY_RECENT_BOOKS = "recent_books"; //最近所有的书籍。WebBookDetail json list, 评分高的在前，缓存前1000个。
 	private static final int KEY_RECENT_BOOKS_NUM = 1000;
 	private static final String KEY_RECENT_BOOKLISTS = "recent_booklists"; //最近所有的书单。WebBookList json list，创建时间新的在前。
 	private static final int KEY_RECENT_BOOKLISTS_NUM = 20;
 	
-	private static final String KEY_BOOK_DETAIL = "book_detail";//key,value key=isbn, value=book 缓存里不保证是全部的数据
-	private static final String KEY_BOOK_STATUS = "book_status";//key,value key=limerBookId, value=limerbookInfo 缓存里不保证是全部的数据
-	private static final String KEY_USER_INFO = "user_info";//key,value key=userId value=userprofile json 缓存里不保证是全部的数据
-	private static final String KEY_USER_AUTH = "user_auth";//key,value key=unionId value=userId 缓存里不保证是全部的数据
+	private static final String KEY_COMMENT_PREFIX = "cm:";//书评 key=cm:id,value=commentObject
+	private static final int KEY_COMMENT_EXPIRE = 3600*72;//3天
 	
-	private static final int BOOK_PAGE_NUM = 10;//每页展示10本书
+	private static final String KEY_BOOK_PREFIX = "bk:";//key,value key=bk:isbn, value=bookObject
+	private static final int KEY_BOOK_EXPIRE = 3600*72;//3天
+	
+	private static final String KEY_BOOK_STATUS = "book_status";//key,value key=limerBookId, value=limerbookInfo 缓存里不保证是全部的数据
+	
+	private static final String KEY_USER_PREFIX = "user:";//key,value key=user:userId value=userprofileObject json 缓存里不保证是全部的数据
+	private static final int KEY_USER_EXPIRE = 3600*72;//3天
+	
+	private static final String KEY_USER_AUTH_PREFIX = "wx:";//key,value key=wx:unionId value=userId 缓存里不保证是全部的数据
+	private static final int KEY_USER_AUTH_EXPIRE = 3600*72;//3天
 	
 	int jedisMaxTotal;
 	int jedisMaxIdle;
@@ -163,16 +172,28 @@ public class LebaoCache {
 		return globalJedis;
 	}
 	
+	//为一个书单添加一本书
+	public boolean addBookToBookList(long bookListId, String isbn,  long userId) {
+		BookListItem item = new BookListItem();
+		item.setIsbn(isbn);
+		item.setBookListId(bookListId);
+		item.setUserId(userId);
+		item.setCreateTime(System.currentTimeMillis());
+		return booklistItemDB.addBookListItem(item);
+	}
+	
 	private WebBookComment toWebBookComment(BookComment bc) {
 		if (bc == null) return null;
 		
 		WebBookComment wbc = new WebBookComment();
-		wbc.setBookId(bc.getBookId());
+		wbc.setIsbn(bc.getIsbn());
 		
-		Book b = bookDB.getBookById(bc.getBookId());//TODO 待优化
-		if (b == null) return null;
-		wbc.setBookImg(b.getCoverUrl());
-		wbc.setBookTitle(b.getTitle());
+		WebBookDetail wbd = this.getBookInfo(bc.getIsbn());
+		if (wbd == null) return null;
+		
+		wbc.setBookId(wbd.getBook().getId());
+		wbc.setBookImg(wbd.getBook().getCoverUrl());
+		wbc.setBookTitle(wbd.getBook().getTitle());
 		wbc.setContent(bc.getContent());
 		wbc.setCreateTimeDisplay(TextUtil.formatDay2(bc.getCreateTime()));
 		try {
@@ -180,8 +201,13 @@ public class LebaoCache {
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("toWebBookComment [commentId="+ bc.getId() +"] exception", e);
 		}
-		wbc.setIsbn(b.getIsbn());
-		wbc.setLikeNum(bc.getLikeNum());
+		wbc.setIsbn(wbd.getBook().getIsbn());
+		
+		//数据库里的likeNum不一定是最新值，应取缓存里的值
+		String likeNumStr = getJedis().get(KEY_COMMENT_PREFIX + bc.getId());
+		wbc.setLikeNum(Math.max(bc.getLikeNum(), likeNumStr == null? bc.getLikeNum() : 
+			Math.max(bc.getLikeNum(), Integer.parseInt(likeNumStr))));
+		
 		wbc.setUserId(bc.getUserId());
 		
 		User u = this.getUserInfo(bc.getUserId());
@@ -192,6 +218,31 @@ public class LebaoCache {
 		return wbc;
 	}
 	
+	public boolean agreeBookComment(long commentId, long userId) {
+		getJedis().incr(KEY_COMMENT_PREFIX + commentId);
+		getJedis().expire(KEY_COMMENT_PREFIX + commentId, KEY_COMMENT_EXPIRE);
+		return true;
+	}
+	
+	public boolean addBookComment(String content, long userId, String isbn, String imgUrlsJson) {
+		long curTime = System.currentTimeMillis();
+		
+		BookComment bc= new BookComment();
+		bc.setContent(content);
+		bc.setCreateTime(curTime);
+		bc.setIsbn(isbn);
+		bc.setLastModifyTime(curTime);
+		bc.setLikeNum(0);
+		bc.setUserId(userId);
+		bc.setImgUrlsJson(imgUrlsJson);
+		
+		boolean result =  commentDB.addBookComment(bc);
+		bc = commentDB.getBookCommentByUserBook(isbn, userId);
+		getJedis().set(KEY_COMMENT_PREFIX + bc.getId(), bc.toJSON());
+		
+		return result;
+	}
+	
 	public WebBookComment getWebBookComment(long commentId) {
 		if (commentId <= 0) return null;
 		
@@ -200,8 +251,8 @@ public class LebaoCache {
 	}
 	
 	//得到一本书的对应数量的书评
-	public WebBookComment[] getBookComments(long bookId, int start, int length) {
-		BookComment[] bcs = commentDB.getBookCommentsByBook(bookId, start, length);
+	public WebBookComment[] getBookComments(String isbn, int start, int length) {
+		BookComment[] bcs = commentDB.getBookCommentsByBook(isbn, start, length);
 		
 		LinkedList<WebBookComment> list = new LinkedList<WebBookComment>();
 		for (BookComment bc : bcs) {
@@ -214,7 +265,7 @@ public class LebaoCache {
 	
 	//得到一本书的对应数量的书评
 	public WebBookComment[] getUserBookComments(long userId, int start, int length) {
-		BookComment[] bcs = commentDB.getBookCommentsByBook(userId, start, length);
+		BookComment[] bcs = commentDB.getBookCommentsByUser(userId, start, length);
 		
 		LinkedList<WebBookComment> list = new LinkedList<WebBookComment>();
 		for (BookComment bc : bcs) {
@@ -332,7 +383,8 @@ public class LebaoCache {
 		User lastU = userDB.getUserByName(nickName);
 		user.setId(lastU.getId());
 		//更新缓存
-		getJedis().hset(KEY_USER_INFO, Long.toString(lastU.getId()), lastU.toJSON());
+		getJedis().set(KEY_USER_PREFIX+lastU.getId(), lastU.toJSON());
+		getJedis().expire(KEY_USER_PREFIX+lastU.getId(), KEY_USER_EXPIRE);
 		
 		UserAuth ua = new UserAuth();
 		ua.setAppId(LimerConstants.MINIPROGRAM_APPID);
@@ -341,7 +393,8 @@ public class LebaoCache {
 		ua.setUnionId(unionId);
 		ua.setUserId(user.getId());
 		userAuthDB.addUserAuth(ua);
-		getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(lastU.getId()));
+		getJedis().set(KEY_USER_AUTH_PREFIX+ unionId, Long.toString(lastU.getId()));
+		getJedis().expire(KEY_USER_AUTH_PREFIX+ unionId, KEY_USER_AUTH_EXPIRE);
 		
 		LogUtil.STAT_LOG.info("[CREATE_URSER] ["+ lastU.getId() +"] ["+ nickName +"] ["+ openId +"] ["+ unionId +"]");
 		
@@ -405,7 +458,7 @@ public class LebaoCache {
 	
 	public User getUserInfo(long userId) {
 		//先从jedis取
-		String json = getJedis().hget(KEY_USER_INFO, Long.toString(userId));
+		String json = getJedis().get(KEY_USER_PREFIX + userId);
 		if (json != null) {
 			try {
 				JSONObject o = new JSONObject(json);
@@ -426,8 +479,8 @@ public class LebaoCache {
 		}
 		
 		//存入jedis
-		getJedis().hset(KEY_USER_INFO, Long.toString(userId), b.toJSON());
-		
+		getJedis().set(KEY_USER_PREFIX+userId, b.toJSON());
+		getJedis().expire(KEY_USER_PREFIX+userId, KEY_USER_EXPIRE);
 		return b;
 		
 	}
@@ -614,6 +667,9 @@ public class LebaoCache {
 		BookList b = bookListDB.getBookListById(id);
 		if (b == null) return null;
 		
+		//获取booklist的全部书籍列表
+		BookListItem[] items = booklistItemDB.getBookListItems(b.getId(), 0, 100);
+		
 		WebBookListDetail wb = new WebBookListDetail();
 		wb.setDesc(b.getDesc());
 		wb.setId(b.getId());
@@ -623,9 +679,8 @@ public class LebaoCache {
 
 		JSONArray bookJsonArr = new JSONArray();
 		try {
-			String[] isbns = b.getBookIsbns();
-			for (String isbn : isbns) {
-				WebBookDetail bd = this.getBookInfo(isbn);
+			for (BookListItem item : items) {
+				WebBookDetail bd = this.getBookInfo(item.getIsbn());
 				bookJsonArr.put(new JSONObject(bd.toWebJSON()));
 			}
 		} catch (Exception e) {
@@ -640,7 +695,7 @@ public class LebaoCache {
 		if (isbn.length() != 10 && isbn.length() != 13) return null;
 		
 		//先从jedis取
-		String bookJson = getJedis().hget(KEY_BOOK_DETAIL, isbn);
+		String bookJson = getJedis().get(KEY_BOOK_PREFIX + isbn);
 		if (bookJson != null) {
 			WebBookDetail wbd = new WebBookDetail();
 			Book book = Book.parseFromDoubanJSON(bookJson);
@@ -672,7 +727,8 @@ public class LebaoCache {
 		wbd.setBook(b);
 		
 		//更新缓存
-		getJedis().hset(KEY_BOOK_DETAIL, isbn, wbd.toDoubanJSON());
+		getJedis().set(KEY_BOOK_PREFIX+ isbn, wbd.toDoubanJSON());
+		getJedis().expire(KEY_BOOK_PREFIX+ isbn, KEY_BOOK_EXPIRE);
 		
 		//更新最近书籍缓存
 		Map<String, Double> scoreMembers = new HashMap<String, Double>();
@@ -730,7 +786,7 @@ public class LebaoCache {
 	
 	public long getUserIdByUnionId(String unionId) {
 		//先从jedis取
-		String strUserId = getJedis().hget(KEY_USER_AUTH, unionId);
+		String strUserId = getJedis().get(KEY_USER_AUTH_PREFIX+ unionId);
 		
 		if (strUserId != null && strUserId.length() > 0) {
 			try {
@@ -745,7 +801,8 @@ public class LebaoCache {
 		if (u == null) return 0;
 		
 		//存入jedis
-		getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(u.getUserId()));
+		getJedis().set(KEY_USER_AUTH_PREFIX+ unionId, Long.toString(u.getId()));
+		getJedis().expire(KEY_USER_AUTH_PREFIX+ unionId, KEY_USER_AUTH_EXPIRE);
 		
 		return u.getUserId();
 	}
@@ -758,7 +815,8 @@ public class LebaoCache {
 		
 		boolean res = userDB.updateUser(u);
 		if (res) {
-			getJedis().hset(KEY_USER_INFO, Long.toString(userId), u.toJSON());
+			getJedis().set(KEY_USER_PREFIX+userId, u.toJSON());
+			getJedis().expire(KEY_USER_PREFIX+userId, KEY_USER_EXPIRE);
 		}
 		return res;
 	}
@@ -772,7 +830,8 @@ public class LebaoCache {
 		
 		boolean res = userDB.updateUser(u);
 		if (res) {
-			getJedis().hset(KEY_USER_INFO, Long.toString(userId), u.toJSON());
+			getJedis().set(KEY_USER_PREFIX+userId, u.toJSON());
+			getJedis().expire(KEY_USER_PREFIX+userId, KEY_USER_EXPIRE);
 		}
 		
 		return res;
@@ -798,7 +857,8 @@ public class LebaoCache {
 					
 					u = userDB.getUserByName(userName);
 					userId = u.getId();
-					getJedis().hset(KEY_USER_INFO, Long.toString(userId), u.toJSON());
+					getJedis().set(KEY_USER_PREFIX+userId, u.toJSON());
+					getJedis().expire(KEY_USER_PREFIX+userId, KEY_USER_EXPIRE);
 					LogUtil.info("[CREATE_USER] [userId="+ userId +"] [userName="+ userName +"]");
 					
 					UserAuth ua = new UserAuth();
@@ -808,7 +868,9 @@ public class LebaoCache {
 					ua.setUnionId(unionId);
 					ua.setUserId(userId);
 					userAuthDB.addUserAuth(ua);
-					getJedis().hset(KEY_USER_AUTH, unionId, Long.toString(userId));
+					getJedis().set(KEY_USER_AUTH_PREFIX+ unionId, Long.toString(userId));
+					getJedis().expire(KEY_USER_AUTH_PREFIX+ unionId, KEY_USER_AUTH_EXPIRE);
+					
 					LogUtil.info("[CREATE_USER_AUTH] [userId="+ userId +"] [unionId="+ unionId +"] [appId="+ ua.getAppId() +"]");
 				} else {
 					u = this.getUserInfo(userId);
@@ -890,6 +952,10 @@ public class LebaoCache {
 
 	public void setCommentDB(BookCommentDB commentDB) {
 		this.commentDB = commentDB;
+	}
+
+	public void setBooklistItemDB(BookListItemDB booklistItemDB) {
+		this.booklistItemDB = booklistItemDB;
 	}
 	
 }

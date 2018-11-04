@@ -53,10 +53,10 @@ public class BookCommentDB {
 		return BookCommentArr;
 	}
 	
-	public BookComment[] getBookCommentsByBook(long bookId, int start, int length) {
+	public BookComment[] getBookCommentsByBook(String isbn, int start, int length) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
-				+" WHERE book_id=? LIMIT ?,?";
-		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{bookId, start, length}, new ResultSetHandler(){
+				+" WHERE isbn=? LIMIT ?,?";
+		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{isbn, start, length}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<BookComment> list = new LinkedList<BookComment>(); 
 				while (rs.next()) {
@@ -89,7 +89,7 @@ public class BookCommentDB {
 		java.sql.Timestamp d;
 		BookComment o = new BookComment();
 		o.setId(rs.getLong(1));
-		o.setBookId(rs.getLong(2));
+		o.setIsbn(rs.getString(2));
 		o.setUserId(rs.getLong(3));
 		o.setContent(rs.getString(4));
 		o.setImgUrlsJson(rs.getString(5));
@@ -116,10 +116,10 @@ public class BookCommentDB {
 		});
 	}
 	
-	public BookComment getBookCommentByUserBook(long limerBookId, long userId) {
+	public BookComment getBookCommentByUserBook(String isbn, long userId) {
 		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE user_id=?  and limer_book_id=?";
-		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{userId, limerBookId}, new ResultSetHandler(){
+				+ " WHERE user_id=?  and isbn=?";
+		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{userId, isbn}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				LinkedList<BookComment> list = new LinkedList<BookComment>(); 
 				while (rs.next()) {
@@ -158,41 +158,7 @@ public class BookCommentDB {
 		return BookCommentArr;
 		
 	}
-	
-	public BookComment[] getBookCommentByIsbn(String isbn) {
-		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE isbn=? ";
-		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{isbn}, new ResultSetHandler(){
-			public Object handle(ResultSet rs, Object[] params) throws Exception {
-				LinkedList<BookComment> list = new LinkedList<BookComment>(); 
-				while (rs.next()) {
-					BookComment u = readOneRow(rs);
-					list.add(u);
-				}
-				return list.toArray(new BookComment[0]);
-			}
-		});
-		return BookCommentArr;
 		
-	}
-	
-	public BookComment[] getBookCommentByLimerBookId(long limerBookId) {
-		String sql = "SELECT * FROM " + TABLENAME + " "
-				+ " WHERE limer_book_id=? ";
-		BookComment[] BookCommentArr = (BookComment[])dbUtils.executeQuery(sql, new Object[]{limerBookId}, new ResultSetHandler(){
-			public Object handle(ResultSet rs, Object[] params) throws Exception {
-				LinkedList<BookComment> list = new LinkedList<BookComment>(); 
-				while (rs.next()) {
-					BookComment u = readOneRow(rs);
-					list.add(u);
-				}
-				return list.toArray(new BookComment[0]);
-			}
-		});
-		return BookCommentArr;
-		
-	}
-	
 	
 	/**
 	 * 添加一个BookComment进数据库
@@ -203,7 +169,7 @@ public class BookCommentDB {
 		
 		String sql = DBUtils.genAddRowSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
-				o.getBookId(),
+				o.getIsbn(),
 				o.getUserId(),
 				o.getContent(),
 				o.getImgUrlsJson(),
@@ -222,7 +188,7 @@ public class BookCommentDB {
 		String sql = DBUtils.genUpdateTableSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
 				
-				o.getBookId(),
+				o.getIsbn(),
 				o.getUserId(),
 				o.getContent(),
 				o.getImgUrlsJson(),
@@ -234,7 +200,7 @@ public class BookCommentDB {
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "book_id", "user_id", "content", 
+	private static final String[] COL_NAMES = {"id", "isbn", "user_id", "content", 
 			"img_urls_json", "like_num", "create_time", "last_modify_time"};
 	
 	
@@ -242,7 +208,7 @@ public class BookCommentDB {
 
 		String sql = "  CREATE TABLE `"+ TABLENAME.toLowerCase() +"` (\r\n" + 
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
-				"  `book_id` bigint(20) default 0,\r\n" +
+				"  `isbn` varchar(64) default 0,\r\n" +
 				"  `user_id` bigint(20) default 0,\r\n" +
 				"  `content` varchar(255) default NULL,\r\n" +
 				"  `img_urls_json` varchar(255) default NULL,\r\n" +
@@ -258,8 +224,8 @@ public class BookCommentDB {
 					" ON "+ TABLENAME +" (user_id)";
 			dbUtils.executeSql(sql, null);
 			
-			sql = " CREATE INDEX index_"+ TABLENAME +"_bookid" + 
-					" ON "+ TABLENAME +" (bookid)";
+			sql = " CREATE INDEX index_"+ TABLENAME +"_isbn" + 
+					" ON "+ TABLENAME +" (isbn)";
 			dbUtils.executeSql(sql, null);
 			
 		}

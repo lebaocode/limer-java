@@ -150,6 +150,8 @@ public class JsonController extends EntryController implements Runnable {
 			HttpServletResponse res, HashMap<String, Object> model) {
 		String isbn = this.getParameterValue(req, "isbn", "");
 		long booklistId = this.getLongParameterValue(req, "booklistId", 0);
+		String content = this.getParameterValue(req, "content", "");
+		String imgUrls = this.getParameterValue(req, "imgUrls", "[]");
 		WebUser wu = this.getUser(req);
 		
 		if (wu == null) {
@@ -157,7 +159,10 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		boolean result = cache.addBookToBookList(booklistId, isbn, wu.getUserId());
+		boolean result1 = cache.addBookToBookList(booklistId, isbn, wu.getUserId());
+		boolean result2 = cache.addBookComment(content, wu.getUserId(), isbn, imgUrls);
+		
+		boolean result = result1 && result2;
 		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
 		
 		this.setRetJson(model, o.toString());
@@ -167,7 +172,7 @@ public class JsonController extends EntryController implements Runnable {
 			HttpServletResponse res, HashMap<String, Object> model) {
 		String isbn = this.getParameterValue(req, "isbn", "");
 		String content = this.getParameterValue(req, "content", "");
-		String imgUrls = this.getParameterValue(req, "imgUrls", "");
+		String imgUrls = this.getParameterValue(req, "imgUrls", "[]");
 		WebUser wu = this.getUser(req);
 		
 		if (wu == null) {

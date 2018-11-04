@@ -96,6 +96,20 @@ public class BookListItemDB {
 		});
 	}
 	
+	public BookListItem getBookListItem(long booklistId, String isbn, long userId) {
+		String sql = "SELECT * FROM " + TABLENAME + " " 
+				+ " WHERE user_id=? AND book_list_id=? AND isbn=?";
+		return (BookListItem)dbUtils.executeQuery(sql, new Object[]{userId, booklistId, isbn}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				while (rs.next()) {
+					BookListItem u = readOneRow(rs);
+					return u;
+				}
+				return null;
+			}
+		});
+	}
+	
 	/**
 	 * 添加一个BookListItem进数据库
 	 * @param BookListItem

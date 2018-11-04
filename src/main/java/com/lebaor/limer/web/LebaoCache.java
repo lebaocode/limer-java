@@ -174,7 +174,10 @@ public class LebaoCache {
 	
 	//为一个书单添加一本书
 	public boolean addBookToBookList(long bookListId, String isbn,  long userId) {
-		BookListItem item = new BookListItem();
+		BookListItem item = booklistItemDB.getBookListItem(userId, isbn, bookListId);
+		if (item != null) return true;
+		
+		item = new BookListItem();
 		item.setIsbn(isbn);
 		item.setBookListId(bookListId);
 		item.setUserId(userId);
@@ -226,19 +229,27 @@ public class LebaoCache {
 	
 	public boolean addBookComment(String content, long userId, String isbn, String imgUrlsJson) {
 		long curTime = System.currentTimeMillis();
-		
-		BookComment bc= new BookComment();
-		bc.setContent(content);
-		bc.setCreateTime(curTime);
-		bc.setIsbn(isbn);
-		bc.setLastModifyTime(curTime);
-		bc.setLikeNum(0);
-		bc.setUserId(userId);
-		bc.setImgUrlsJson(imgUrlsJson);
-		
-		boolean result =  commentDB.addBookComment(bc);
-		bc = commentDB.getBookCommentByUserBook(isbn, userId);
-		getJedis().set(KEY_COMMENT_PREFIX + bc.getId(), bc.toJSON());
+		boolean result;
+		BookComment bc = commentDB.getBookCommentByUserBook(isbn, userId);
+		if (bc != null) {
+			//update
+			bc.setContent(content);
+			bc.setImgUrlsJson(imgUrlsJson);
+			bc.setLastModifyTime(curTime);
+			result = commentDB.updateBookComment(bc);
+		} else {
+			bc= new BookComment();
+			bc.setContent(content);
+			bc.setCreateTime(curTime);
+			bc.setIsbn(isbn);
+			bc.setLastModifyTime(curTime);
+			bc.setLikeNum(0);
+			bc.setUserId(userId);
+			bc.setImgUrlsJson(imgUrlsJson);
+			
+			result =  commentDB.addBookComment(bc);
+			bc = commentDB.getBookCommentByUserBook(isbn, userId);
+		}
 		
 		return result;
 	}

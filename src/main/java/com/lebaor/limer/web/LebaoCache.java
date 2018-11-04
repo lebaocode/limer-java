@@ -204,6 +204,7 @@ public class LebaoCache {
 		wbc.setBookImg(wbd.getBook().getCoverUrl());
 		wbc.setBookTitle(wbd.getBook().getTitle());
 		wbc.setContent(bc.getContent());
+		wbc.setCommentId(bc.getId());
 		wbc.setCreateTimeDisplay(TextUtil.formatDay2(bc.getCreateTime()));
 		try {
 			wbc.setImgUrls(new JSONArray(bc.getImgUrlsJson()));

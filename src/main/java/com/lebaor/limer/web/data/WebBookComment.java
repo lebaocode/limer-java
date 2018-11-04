@@ -19,6 +19,7 @@ public class WebBookComment {
 	String content;
 	JSONArray imgUrls;
 	int likeNum;
+	long commentId;
 	
 	long bookId;
 	String isbn;
@@ -35,6 +36,7 @@ public class WebBookComment {
 			o.put("content", content);
 			o.put("imgUrls", imgUrls);
 			o.put("likeNum", likeNum);
+			o.put("commentId", Long.toString(commentId));
 			o.put("bookId", Long.toString(bookId));
 			o.put("isbn", isbn);
 			o.put("bookImg", bookImg);
@@ -65,6 +67,7 @@ public class WebBookComment {
 			n.content = JSONUtil.getString(o, "content");
 			n.imgUrls = JSONUtil.getJSONArray(o, "imgUrls");
 			n.likeNum = JSONUtil.getInt(o, "likeNum");
+			n.commentId = JSONUtil.getLong(o, "commentId");
 			n.bookId = JSONUtil.getLong(o, "bookId");
 			n.isbn = JSONUtil.getString(o, "isbn");
 			n.bookImg = JSONUtil.getString(o, "bookImg");
@@ -154,6 +157,14 @@ public class WebBookComment {
 	}
 	public void setBookTitle(String bookTitle) {
 		this.bookTitle = bookTitle;
+	}
+
+	public long getCommentId() {
+		return commentId;
+	}
+
+	public void setCommentId(long commentId) {
+		this.commentId = commentId;
 	}
 	
 	

@@ -210,8 +210,8 @@ public class BookCommentDB {
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
 				"  `isbn` varchar(64) default 0,\r\n" +
 				"  `user_id` bigint(20) default 0,\r\n" +
-				"  `content` varchar(255) default NULL,\r\n" +
-				"  `img_urls_json` varchar(255) default NULL,\r\n" +
+				"  `content` TEXT default NULL,\r\n" +
+				"  `img_urls_json` TEXT default NULL,\r\n" +
 				"  `like_num` smallint(2) default 0,\r\n" +
 				"  `create_time` datetime default NULL,\r\n" +
 				"  `last_modify_time` datetime default NULL,\r\n" +

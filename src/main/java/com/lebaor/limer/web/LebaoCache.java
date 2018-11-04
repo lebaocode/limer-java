@@ -174,7 +174,7 @@ public class LebaoCache {
 	
 	//为一个书单添加一本书
 	public boolean addBookToBookList(long bookListId, String isbn,  long userId) {
-		BookListItem item = booklistItemDB.getBookListItem(userId, isbn, bookListId);
+		BookListItem item = booklistItemDB.getBookListItem(bookListId, isbn, userId);
 		if (item != null) return true;
 		
 		item = new BookListItem();

@@ -812,7 +812,7 @@ public class LebaoCache {
 		if (u == null) return 0;
 		
 		//存入jedis
-		getJedis().set(KEY_USER_AUTH_PREFIX+ unionId, Long.toString(u.getId()));
+		getJedis().set(KEY_USER_AUTH_PREFIX+ unionId, Long.toString(u.getUserId()));
 		getJedis().expire(KEY_USER_AUTH_PREFIX+ unionId, KEY_USER_AUTH_EXPIRE);
 		
 		return u.getUserId();

@@ -109,11 +109,11 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/getLogisticsFee")) {
 			getLogisticsFee(req, res, model);
 			return;
-		} else if (uri.startsWith("/json/getBookComment")) {
-			getBookComment(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/getBookComments")) {
+		} else if (uri.startsWith("/json/getBookComments")) {//这个需要在前边
 			getBookComments(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/getBookSingleComment")) {
+			getBookComment(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/getUserBookComments")) {
 			getUserBookComments(req, res, model);

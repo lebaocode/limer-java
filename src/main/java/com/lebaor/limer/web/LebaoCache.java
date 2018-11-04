@@ -193,12 +193,16 @@ public class LebaoCache {
 	
 	private WebBookComment toWebBookComment(BookComment bc) {
 		if (bc == null) return null;
+		LogUtil.WEB_LOG.debug(bc.toJSON());
 		
 		WebBookComment wbc = new WebBookComment();
 		wbc.setIsbn(bc.getIsbn());
 		
 		WebBookDetail wbd = this.getBookInfo(bc.getIsbn());
-		if (wbd == null) return null;
+		if (wbd == null) {
+			LogUtil.WEB_LOG.warn("toWebBookComment [commentId="+ bc.getId() +"] no_book [isbn="+ bc.getIsbn() +"]");
+			return null;
+		}
 		
 		wbc.setBookId(wbd.getBook().getId());
 		wbc.setBookImg(wbd.getBook().getCoverUrl());
@@ -211,7 +215,7 @@ public class LebaoCache {
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("toWebBookComment [commentId="+ bc.getId() +"] exception", e);
 		}
-		wbc.setIsbn(wbd.getBook().getIsbn());
+		wbc.setIsbn(bc.getIsbn());
 		
 		//数据库里的likeNum不一定是最新值，应取缓存里的值
 		String likeNumStr = getJedis().get(KEY_COMMENT_PREFIX + bc.getId());
@@ -221,7 +225,10 @@ public class LebaoCache {
 		wbc.setUserId(bc.getUserId());
 		
 		User u = this.getUserInfo(bc.getUserId());
-		if (u == null) return null;
+		if (u == null) {
+			LogUtil.WEB_LOG.warn("toWebBookComment [commentId="+ bc.getId() +"] no_user [userId="+ bc.getUserId() +"]");
+			return null;
+		}
 		wbc.setUserLogo(u.getUserLogo());
 		wbc.setUserName(u.getUserName());
 		

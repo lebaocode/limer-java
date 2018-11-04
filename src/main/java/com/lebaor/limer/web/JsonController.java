@@ -160,10 +160,15 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		boolean result1 = cache.addBookToBookList(booklistId, isbn, wu.getUserId());
+		boolean result = true;
+		if (booklistId > 0) {
+			//如果没有提交booklistId，则说明只是书评
+			boolean result1 = cache.addBookToBookList(booklistId, isbn, wu.getUserId());
+			result = result1;
+		}
 		boolean result2 = cache.addBookComment(content, wu.getUserId(), isbn, imgUrls);
 		
-		boolean result = result1 && result2;
+		result = result && result2;
 		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
 		
 		this.setRetJson(model, o.toString());

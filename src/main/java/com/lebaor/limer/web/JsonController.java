@@ -129,6 +129,9 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/agreeBookComment")) {
 			agreeBookComment(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/addChild")) {
+			addChild(req, res, model);
+			return;
 		} 
 	}
 	
@@ -171,6 +174,34 @@ public class JsonController extends EntryController implements Runnable {
 		boolean result2 = cache.addBookComment(content, wu.getUserId(), isbn, imgUrls);
 		
 		result = result && result2;
+		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+		
+		this.setRetJson(model, o.toString());
+	}
+	
+	public void addChild(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		String birthday = this.getParameterValue(req, "birthday", "");
+		int sex = this.getIntParameterValue(req, "sex", 0);
+		String nickName = this.getParameterValue(req, "nickname", "");
+		int relation = this.getIntParameterValue(req, "relation", 0);
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		Child child = new Child();
+		child.setBirthday(birthday);
+		child.setSex(sex);
+		child.setChildName(nickName);
+		child.setCreateTime(System.currentTimeMillis());
+		child.setExtraInfo("{}");
+		child.setParentUserId(wu.getUserId());
+		child.setRelation(relation);
+		boolean result = cache.addChild(child);
 		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
 		
 		this.setRetJson(model, o.toString());

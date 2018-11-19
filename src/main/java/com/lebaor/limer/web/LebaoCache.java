@@ -32,6 +32,7 @@ public class LebaoCache {
 	UserScoreDB userScoreDB;
 	BorrowRecordDB brDB;
 	UserDB userDB;
+	ChildDB childDB;
 	UserAuthDB userAuthDB;
 	LogisticsDB ltDB;
 	OrderDB orderDB;
@@ -45,6 +46,9 @@ public class LebaoCache {
 	private static final int KEY_RECENT_BOOKS_NUM = 1000;
 	private static final String KEY_RECENT_BOOKLISTS = "recent_booklists"; //最近所有的书单。WebBookList json list，创建时间新的在前。
 	private static final int KEY_RECENT_BOOKLISTS_NUM = 20;
+	
+	private static final String KEY_CHILD_PREFIX = "chd:";//key,value key=chd:parentid, value=childObject
+	private static final int KEY_CHILD_EXPIRE = 3600*72;//3天
 	
 	private static final String KEY_COMMENT_PREFIX = "cm:";//书评 key=cm:id,value=commentObject
 	private static final int KEY_COMMENT_EXPIRE = 3600*72;//3天
@@ -178,6 +182,34 @@ public class LebaoCache {
 		return globalJedis;
 	}
 	
+	//只能添加一个孩子 TODO
+	public boolean addChild(Child child) {
+		boolean result = childDB.addChild(child);
+		if (result) {
+			//添加缓存
+			getJedis().set(KEY_CHILD_PREFIX+ child.getParentUserId(), child.toJSON());
+		}
+		return result;
+	}
+	
+	//需要用缓存 只取了第一个孩子 TODO
+	public Child getChild(long parentId) {
+		String json = getJedis().get(KEY_CHILD_PREFIX+ parentId);
+		Child child = Child.parseJSON(json);
+		if (child == null) {
+			Child[] children = childDB.getChildrenByParent(parentId);
+			if (children.length == 0) return null;
+			
+			child = children[0];
+		}
+		
+		if (child != null) {
+			getJedis().set(KEY_CHILD_PREFIX+ child.getParentUserId(), child.toJSON());
+		}
+		
+		return child; 
+	}
+	
 	//为一个书单添加一本书
 	public boolean addBookToBookList(long bookListId, String isbn,  long userId) {
 		BookListItem item = booklistItemDB.getBookListItem(bookListId, isbn, userId);
@@ -231,6 +263,12 @@ public class LebaoCache {
 		}
 		wbc.setUserLogo(u.getUserLogo());
 		wbc.setUserName(u.getUserName());
+		
+		//设置孩子年龄
+		Child child = getChild(wbc.getUserId());
+		if (child != null) {
+			wbc.setChildAge(TextUtil.parseAge(child.getBirthday()));
+		}
 		
 		return wbc;
 	}
@@ -315,6 +353,7 @@ public class LebaoCache {
 		for (BookComment bc : bcs) {
 			WebBookComment wbc = this.toWebBookComment(bc);
 			if (wbc == null) continue;
+			
 			list.add(wbc);
 		}
 		return list.toArray(new WebBookComment[0]);
@@ -1023,6 +1062,10 @@ public class LebaoCache {
 
 	public void setBooklistItemDB(BookListItemDB booklistItemDB) {
 		this.booklistItemDB = booklistItemDB;
+	}
+
+	public void setChildDB(ChildDB childDB) {
+		this.childDB = childDB;
 	}
 	
 }

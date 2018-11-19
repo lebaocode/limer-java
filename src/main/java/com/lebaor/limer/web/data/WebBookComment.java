@@ -14,6 +14,7 @@ public class WebBookComment {
 	long userId;
 	String userLogo;
 	String userName;
+	String childAge;//孩子年龄的文本描述，比如6岁，1岁半
 	String createTimeDisplay;
 	
 	String content;
@@ -32,6 +33,7 @@ public class WebBookComment {
 			o.put("userId", Long.toString(userId));
 			o.put("userLogo", userLogo);
 			o.put("userName", userName);
+			o.put("childAge", childAge);
 			o.put("createTimeDisplay", createTimeDisplay);
 			o.put("content", content);
 			o.put("imgUrls", imgUrls);
@@ -63,6 +65,7 @@ public class WebBookComment {
 			n.userId = JSONUtil.getLong(o, "userId");
 			n.userLogo = JSONUtil.getString(o, "userLogo");
 			n.userName = JSONUtil.getString(o, "userName");
+			n.childAge = JSONUtil.getString(o, "childAge");
 			n.createTimeDisplay = JSONUtil.getString(o, "createTimeDisplay");
 			n.content = JSONUtil.getString(o, "content");
 			n.imgUrls = JSONUtil.getJSONArray(o, "imgUrls");
@@ -165,6 +168,14 @@ public class WebBookComment {
 
 	public void setCommentId(long commentId) {
 		this.commentId = commentId;
+	}
+
+	public String getChildAge() {
+		return childAge;
+	}
+
+	public void setChildAge(String childAge) {
+		this.childAge = childAge;
 	}
 	
 	

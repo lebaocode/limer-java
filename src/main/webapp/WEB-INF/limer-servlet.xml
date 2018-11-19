@@ -45,6 +45,9 @@
 <bean id="userDB" class="com.lebaor.limer.db.UserDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
+<bean id="childDB" class="com.lebaor.limer.db.ChildDB" init-method="init">
+    <property name="dbUtils"><ref bean="dbUtils"/></property>
+</bean>
 <bean id="activityDB" class="com.lebaor.limer.db.ActivityDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
@@ -62,6 +65,7 @@
     <property name="bookListDB"><ref bean="bookListDB"/></property>
     <property name="lbiDB"><ref bean="lbiDB"/></property>
     <property name="userScoreDB"><ref bean="userScoreDB"/></property>
+    <property name="childDB"><ref bean="childDB"/></property>
     <property name="brDB"><ref bean="brDB"/></property>
     <property name="ltDB"><ref bean="ltDB"/></property>
     <property name="orderDB"><ref bean="orderDB"/></property>

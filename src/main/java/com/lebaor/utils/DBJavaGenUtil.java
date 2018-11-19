@@ -198,12 +198,15 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long bookListId;//书单id\n" + 
-				"	long userId;//哪位用户贡献的 0表示系统管理员加的\n" + 
-				"	long bookId;//哪本书\n" + 
-				"\n" + 
-				"	long createTime;//添加时间";
-		String className = "BookListItem";
+		String s = "long id;\n" + 
+				"	String childName;\n" + 
+				"	String birthday;\n" + 
+				"	int sex;\n" + 
+				"	int relation;//孩子和家长的关系：妈妈、爸爸这些\n" + 
+				"	long parentUserId;\n" + 
+				"	String extraInfo;\n" + 
+				"	long createTime;";
+		String className = "Child";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

@@ -245,6 +245,16 @@ public class TextUtil {
     		cal.set(Calendar.MINUTE, Integer.parseInt(s.substring(14, 16)));
     		cal.set(Calendar.SECOND, Integer.parseInt(s.substring(17,19)));
     		return cal.getTimeInMillis();
+    	} else if (format.equalsIgnoreCase("yyyy-mm-dd")) {
+    		Calendar cal = Calendar.getInstance();
+    		
+    		cal.set(Calendar.YEAR, Integer.parseInt(s.substring(0,4)));	
+    		cal.set(Calendar.MONTH, Integer.parseInt(s.substring(5,7)) - 1);
+    		cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(s.substring(8,10)));
+    		cal.set(Calendar.HOUR_OF_DAY, 0);
+    		cal.set(Calendar.MINUTE, 0);
+    		cal.set(Calendar.SECOND, 1);
+    		return cal.getTimeInMillis();
     	} 
     	
     	return 0;
@@ -267,6 +277,25 @@ public class TextUtil {
 		int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 		return cal.get(Calendar.YEAR) +(month < 10 ? "0" : "")+ month  + (dayOfMonth < 10 ? "0" : "") + dayOfMonth ;
 	}
+	
+	public static String parseAge(String date) {
+		if (date != null && date.trim().length() > 0) {
+			long b = TextUtil.parseTime(date, "yyyy-mm-dd");
+			long minus = System.currentTimeMillis() - b;
+			float age = (float)minus/(365*24*3600*1000L);
+			
+			int ageInt = (int)age;
+			if (ageInt > 0) {
+				String month = age - ageInt > 0.5 ? "半" : "";
+				return ageInt + "岁" + month;
+			} else {
+				String month = (int)((age - ageInt)*12) + "个月";
+				return month;
+			}
+		} else {
+			return "";
+		}
+	}
     
     public static void main(String[] args) {
 //    	String s = SHA1("jsapi_ticket=sM4AOVdWfPE4DxkXGEs8VMCPGGVi4C3VM0P37wVUCFvkVAy_90u5h9nbSlYy3-Sl-HhTdfl2fzFy1AOcHKP7qg&noncestr=Wm3WZYTPz0wzccnW&timestamp=1414587457&url=http://mp.weixin.qq.com?params=value");
@@ -283,7 +312,7 @@ public class TextUtil {
 //    	System.out.println(getMinusDayOfTwoDate("20150301", "20150228"));
 //    	System.out.println(getMinusDayOfTwoDate("20150301", "20150227"));
     	
-    	
+    	System.out.println(parseAge("2017-12-10"));
     	
     }
 }

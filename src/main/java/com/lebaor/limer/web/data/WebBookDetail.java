@@ -25,7 +25,6 @@ public class WebBookDetail {
 			}
 			o.put("commentNum", commentNum);
 			o.put("likeNum", likeNum);
-			
 			return o;
 		} catch (Exception e) {
 			return new JSONObject();
@@ -63,6 +62,4 @@ public class WebBookDetail {
 	public void setLikeNum(int likeNum) {
 		this.likeNum = likeNum;
 	}
-	
-	
 }

@@ -172,7 +172,7 @@ public class ChildDB {
 				"  `sex` smallint(2) default 0,\r\n" +
 				"  `relation` smallint(2) default 0,\r\n" +
 				"  `parent_user_id` bigint(20) default 0,\r\n" +
-				"  `extra_info` varchar(255) default NULL,\r\n" +
+				"  `extra_info` TEXT default NULL,\r\n" +
 				"  `create_time` datetime default NULL,\r\n" +
 
 				

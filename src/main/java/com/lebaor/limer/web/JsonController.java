@@ -550,6 +550,13 @@ public class JsonController extends EntryController implements Runnable {
 		jo.put("status", wbs.getStatus());
 		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
 		
+		//该用户是否已填写孩子信息
+		WebUser wu = this.getUser(req);
+		if (wu != null) {
+			Child child = cache.getChild(wu.getUserId());
+			jo.put("hasChildInfo", child != null);
+		}
+		
 		this.setRetJson(model, new WebJSONObject(jo.toString()).toJSON());
 	}
 	

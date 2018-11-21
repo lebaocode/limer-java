@@ -194,8 +194,13 @@ public class LebaoCache {
 	
 	//需要用缓存 只取了第一个孩子 TODO
 	public Child getChild(long parentId) {
+		Child child = null;
+		
 		String json = getJedis().get(KEY_CHILD_PREFIX+ parentId);
-		Child child = Child.parseJSON(json);
+		if (json != null && json.trim().length() > 0) {
+			child = Child.parseJSON(json);
+		}
+		
 		if (child == null) {
 			Child[] children = childDB.getChildrenByParent(parentId);
 			if (children.length == 0) return null;

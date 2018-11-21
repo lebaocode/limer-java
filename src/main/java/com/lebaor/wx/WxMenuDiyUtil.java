@@ -46,14 +46,15 @@ public class WxMenuDiyUtil {
 //		WxMenu m3 = new WxMenu(false, "下载APP", "http://www.limer.com.cn/download");
 		//WxMenu m4 = new WxMenu("父菜单", new WxMenu[] {m1, m3});
 		
-		WxMenu m1 = new WxMenu(false, "土著说", "http://www.limer.com.cn/mq/index");
-		WxMenu m3 = new WxMenu(false, "最近访问", "http://www.limer.com.cn/mq/recentplaces");
-		WxMenu m21 = new WxMenu(false, "我的提问", "http://www.limer.com.cn/mq/listmyquestions");
-		WxMenu m22 = new WxMenu(false, "我回答的问题", "http://www.limer.com.cn/mq/listmyreplys");
-		WxMenu m23 = new WxMenu(false, "待回答的问题", "http://www.limer.com.cn/mq/listmyneedreplys");
-		WxMenu m24 = new WxMenu(false, "我的消费和收益", "http://www.limer.com.cn/mq/listmyfees");
-		WxMenu m2 = new WxMenu("我的", new WxMenu[] {m24, m23, m22, m21});
-		WxMenuDiyUtil.setMenu(new WxMenu[]{m1, m3, m2});
+//		WxMenu m1 = new WxMenu(false, "土著说", "http://www.limer.com.cn/mq/index");
+//		WxMenu m3 = new WxMenu(false, "最近访问", "http://www.limer.com.cn/mq/recentplaces");
+//		WxMenu m21 = new WxMenu(false, "我的提问", "http://www.limer.com.cn/mq/listmyquestions");
+//		WxMenu m22 = new WxMenu(false, "我回答的问题", "http://www.limer.com.cn/mq/listmyreplys");
+//		WxMenu m23 = new WxMenu(false, "待回答的问题", "http://www.limer.com.cn/mq/listmyneedreplys");
+//		WxMenu m24 = new WxMenu(false, "我的消费和收益", "http://www.limer.com.cn/mq/listmyfees");
+//		WxMenu m2 = new WxMenu("我的", new WxMenu[] {m24, m23, m22, m21});
+//		WxMenuDiyUtil.setMenu(new WxMenu[]{m1, m3, m2});
+		WxMenuDiyUtil.setMenu(new WxMenu[]{});
 		
 		Thread.sleep(3000);
 		a.stop();

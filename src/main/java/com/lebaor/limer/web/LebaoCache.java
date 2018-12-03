@@ -109,6 +109,23 @@ public class LebaoCache {
 		globalJedis.auth(getInstance().jedisPassword);
 		
 		//从jedis里取
+		//更新recentBooks缓存
+		LimerBookInfo[] lbiBooks = lbiDB.getAllLimerBookInfos();
+		for (LimerBookInfo lbi : lbiBooks) {
+			WebBookDetail wbd = this.getBookInfo(lbi.getIsbn());
+			if (wbd == null) {
+				LogUtil.WEB_LOG.warn("no book info: isbn="+lbi.getIsbn());
+				continue;
+			}
+			
+			//把这本书加入tag对应的缓存
+			String[] tags = wbd.getBook().getLimerTagsAsArray();
+			for (String tag : tags) {
+				Map<String, Double> sm = new HashMap<String, Double>();
+				sm.put(wbd.getBook().getIsbn(), (double)wbd.computeScore());
+				getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(tag), sm);
+			}
+		}
 		
 		try {
 			if (!getJedis().exists(KEY_RECENT_BOOKLISTS)) {
@@ -715,6 +732,7 @@ public class LebaoCache {
 		LogUtil.WEB_LOG.debug("getRecentBooks("+tag+","+start+","+len+"), return "+ list.size());
 		for (String isbn: list) {
 			WebBookDetail wb = this.getBookInfo(isbn);
+			if (wb == null) continue;
 			resultList.add(wb);
 		}
 		return resultList;
@@ -854,7 +872,7 @@ public class LebaoCache {
 				lbi = lbiDB.getRecentDonateBook(isbn, userId);
 				getJedis().set(KEY_BOOK_STATUS_PREFIX+ lbi.getId(), lbi.toJSON());
 				
-				//更新recentBooks缓存 TODO
+				//更新recentBooks缓存
 				//把这本书加入tag对应的缓存
 				String[] tags = wbd.getBook().getLimerTagsAsArray();
 				for (String tag : tags) {

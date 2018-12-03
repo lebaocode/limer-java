@@ -61,9 +61,10 @@ public class LimerBookInfoDB {
 		o.setDonateUserId(rs.getLong(3));
 		o.setStatus(rs.getInt(4));
 		o.setDegree(rs.getInt(5));
-		d = rs.getTimestamp(6);
-		o.setDonateTime(d != null ? d.getTime() : 0);
+		o.setExtraInfo(rs.getString(6));
 		d = rs.getTimestamp(7);
+		o.setDonateTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(8);
 		o.setLastUpdateTime(d != null ? d.getTime() : 0);
 		return o;
 	}
@@ -159,6 +160,7 @@ public class LimerBookInfoDB {
 				o.getDonateUserId(),
 				o.getStatus(),
 				o.getDegree(),
+				o.getExtraInfo(),
 				TextUtil.formatTime(o.getDonateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
 		});
@@ -177,6 +179,7 @@ public class LimerBookInfoDB {
 				o.getDonateUserId(),
 				o.getStatus(),
 				o.getDegree(),
+				o.getExtraInfo(),
 				TextUtil.formatTime(o.getDonateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
 				o.getId(),
@@ -184,7 +187,7 @@ public class LimerBookInfoDB {
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "isbn", "donate_user_id", "status", "degree", "donate_time", "last_update_time"};
+	private static final String[] COL_NAMES = {"id", "isbn", "donate_user_id", "status", "degree", "extra_info", "donate_time", "last_update_time"};
 	
 	
 	private void createLimerBookInfoDBTable() {
@@ -195,6 +198,8 @@ public class LimerBookInfoDB {
 				"  `donate_user_id` bigint(20) NOT NULL,\r\n" +
 				"  `status` smallint(2) default 0,\r\n" +
 				"  `degree` smallint(3) default 0,\r\n" +
+				"  `extra_info` TEXT default NULL,\r\n" +
+				
 				"  `donate_time` datetime default NULL,\r\n" +
 				"  `last_update_time` datetime default NULL,\r\n" +
 				

@@ -18,6 +18,7 @@ public class User {
 	String city;
 	String district;
 	
+	String extraInfo;
 	int status;
 	
 	long createTime;
@@ -38,6 +39,7 @@ public class User {
 			o.put("province", province);
 			o.put("city", city);
 			o.put("district", district);
+			o.put("extraInfo", extraInfo);
 			o.put("status", status);
 			o.put("createTime", Long.toString(createTime));
 			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
@@ -72,6 +74,7 @@ public class User {
 			n.province = JSONUtil.getString(o, "province");
 			n.city = JSONUtil.getString(o, "city");
 			n.district = JSONUtil.getString(o, "district");
+			n.extraInfo = JSONUtil.getString(o, "extraInfo");
 			n.status = JSONUtil.getInt(o, "status");
 			n.createTime = JSONUtil.getLong(o, "createTime");
 			n.lastUpdateTime = JSONUtil.getLong(o, "lastUpdateTime");
@@ -177,6 +180,14 @@ public class User {
 	}
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public void setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
 	}
 	
 	

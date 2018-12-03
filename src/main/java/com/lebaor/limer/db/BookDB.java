@@ -66,10 +66,11 @@ public class BookDB {
 		java.sql.Timestamp d;
 		Book o = new Book();
 		o.setId(rs.getLong(1));
-		o.setDoubanJson(rs.getString(4));
-		d = rs.getTimestamp(5);
+		o.setLimerTags(rs.getString(4));
+		o.setDoubanJson(rs.getString(5));
+		d = rs.getTimestamp(6);
 		o.setCreateTime(d != null ? d.getTime() : 0);
-		o.setBookFrom(rs.getString(6));
+		o.setBookFrom(rs.getString(7));
 		return o;
 	}
 	
@@ -127,6 +128,7 @@ public class BookDB {
 				
 				o.getIsbn10(),
 				o.getIsbn13(),
+				o.getLimerTags(),
 				o.getJson(),
 				TextUtil.formatTime(o.getCreateTime()),
 				o.getBookFrom()
@@ -144,6 +146,7 @@ public class BookDB {
 				
 				o.getIsbn10(),
 				o.getIsbn13(),
+				o.getLimerTags(),
 				o.getJson(),
 				TextUtil.formatTime(o.getCreateTime()),
 				o.getBookFrom(),
@@ -152,7 +155,7 @@ public class BookDB {
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "isbn10", "isbn13", "json", 
+	private static final String[] COL_NAMES = {"id", "isbn10", "isbn13","limer_tags", "json",
 		"create_time", "book_from"};
 	
 	
@@ -162,6 +165,7 @@ public class BookDB {
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
 				"  `isbn10` varchar(10) NOT NULL,\r\n" +
 				"  `isbn13` varchar(13) NOT NULL,\r\n" +
+				"  `limer_tags` varchar(1023) default NULL,\r\n" +
 				"  `json` TEXT default NULL,\r\n" +
 				"  `create_time` datetime default NULL,\r\n" +
 				"  `book_from` varchar(255) default NULL,\r\n" +

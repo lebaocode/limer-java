@@ -18,9 +18,10 @@ public class LimerBookInfo {
 	
 	long id;
 	String isbn;
-	long donateUserId;//捐赠人id
+	long donateUserId;//捐赠人id 如果为0，表示是公司的书
 	int status;
 	int degree = 80;//书籍新旧程度
+	String extraInfo;//如果是一套书里的其中一本，则把每一本信息放在这里no, title, price, pageNum
 	long donateTime;//捐赠时间
 	long lastUpdateTime;
 	
@@ -116,7 +117,66 @@ public class LimerBookInfo {
 	public void setDegree(int degree) {
 		this.degree = degree;
 	}
+
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
+	public void setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
+	}
 	
+	public void setSingleBookInfo(int no, String title, int price, int pageNum) {
+		try {
+			JSONObject o = new JSONObject();
+			o.put("no", no);
+			o.put("title", title);
+			o.put("price", price);
+			o.put("pageNum", pageNum);
+			this.extraInfo = o.toString();
+		}catch (Exception e) {
+			
+		}
+	}
 	
+	//是一个isbn里的单册书吗？即每册书没有自己的isbn，一整套书才有一个isbn
+	public boolean isSingleBook() {
+		if (this.extraInfo == null || this.extraInfo.trim().length() == 0 || this.extraInfo.equals("{}")) return false;
+		
+		return true;
+	}
+	
+	public int getSingleBookNo() {
+		try {
+			JSONObject o = new JSONObject(this.extraInfo);
+			return o.getInt("no");
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	public String getSingleBookTitle() {
+		try {
+			JSONObject o = new JSONObject(this.extraInfo);
+			return o.getString("title");
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	public int getSingleBookPrice() {
+		try {
+			JSONObject o = new JSONObject(this.extraInfo);
+			return o.getInt("price");
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	public int getSingleBookPageNum() {
+		try {
+			JSONObject o = new JSONObject(this.extraInfo);
+			return o.getInt("pageNum");
+		} catch (Exception e) {
+			return 0;
+		}
+	}
 	
 }

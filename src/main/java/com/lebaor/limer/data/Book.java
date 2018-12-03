@@ -44,6 +44,8 @@ public class Book {
 	String seriesId;//所属系列id(doubanid)
 	String seriesTitle; //所属系列标题
 	
+	String limerTags;//我们自己定义的标签，是个json数组["0-6岁", "科普"]
+	
 	public String getAuthorAsString() {
 		
 		if (authors == null) return "";
@@ -301,6 +303,28 @@ public class Book {
 	public String getDoubanBookId() {
 		return doubanBookId;
 	}
+
+	public String getLimerTags() {
+		return limerTags;
+	}
+
+	public void setLimerTags(String limerTags) {
+		this.limerTags = limerTags;
+	}
 	
+	public String[] getLimerTagsAsArray() {
+		if (limerTags == null || limerTags.trim().length() == 0) return new String[0];
+		
+		try {
+			JSONArray arr = new JSONArray(limerTags);
+			String[] ret = new String[arr.length()];
+			for (int i = 0; i < arr.length(); i++) {
+				ret[i] = arr.getString(i);
+			}
+			return ret;
+		} catch (Exception e) {
+			return new String[0];
+		}
+	}
 	
 }

@@ -58,6 +58,69 @@ public class UserAuth {
 		}
 	}
 
+	//设定本用户是否苹果用户
+	public void setIOS(boolean isIOS) {
+		JSONObject o;
+		try {
+			if (extraInfo == null || extraInfo.trim().length() == 0) {
+				o = new JSONObject();
+			} else {
+				o = new JSONObject(extraInfo);
+			}
+			o.put("iOS", isIOS);
+			this.extraInfo = o.toString();
+		
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	public boolean isIOS() {
+		JSONObject o;
+		try {
+			if (extraInfo == null || extraInfo.trim().length() == 0) {
+				return false;
+			} 
+			
+			o = new JSONObject(extraInfo);
+			return o.getBoolean("iOS");
+		
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	//设定本用户是否可以进小程序
+	public void setIOSAuth(boolean hasAuth) {
+		JSONObject o;
+		try {
+			if (extraInfo == null || extraInfo.trim().length() == 0) {
+				o = new JSONObject();
+			} else {
+				o = new JSONObject(extraInfo);
+			}
+			o.put("hasAuth", hasAuth);
+			this.extraInfo = o.toString();
+		
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	public boolean isIOSHasAuth() {
+		JSONObject o;
+		try {
+			if (extraInfo == null || extraInfo.trim().length() == 0) {
+				return false;
+			} 
+			
+			o = new JSONObject(extraInfo);
+			return o.getBoolean("hasAuth");
+		
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 	public String toString() {
 		return toJSON();

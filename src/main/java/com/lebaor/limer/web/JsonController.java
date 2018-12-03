@@ -132,7 +132,32 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/addChild")) {
 			addChild(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/isAddressFilled")) {
+			isAddressFilled(req, res, model);
+			return;
 		} 
+	}
+	
+	public void isAddressFilled(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		boolean result = wu.getUser().getAddress() != null && wu.getUser().getAddress().trim().length() > 0;
+		JSONObject fill = new JSONObject();
+		try {
+			fill.put("hasInfo", result);
+		} catch (Exception e) {
+			
+		}
+		WebJSONObject o = new WebJSONObject(fill.toString());
+		
+		this.setRetJson(model, o.toString());
 	}
 	
 	public void agreeBookComment(HttpServletRequest req, 
@@ -186,11 +211,28 @@ public class JsonController extends EntryController implements Runnable {
 		String nickName = this.getParameterValue(req, "nickname", "");
 		int relation = this.getIntParameterValue(req, "relation", 0);
 		
+		String address = this.getParameterValue(req, "address", "");
+		String receiverMobile = this.getParameterValue(req, "receiverMobile", "");
+		String receiverName = this.getParameterValue(req, "receiverName", "");
+		
 		WebUser wu = this.getUser(req);
 		
-		if (wu == null) {
+		if (wu == null || wu.getUser() == null) {
 			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
 			return;
+		}
+		
+		try {
+			String extraJson = wu.getUser().getExtraInfo();
+			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
+			JSONObject extra = new JSONObject(extraJson);
+			extra.put("address", address);
+			extra.put("receiverMobile", receiverMobile);
+			extra.put("receiverName", receiverName);
+			wu.getUser().setExtraInfo(extra.toString());
+			cache.updateUserInfo(wu.getUserId(), wu.getUser());
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("updateUserInfo exception [userId="+ wu.getUserId() +"]", e);
 		}
 		
 		Child child = new Child();

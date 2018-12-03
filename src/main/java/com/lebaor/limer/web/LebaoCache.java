@@ -54,7 +54,7 @@ public class LebaoCache {
 	private static final int KEY_COMMENT_EXPIRE = 3600*72;//3天
 	
 	private static final String KEY_BOOK_PREFIX = "bk:";//key,value key=bk:isbn, value=bookObject
-	private static final int KEY_BOOK_EXPIRE = 3600*72;//3天
+	private static final int KEY_BOOK_EXPIRE = 3600*24*21;//21天
 	
 	private static final String KEY_COMMENTNUM_PREFIX = "cmn:";//key,value key=cmn:isbn, value=书评数
 	private static final int KEY_COMMENTNUM_EXPIRE = 3600*720;//30天
@@ -62,7 +62,8 @@ public class LebaoCache {
 	private static final String KEY_COMMENTLIKENUM_PREFIX = "cmagree:";//key,value key=cmagree:isbn, value=点赞数
 	private static final int KEY_COMMENTLIKENUM_EXPIRE = 3600*720;//30天
 	
-	private static final String KEY_BOOK_STATUS = "book_status";//key,value key=limerBookId, value=limerbookInfo 缓存里不保证是全部的数据
+	private static final String KEY_BOOK_STATUS_PREFIX = "bs:";//key,value key=bs:limerBookId, value=limerbookInfo
+	private static final int KEY_BOOK_STATUS_EXPIRE = 3600*720;//30天
 	
 	private static final String KEY_USER_PREFIX = "user:";//key,value key=user:userId value=userprofileObject json 缓存里不保证是全部的数据
 	private static final int KEY_USER_EXPIRE = 3600*72;//3天
@@ -108,34 +109,6 @@ public class LebaoCache {
 		globalJedis.auth(getInstance().jedisPassword);
 		
 		//从jedis里取
-		try {
-			if (!getJedis().exists(KEY_RECENT_BOOKS)) {
-				//最近1000本书籍状态
-				Map<String, Double> scoreMembers = new HashMap<String, Double>();
-				Book[] bookArr = bookDB.getBooks(0, KEY_RECENT_BOOKS_NUM);
-				LogUtil.WEB_LOG.debug("getRecentBooks() read from db:"+bookArr.length);
-				
-				for (Book b : bookArr) {
-					WebBookDetail wbd = this.getBookInfo(b.getIsbn13());
-					LogUtil.WEB_LOG.debug("getBookInfo finished: " + b.getIsbn13());
-					
-					Map<String, Double> sm = new HashMap<String, Double>();
-					sm.put(wbd.getBook().toDoubanJSON(), (double)wbd.computeScore());
-					scoreMembers.put(wbd.getBook().toDoubanJSON(), (double)wbd.computeScore());
-					
-					for (String t : wbd.getBook().getTagsString()) {
-						getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(t), sm);
-						LogUtil.WEB_LOG.debug("getRecentBooks() write to redis: "+ KEY_RECENT_BOOKS+"_" +t+": "+ sm.size());
-					}
-				}
-				getJedis().zadd(KEY_RECENT_BOOKS, scoreMembers);
-				LogUtil.WEB_LOG.debug("getRecentBooks() write to redis: "+KEY_RECENT_BOOKS+ " "+scoreMembers.size());
-			}
-		} catch(Exception t) {
-			LogUtil.WEB_LOG.debug("getRecentBooks(0,"+KEY_RECENT_BOOKS_NUM+") error", t);
-		}
-		
-		LogUtil.WEB_LOG.info("init Jedis recent_books success.");
 		
 		try {
 			if (!getJedis().exists(KEY_RECENT_BOOKLISTS)) {
@@ -178,6 +151,8 @@ public class LebaoCache {
 		LogUtil.WEB_LOG.info("init Jedis recent_booklists success.");
 	}
 	
+	
+	
 	public static Jedis getJedis() {
 		return globalJedis;
 	}
@@ -211,7 +186,7 @@ public class LebaoCache {
 		if (child != null) {
 			getJedis().set(KEY_CHILD_PREFIX+ child.getParentUserId(), child.toJSON());
 		}
-		
+
 		return child; 
 	}
 	
@@ -613,7 +588,7 @@ public class LebaoCache {
 					lbiDB.updateLimerBookInfo(lbi);
 
 					//更新缓存
-					getJedis().hset(KEY_BOOK_STATUS, Long.toString(limerBookId), lbi.toJSON());
+					getJedis().set(KEY_BOOK_STATUS_PREFIX+limerBookId, lbi.toJSON());
 				}
 			} catch(Throwable e) {
 				LogUtil.WEB_LOG.warn("[returnBook error: "+ "[userId=]"+ userId +"] [limerBookId="+ limerBookId +"]", e);
@@ -624,7 +599,7 @@ public class LebaoCache {
 	
 	public LimerBookInfo getLimerBookStatus(long limerBookId) {
 		//先从jedis取
-		String bookJson = getJedis().hget(KEY_BOOK_STATUS, Long.toString(limerBookId));
+		String bookJson = getJedis().get(KEY_BOOK_STATUS_PREFIX + limerBookId);
 		if (bookJson != null) {
 			try {
 				JSONObject o = new JSONObject(bookJson);
@@ -641,7 +616,7 @@ public class LebaoCache {
 		if (b == null) return null;
 		
 		//存入jedis
-		getJedis().hset(KEY_BOOK_STATUS, Long.toString(limerBookId), b.toJSON());
+		getJedis().set(KEY_BOOK_STATUS_PREFIX + limerBookId, b.toJSON());
 		
 		return b;
 	}
@@ -738,9 +713,8 @@ public class LebaoCache {
 		if (list == null || list.size() == 0) return resultList;
 		
 		LogUtil.WEB_LOG.debug("getRecentBooks("+tag+","+start+","+len+"), return "+ list.size());
-		for (String s: list) {
-			WebBookDetail wb = new WebBookDetail();
-			wb.setBook(Book.parseFromDoubanJSON(s));
+		for (String isbn: list) {
+			WebBookDetail wb = this.getBookInfo(isbn);
 			resultList.add(wb);
 		}
 		return resultList;
@@ -857,13 +831,6 @@ public class LebaoCache {
 		
 		synchronized (this) {
 			try {
-				LimerBookInfo[] lbiArr = lbiDB.getLimerBooksByDonateUser(userId);
-				for (LimerBookInfo lbi: lbiArr) {
-					if (isbn.equals(lbi.getIsbn())) {
-						//已捐赠过此书
-						return false;
-					}
-				}
 				
 				//判断isbn是否入库过，如果没有，则入库
 				WebBookDetail wbd = this.getBookInfo(isbn);
@@ -885,7 +852,16 @@ public class LebaoCache {
 
 				//更新缓存
 				lbi = lbiDB.getRecentDonateBook(isbn, userId);
-				getJedis().hset(KEY_BOOK_STATUS, Long.toString(lbi.getId()), lbi.toJSON());
+				getJedis().set(KEY_BOOK_STATUS_PREFIX+ lbi.getId(), lbi.toJSON());
+				
+				//更新recentBooks缓存 TODO
+				//把这本书加入tag对应的缓存
+				String[] tags = wbd.getBook().getLimerTagsAsArray();
+				for (String tag : tags) {
+					Map<String, Double> sm = new HashMap<String, Double>();
+					sm.put(wbd.getBook().getIsbn(), (double)wbd.computeScore());
+					getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(tag), sm);
+				}
 				
 				return res;
 			} catch(Throwable t) {

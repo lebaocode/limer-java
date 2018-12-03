@@ -68,12 +68,13 @@ public class UserDB {
 		o.setProvince(rs.getString(9));
 		o.setCity(rs.getString(10));
 		o.setDistrict(rs.getString(11));
-		o.setStatus(rs.getInt(12));
-		d = rs.getTimestamp(13);
-		o.setCreateTime(d != null ? d.getTime() : 0);
+		o.setExtraInfo(rs.getString(12));
+		o.setStatus(rs.getInt(13));
 		d = rs.getTimestamp(14);
-		o.setLastUpdateTime(d != null ? d.getTime() : 0);
+		o.setCreateTime(d != null ? d.getTime() : 0);
 		d = rs.getTimestamp(15);
+		o.setLastUpdateTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(16);
 		o.setLastLoginTime(d != null ? d.getTime() : 0);
 		return o;
 	}
@@ -117,6 +118,30 @@ public class UserDB {
 		return res;
 	}
 	
+	public User getUserByMobile(String mobile) {
+		String sql = "SELECT * FROM " + TABLENAME + " " 
+				+ " WHERE mobile=? ";
+		User[] UserArr = (User[])dbUtils.executeQuery(sql, new Object[]{mobile}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				LinkedList<User> list = new LinkedList<User>(); 
+				while (rs.next()) {
+					User u = readOneRow(rs);
+					list.add(u);
+				}
+				return list.toArray(new User[0]);
+			}
+		});
+		User res = null;
+		long max = 0;
+		for (User u : UserArr) {
+			if (u.getCreateTime() > max) {
+				max = u.getCreateTime();
+				res = u;
+			}
+		}
+		return res;
+	}
+	
 	/**
 	 * 添加一个User进数据库
 	 * @param User
@@ -136,6 +161,7 @@ public class UserDB {
 				o.getProvince(),
 				o.getCity(),
 				o.getDistrict(),
+				o.getExtraInfo(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getCreateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
@@ -161,6 +187,7 @@ public class UserDB {
 				o.getProvince(),
 				o.getCity(),
 				o.getDistrict(),
+				o.getExtraInfo(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getCreateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
@@ -172,7 +199,7 @@ public class UserDB {
 	
 	private static final String[] COL_NAMES = {"id", "user_name", "user_logo", "mobile", 
 		"address", "email", "sex", "birthday", 
-		"province", "city", "district", "status", "create_time", 
+		"province", "city", "district", "extra_info", "status", "create_time", 
 		"last_update_time", "last_login_time"};
 	
 	/**
@@ -210,6 +237,7 @@ public class UserDB {
 				"  `province` varchar(64) default NULL,\r\n" +
 				"  `city` varchar(64) default NULL,\r\n" +
 				"  `district` varchar(64) default NULL,\r\n" +
+				"  `extra_info` TEXT default NULL,\r\n" +
 				
 				"  `status` smallint(2) default 0,\r\n" +
 				
@@ -225,6 +253,9 @@ public class UserDB {
 					" ON "+ TABLENAME +" (user_name)";
 			dbUtils.executeSql(sql, null);
 			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_mobile" + 
+					" ON "+ TABLENAME +" (mobile)";
+			dbUtils.executeSql(sql, null);
 		}
 		
 	}

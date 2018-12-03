@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lebaor.limer.data.Child;
+import com.lebaor.limer.data.LimerBookInfo;
 import com.lebaor.limer.data.LimerConstants;
 import com.lebaor.limer.data.User;
 import com.lebaor.limer.data.UserAuth;
@@ -98,6 +99,9 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		} else if (uri.startsWith("/json/borrowBooks")) {
 			borrowBooks(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/preBorrowOneBook")) {
+			preBorrowOneBook(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/returnBook")) {
 			returnBook(req, res, model);
@@ -388,6 +392,27 @@ public class JsonController extends EntryController implements Runnable {
 		WebJSONArray wja = new WebJSONArray(ja.toString());
 		
 		this.setRetJson(model, wja.toJSON());
+	}
+	
+	public void preBorrowOneBook(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  
+            throws Exception {
+		WebUser wu = this.getUser(req);
+		if (wu == null) {
+			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+			return;
+		}
+		
+		
+		//用户一次借n本书
+		String isbn = this.getParameterValue(req, "isbn", "");
+		LimerBookInfo lbi = cache.preBorrowOneBook(isbn, wu.getUserId());
+		
+		if (lbi != null) {
+			this.setRetJson(model, new WebJSONObject(lbi.getId()+"").toJSON());
+		} else {
+			this.setRetJson(model, new WebJSONObject(false, "已无库存").toJSON());
+		}
 	}
 	
 	public void borrowBooks(HttpServletRequest req, 

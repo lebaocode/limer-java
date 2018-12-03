@@ -71,6 +71,9 @@ public class LebaoCache {
 	private static final String KEY_USER_AUTH_PREFIX = "wx:";//key,value key=wx:unionId value=userId 缓存里不保证是全部的数据
 	private static final int KEY_USER_AUTH_EXPIRE = 3600*72;//3天
 	
+	private static final String KEY_PRE_BORROW_PREFIX = "preb:";//key,value key=preb:limerBookId value=userId
+	private static final int KEY_PRE_BORROW_EXPIRE = 3600*2;//2小时
+	
 	int jedisMaxTotal;
 	int jedisMaxIdle;
 	int jedisMinIdle;
@@ -367,6 +370,37 @@ public class LebaoCache {
 			list.add(wbc);
 		}
 		return list.toArray(new WebBookComment[0]);
+	}
+	
+	public LimerBookInfo preBorrowOneBook(String isbn, long userId) {
+		//判断该书是否可借
+		LimerBookInfo one =null;
+		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
+		for (LimerBookInfo lbs : lbsArr) {
+			//判断缓存里是否已经被借走
+			if (getJedis().exists(KEY_PRE_BORROW_PREFIX + lbs.getId())) {
+				//已被预借
+				continue;
+			}
+			
+			if (lbs.getStatus() == LimerConstants.LIMER_BOOK_STATUS_READY) {
+				//可以借
+				if (one == null) one = lbs;
+				break;
+			}
+		}
+		
+		//无书可借
+		if (one == null) return null;
+		
+		WebBookDetail wb = this.getBookInfo(isbn);
+		if (wb == null) return null;
+		
+		//放入缓存
+		getJedis().set(KEY_PRE_BORROW_PREFIX + one.getId(), Long.toString(userId));
+		getJedis().expire(KEY_PRE_BORROW_PREFIX + one.getId(), KEY_PRE_BORROW_EXPIRE);
+		
+		return one;
 	}
 	
 	public LimerBookInfo borrowOneBook(String isbn, long userId) {

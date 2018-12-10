@@ -12,7 +12,7 @@ public class WxConstants {
 //	public static long WX_TIMESTAMP = 1484909088L;
 	public static String WX_NONCESTR = "1939430029";
 	public static String WX_MCH_ID = "1430694502";
-	public static String SERVER_IP = "222.128.156.59";//local home 
+	public static String SERVER_IP = "132.232.154.90";//qcloud www.limer.cn
 	//encodingAESKey:1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
 //	public static String SERVER_IP = "120.77.250.200";//www.limer.com.cn
 	

@@ -44,10 +44,11 @@ public class LimerConstants {
 	public final static int SCORE_DONATE_ONE_BOOK = 100;//捐赠一本书，加多少积分
 	
 	public final static int ORDER_STATUS_NOT_XIADAN = 0;//未下单
-	public final static int ORDER_STATUS_XIADAN = 1;//刚下单
-	public final static int ORDER_STATUS_PAY_SUCCESS = 2;//支付成功
-	public final static int ORDER_STATUS_PAY_FAILED = 3;//支付失败
-	public final static int ORDER_STATUS_PAY_EXPIRED = 4;//时间过期
+	public final static int ORDER_STATUS_MCH_PRE_XIADAN = 1;//商户预下单
+	public final static int ORDER_STATUS_WX_PRE_XIADAN = 2;//预下单
+	public final static int ORDER_STATUS_PAY_SUCCESS = 3;//支付成功
+	public final static int ORDER_STATUS_PAY_FAILED = 4;//支付失败
+	public final static int ORDER_STATUS_PAY_EXPIRED = 5;//时间过期
 	
 	public final static int USER_STATUS_NORMAL = 0;//正常
 	
@@ -65,6 +66,10 @@ public class LimerConstants {
 	public static int computeLogisticsFee(int pageNum) {
 		return pageNum <= 30 ? 210 : pageNum* 7;
 	}
+	
+	public final static String PAY_METHOD_WXPAY = "wxpay";
+	public final static String PAY_METHOD_ALIPAY = "alipay";
+	public final static String FEE_TYPE_RMB = "CNY";
 	
 	public final static int ACTIVITY_STATUS_NOTPUBLISHED = 0;//未发布
 	public final static int ACTIVITY_STATUS_DOING = 0;//进行中
@@ -118,6 +123,26 @@ public class LimerConstants {
 		}
 		return "其它";
 	}
+	
+	//按地区收会员费
+	public static int getMemberPrice(String address) {
+		if (address.startsWith("北京")) {
+			return 3000;//30元
+		} else if (address.startsWith("青海")
+				|| address.startsWith("海南")
+				|| address.startsWith("云南")
+				|| address.startsWith("贵州")
+				|| address.startsWith("广西")
+				|| address.startsWith("西藏")
+				|| address.startsWith("新疆")
+				) {
+			return 5000;
+		} else {
+			return 4000;
+		}
+	}
+	
+	public static final int DEPOSIT_FEE = 10000;//100元
 	
 	public static void main(String[] args) {
 		for (int i =11 ;i <100; i++  ) {

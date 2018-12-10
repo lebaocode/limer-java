@@ -15,7 +15,8 @@ import com.lebaor.wx.data.WxChargeNotifyData;
 public class WxPayUtil {
 	private static final Logger LOG = LogFormatter.getLogger(WxPayUtil.class);
 	
-	public static String unifiedOrderJsApi(String attach, String orderId, int priceFen, String userIp, String notifyUrl, String userOpenId, String wxPayDesc) throws Exception {
+	public static String unifiedOrderJsApi(String attach, String orderId, int priceFen, String userIp, String notifyUrl, 
+			String userOpenId, String wxPayDesc, String detailDesc) throws Exception {
 		try {
 			XMLConfiguration xmlConfig = new XMLConfiguration();
 			xmlConfig.setRootElementName("xml");
@@ -23,6 +24,7 @@ public class WxPayUtil {
 			xmlConfig.setProperty("appid", WxConstants.WX_APPID);
 			xmlConfig.setProperty("attach", attach);
 			xmlConfig.setProperty("body", wxPayDesc);
+			xmlConfig.setProperty("detail", detailDesc);
 			xmlConfig.setProperty("device_info", "WEB");
 			xmlConfig.setProperty("mch_id", WxConstants.WX_MCH_ID);
 			xmlConfig.setProperty("nonce_str", WxConstants.WX_NONCESTR);
@@ -37,6 +39,7 @@ public class WxPayUtil {
 			String param = "appid=" + WxConstants.WX_APPID
 					+ "&attach=" + attach
 					+ "&body=" + wxPayDesc
+					+ "&detail=" + detailDesc
 					+ "&device_info=WEB"
 					+ "&mch_id=" + WxConstants.WX_MCH_ID
 					+ "&nonce_str=" + WxConstants.WX_NONCESTR

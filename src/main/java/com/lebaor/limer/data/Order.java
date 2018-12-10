@@ -2,6 +2,7 @@ package com.lebaor.limer.data;
 
 import org.json.JSONObject;
 
+import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.TextUtil;
 
 /**
@@ -12,7 +13,7 @@ import com.lebaor.utils.TextUtil;
 public class Order {
 	long id;
 	String mchTradeNo;//内部订单id
-	String wxTradeNo;//微信订单id
+	String wxTradeNo;//微信订单id，即prepayid
 	String payMethod = "weixin";//支付方式，默认都是微信支付
 	
 	long userId;//用户id
@@ -20,9 +21,9 @@ public class Order {
 	String unionid;
 	String ip;
 	
-	String limerBookIdsJson;//此次订单包含的书籍limerBookId ["3323", "23283"]
+	String extraJson;//此次订单包含的书籍limerBookId ["3323", "23283"]
 	String title;//订单名称
-	int bookNum;//商品数量
+	int mchNum;//商品数量
 	
 	int totalFee;//原价 分
 	int realFee;//实际支付价格 分
@@ -56,9 +57,9 @@ public class Order {
 			o.put("openid", openid);
 			o.put("unionid", unionid);
 			o.put("ip", ip);
-			o.put("limerBookIdsJson", limerBookIdsJson);
+			o.put("extraJson", extraJson);
 			o.put("title", title);
-			o.put("bookNum", bookNum);
+			o.put("bookNum", mchNum);
 			o.put("totalFee", totalFee);
 			o.put("realFee", realFee);
 			o.put("coupounId", coupounId);
@@ -86,25 +87,25 @@ public class Order {
 	public static Order parseJSON(JSONObject o) {
 		try {
 			Order n = new Order();
-			n.id = o.getLong("id");
-			n.mchTradeNo = o.getString("mchTradeNo");
-			n.wxTradeNo = o.getString("wxTradeNo");
-			n.payMethod = o.getString("payMethod");
-			n.userId = o.getLong("userId");
-			n.openid = o.getString("openid");
-			n.unionid = o.getString("unionid");
-			n.ip = o.getString("ip");
-			n.limerBookIdsJson = o.getString("limerBookIdsJson");
-			n.title = o.getString("title");
-			n.bookNum = o.getInt("bookNum");
-			n.totalFee = o.getInt("totalFee");
-			n.realFee = o.getInt("realFee");
-			n.coupounId = o.getString("coupounId");
-			n.coupounFee = o.getInt("coupounFee");
-			n.feeType = o.getString("feeType");
-			n.status = o.getInt("status");
-			n.orderStartTime = o.getLong("orderStartTime");
-			n.orderFinishTime = o.getLong("orderFinishTime");
+			n.id = JSONUtil.getLong(o, "id");
+			n.mchTradeNo = JSONUtil.getString(o, "mchTradeNo");
+			n.wxTradeNo = JSONUtil.getString(o, "wxTradeNo");
+			n.payMethod = JSONUtil.getString(o, "payMethod");
+			n.userId = JSONUtil.getLong(o, "userId");
+			n.openid = JSONUtil.getString(o, "openid");
+			n.unionid = JSONUtil.getString(o, "unionid");
+			n.ip = JSONUtil.getString(o, "ip");
+			n.extraJson = JSONUtil.getString(o, "extraJson");
+			n.title = JSONUtil.getString(o, "title");
+			n.mchNum = JSONUtil.getInt(o, "bookNum");
+			n.totalFee = JSONUtil.getInt(o, "totalFee");
+			n.realFee = JSONUtil.getInt(o, "realFee");
+			n.coupounId = JSONUtil.getString(o, "coupounId");
+			n.coupounFee = JSONUtil.getInt(o, "coupounFee");
+			n.feeType = JSONUtil.getString(o, "feeType");
+			n.status = JSONUtil.getInt(o, "status");
+			n.orderStartTime = JSONUtil.getLong(o, "orderStartTime");
+			n.orderFinishTime = JSONUtil.getLong(o, "orderFinishTime");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -164,11 +165,11 @@ public class Order {
 	public void setIp(String ip) {
 		this.ip = ip;
 	}
-	public String getLimerBookIdsJson() {
-		return limerBookIdsJson;
+	public String getExtraJson() {
+		return extraJson;
 	}
-	public void setLimerBookIdsJson(String limerBookIdsJson) {
-		this.limerBookIdsJson = limerBookIdsJson;
+	public void setExtraJson(String extraJson) {
+		this.extraJson = extraJson;
 	}
 	public String getTitle() {
 		return title;
@@ -176,11 +177,11 @@ public class Order {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public int getBookNum() {
-		return bookNum;
+	public int getMchNum() {
+		return mchNum;
 	}
-	public void setBookNum(int bookNum) {
-		this.bookNum = bookNum;
+	public void setMchNum(int mchNum) {
+		this.mchNum = mchNum;
 	}
 	public int getTotalFee() {
 		return totalFee;
@@ -230,6 +231,5 @@ public class Order {
 	public void setOrderFinishTime(long orderFinishTime) {
 		this.orderFinishTime = orderFinishTime;
 	}
-	
-	
+
 }

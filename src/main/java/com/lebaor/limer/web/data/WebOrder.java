@@ -12,6 +12,7 @@ public class WebOrder {
 	String mchTradeNo;//订单号
 	int totalFee;//原价
 	int realFee;//实际价格
+	int deposit;//押金价格，单位分
 	JSONArray items; //itemsjson
 	
 	String remainTimeDesc;//剩余借阅时间描述
@@ -25,6 +26,7 @@ public class WebOrder {
 			o.put("mchTradeNo", mchTradeNo);
 			o.put("totalFee", totalFee);
 			o.put("realFee", realFee);
+			o.put("deposit", deposit);
 			o.put("items", items);
 			o.put("remainTimeDesc", remainTimeDesc);
 			return o.toString();
@@ -52,6 +54,7 @@ public class WebOrder {
 			n.mchTradeNo = o.getString("mchTradeNo");
 			n.totalFee = o.getInt("totalFee");
 			n.realFee = o.getInt("realFee");
+			n.deposit = o.getInt("deposit");
 			n.items = o.getJSONArray("items");
 			n.remainTimeDesc = o.getString("remainTimeDesc");
 			return n;
@@ -228,6 +231,14 @@ public class WebOrder {
 
 	public void setRemainTimeDesc(String remainTimeDesc) {
 		this.remainTimeDesc = remainTimeDesc;
+	}
+
+	public int getDeposit() {
+		return deposit;
+	}
+
+	public void setDeposit(int deposit) {
+		this.deposit = deposit;
 	}
 	
 	

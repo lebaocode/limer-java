@@ -57,6 +57,9 @@
 <bean id="booklistItemDB" class="com.lebaor.limer.db.BookListItemDB" init-method="init">
     <property name="dbUtils"><ref bean="dbUtils"/></property>
 </bean>
+<bean id="tokenUtil" class="com.lebaor.wx.WxAccessTokenUtil" init-method="start">
+</bean>
+
 
 <bean id="lebaoCache" class="com.lebaor.limer.web.LebaoCache" init-method="init" destroy-method="release">
     <property name="userDB"><ref bean="userDB"/></property>
@@ -79,6 +82,8 @@
     <property name="jedisMaxTotal" value="${limer-servlet.jedisMaxTotal}"/>
     <property name="jedisMaxIdle" value="${limer-servlet.jedisMaxIdle}"/>
     <property name="jedisMinIdle" value="${limer-servlet.jedisMinIdle}"/>
+    <property name="wxPayNotifyUrl" value="${wx.pay.notifyurl}"/>
+    
 </bean>
 
 <bean id="jsonController" class="com.lebaor.limer.web.JsonController">

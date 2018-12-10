@@ -21,6 +21,7 @@ import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
 import com.lebaor.webutils.HttpClientUtil;
 import com.lebaor.wx.WxMiniProgramUtil;
+import com.lebaor.wx.WxPayUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -40,6 +41,8 @@ public class LebaoCache {
 	ActivityDB activityDB;
 	BookCommentDB commentDB;
 	BookListItemDB booklistItemDB;
+	
+	String wxPayNotifyUrl;
 	
 	//TODO 未考虑缓存的大小问题？
 	private static final String KEY_RECENT_BOOKS = "recent_books"; //最近所有的书籍。WebBookDetail json list, 评分高的在前，缓存前1000个。
@@ -175,6 +178,47 @@ public class LebaoCache {
 	
 	public static Jedis getJedis() {
 		return globalJedis;
+	}
+	
+	//下单
+	public boolean preOrderMember(String openId, String unionId, long userId, String ip, int totalFee, int realFee) {
+		Order order = new Order();
+		order.setMchNum(1);
+		order.setCoupounFee(0);
+		order.setCoupounId(null);
+		order.setFeeType(LimerConstants.FEE_TYPE_RMB);
+		order.setIp(ip);
+		
+		String mchTradeNo = Order.genMchTradeNo(userId);
+		order.setMchTradeNo(mchTradeNo);
+		order.setOpenid(openId);
+		order.setOrderStartTime(System.currentTimeMillis());
+		order.setPayMethod(LimerConstants.PAY_METHOD_WXPAY);
+		order.setRealFee(realFee);
+		order.setStatus(LimerConstants.ORDER_STATUS_MCH_PRE_XIADAN);
+		order.setTotalFee(totalFee);
+		order.setUnionid(unionId);
+		order.setUserId(userId);
+		order.setWxTradeNo("");
+		boolean result = orderDB.addOrder(order);
+		if (!result) {
+			return false;
+		}
+		
+		//调起微信支付
+		String prepayId = "";
+		try {
+			prepayId = WxPayUtil.unifiedOrderJsApi("", mchTradeNo, realFee, ip, wxPayNotifyUrl, openId, "青柠月度会员", "青柠月度会员");
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("WxPayUnifyOrder exception [userId="+ userId +"]", e);
+		}
+		
+		order = orderDB.getOrderByMchOrderId(mchTradeNo);
+		order.setWxTradeNo(prepayId);
+		order.setStatus(LimerConstants.ORDER_STATUS_WX_PRE_XIADAN);
+		result = orderDB.updateOrder(order);
+		
+		return result;
 	}
 	
 	//只能添加一个孩子 TODO
@@ -454,7 +498,7 @@ public class LebaoCache {
 				wo.setStatusDesc(LimerConstants.explainOrderStatus(o.getStatus()));
 				JSONArray items = new JSONArray();
 				
-				JSONArray ids = new JSONArray(o.getLimerBookIdsJson());
+				JSONArray ids = new JSONArray(o.getExtraJson());
 				for (int i = 0;i < ids.length(); i++) {
 					long limerBookId = Long.parseLong(ids.getString(i));
 					LimerBookInfo lbi = this.getLimerBookStatus(limerBookId);
@@ -546,24 +590,7 @@ public class LebaoCache {
 					}
 				}
 				
-				//创建一个订单
-				Order order = new Order();
-				order.setBookNum(successNum);
-				order.setIp(ip);
-				order.setLimerBookIdsJson(limerBookIds.toString());
-				order.setUserId(u.getUserId());
-				order.setMchTradeNo(Order.genMchTradeNo(u.getUserId()));
-				//order.setOpenid(u.getOpenid());//TODO
-				order.setUnionid(u.getUnionId());
-				order.setOrderStartTime(System.currentTimeMillis());
-				int fee = 0;
-				order.setRealFee(fee);
-				order.setStatus(LimerConstants.ORDER_STATUS_NOT_XIADAN);
-				order.setTitle("");
-				order.setTotalFee(fee);
-				
-				//加入队列
-				OrderTask.addOrder(order);
+				//创建一个订单TODO
 			} catch(Throwable t) {
 				LogUtil.WEB_LOG.warn("Exception when borrowBook(books="+ Arrays.toString(isbnArr) +", userId=" + u.getUserId()+")", t);
 				return null;
@@ -1099,6 +1126,14 @@ public class LebaoCache {
 
 	public void setChildDB(ChildDB childDB) {
 		this.childDB = childDB;
+	}
+
+	public String getWxPayNotifyUrl() {
+		return wxPayNotifyUrl;
+	}
+
+	public void setWxPayNotifyUrl(String wxPayNotifyUrl) {
+		this.wxPayNotifyUrl = wxPayNotifyUrl;
 	}
 	
 }

@@ -40,9 +40,9 @@ public class OrderDB {
 		o.setOpenid(rs.getString(6));
 		o.setUnionid(rs.getString(7));
 		o.setIp(rs.getString(8));
-		o.setLimerBookIdsJson(rs.getString(9));
+		o.setExtraJson(rs.getString(9));
 		o.setTitle(rs.getString(10));
-		o.setBookNum(rs.getInt(11));
+		o.setMchNum(rs.getInt(11));
 		o.setTotalFee(rs.getInt(12));
 		o.setRealFee(rs.getInt(13));
 		o.setCoupounId(rs.getString(14));
@@ -61,6 +61,20 @@ public class OrderDB {
 		String sql = "SELECT * FROM " + TABLENAME + " " 
 				+ " WHERE id=? ";
 		return (Order)dbUtils.executeQuery(sql, new Object[]{id}, new ResultSetHandler(){
+			public Object handle(ResultSet rs, Object[] params) throws Exception {
+				while (rs.next()) {
+					Order u = readOneRow(rs);
+					return u;
+				}
+				return null;
+			}
+		});
+	}
+	
+	public Order getOrderByMchOrderId(String mchOrderId) {
+		String sql = "SELECT * FROM " + TABLENAME + " " 
+				+ " WHERE mch_trade_no=? ";
+		return (Order)dbUtils.executeQuery(sql, new Object[]{mchOrderId}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				while (rs.next()) {
 					Order u = readOneRow(rs);
@@ -101,13 +115,14 @@ public class OrderDB {
 				o.getMchTradeNo(),
 				o.getWxTradeNo(),
 				o.getPayMethod(),
+				
 				o.getUserId(),
 				o.getOpenid(),
 				o.getUnionid(),
 				o.getIp(),
-				o.getLimerBookIdsJson(),
+				o.getExtraJson(),
 				o.getTitle(),
-				o.getBookNum(),
+				o.getMchNum(),
 				o.getTotalFee(),
 				o.getRealFee(),
 				o.getCoupounId(),
@@ -131,13 +146,14 @@ public class OrderDB {
 				o.getMchTradeNo(),
 				o.getWxTradeNo(),
 				o.getPayMethod(),
+				
 				o.getUserId(),
 				o.getOpenid(),
 				o.getUnionid(),
 				o.getIp(),
-				o.getLimerBookIdsJson(),
+				o.getExtraJson(),
 				o.getTitle(),
-				o.getBookNum(),
+				o.getMchNum(),
 				o.getTotalFee(),
 				o.getRealFee(),
 				o.getCoupounId(),
@@ -153,7 +169,7 @@ public class OrderDB {
 	
 	private static final String[] COL_NAMES = {"id", "mch_trade_no", "wx_trade_no", "pay_method", 
 			"user_id", "openid", "unionid", "ip", 
-			"limer_book_idsjson", "title", "book_num", "total_fee", 
+			"extra_json", "title", "mch_num", "total_fee", 
 			"real_fee", "coupoun_id", "coupoun_fee", "fee_type", 
 			"status", "order_start_time", "order_finish_time"};
 	
@@ -166,20 +182,22 @@ public class OrderDB {
 				"  `wx_trade_no` varchar(255) NOT NULL,\r\n" +
 				"  `pay_method` varchar(64) NOT NULL,\r\n" +
 				
+				
 				"  `user_id` bigint(20) NOT NULL,\r\n" +
 				"  `openid` varchar(255) default NULL,\r\n" +
 				"  `unionid` varchar(255) NOT NULL,\r\n" +
 				
 				"  `ip` varchar(32) default NULL,\r\n" +
-				"  `limer_book_idsjson` TEXT NOT NULL,\r\n" +
+				"  `extra_json` TEXT default NULL,\r\n" +
 				"  `title` varchar(255) default NULL,\r\n" +
-				"  `book_num` smallint(2) default 0,\r\n" +
+				"  `mch_num` smallint(2) default 0,\r\n" +
 				"  `total_fee` int(6) default 0,\r\n" +
 				"  `real_fee` int(6) default 0,\r\n" +
 				"  `coupoun_id` varchar(255) default NULL,\r\n" +
 				"  `coupoun_fee` int(6) default 0,\r\n" +
 				"  `fee_type` varchar(255) default NULL,\r\n" +
 				"  `status` smallint(2) default 0,\r\n" +
+				
 				"  `order_start_time` datetime default NULL,\r\n" +
 				"  `order_finish_time` datetime default NULL,\r\n" +
 				
@@ -191,8 +209,20 @@ public class OrderDB {
 					" ON "+ TABLENAME +" (wx_trade_no)";
 			dbUtils.executeSql(sql, null);
 			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_mchtradeno" + 
+					" ON "+ TABLENAME +" (mch_trade_no)";
+			dbUtils.executeSql(sql, null);
+			
 			sql = " CREATE INDEX index_"+ TABLENAME +"_userid" + 
 					" ON "+ TABLENAME +" (user_id)";
+			dbUtils.executeSql(sql, null);
+			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_openid" + 
+					" ON "+ TABLENAME +" (openid)";
+			dbUtils.executeSql(sql, null);
+			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_unionid" + 
+					" ON "+ TABLENAME +" (unionid)";
 			dbUtils.executeSql(sql, null);
 		}
 		

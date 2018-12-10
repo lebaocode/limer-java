@@ -26,6 +26,7 @@ import com.lebaor.limer.web.data.WebDonateBook;
 import com.lebaor.limer.web.data.WebJSONArray;
 import com.lebaor.limer.web.data.WebJSONObject;
 import com.lebaor.limer.web.data.WebOrder;
+import com.lebaor.limer.web.data.WebPreOrder;
 import com.lebaor.limer.web.data.WebUser;
 import com.lebaor.limer.web.data.WebUserCenterInfo;
 import com.lebaor.thirdpartyutils.SmsCodeUtil;
@@ -36,6 +37,8 @@ import com.lebaor.utils.TextUtil;
 import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
 import com.lebaor.wx.WxMiniProgramUtil;
+import com.lebaor.wx.WxUserInfoUtil;
+import com.lebaor.wx.data.WxUserInfo;
 
 
 public class JsonController extends EntryController implements Runnable {
@@ -133,13 +136,39 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/agreeBookComment")) {
 			agreeBookComment(req, res, model);
 			return;
-		} else if (uri.startsWith("/json/addChild")) {
-			addChild(req, res, model);
+		} else if (uri.startsWith("/json/fillAddress")) {
+			fillAddress(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/isAddressFilled")) {
 			isAddressFilled(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/isMpFollowed")) {
+			isMpFollowed(req, res, model);
+			return;
 		} 
+	}
+	
+	public void isMpFollowed(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		WxUserInfo ui = WxUserInfoUtil.getUserInfoByOpenId(wu.getOpenId());
+		
+		JSONObject fill = new JSONObject();
+		try {
+			fill.put("isFollowed", ui != null && ui.getSubscribe() != 0);
+		} catch (Exception e) {
+			
+		}
+		WebJSONObject o = new WebJSONObject(fill.toString());
+		
+		this.setRetJson(model, o.toString());
 	}
 	
 	public void isAddressFilled(HttpServletRequest req, 
@@ -208,7 +237,7 @@ public class JsonController extends EntryController implements Runnable {
 		this.setRetJson(model, o.toString());
 	}
 	
-	public void addChild(HttpServletRequest req, 
+	public void fillAddress(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		String birthday = this.getParameterValue(req, "birthday", "");
 		int sex = this.getIntParameterValue(req, "sex", 0);
@@ -218,6 +247,9 @@ public class JsonController extends EntryController implements Runnable {
 		String address = this.getParameterValue(req, "address", "");
 		String receiverMobile = this.getParameterValue(req, "receiverMobile", "");
 		String receiverName = this.getParameterValue(req, "receiverName", "");
+		
+		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
+		boolean order = this.getBooleanParameterValue(req, "order", false);
 		
 		WebUser wu = this.getUser(req);
 		
@@ -248,10 +280,44 @@ public class JsonController extends EntryController implements Runnable {
 		child.setParentUserId(wu.getUserId());
 		child.setRelation(relation);
 		boolean result = cache.addChild(child);
-		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
 		
+		if (!result) {
+			WebJSONObject o = new WebJSONObject(result, "填写信息提交失败");
+			this.setRetJson(model, o.toString());
+			return;
+		}
+		
+		//下单
+		if (order) {
+			int realFee = LimerConstants.getMemberPrice(address);
+			WebPreOrder wo = new WebPreOrder();
+			wo.setAddress(address);
+			wo.setReceiverMobile(receiverMobile);
+			wo.setReceiverName(receiverName);
+			wo.setDesopitFee(LimerConstants.DEPOSIT_FEE);
+			wo.setMchDesc("青柠月度会员");
+			wo.setRealFee(realFee);
+			wo.setTotalFee(totalFee);
+			
+			this.setRetJson(model, new WebJSONObject(wo.toJSON()).toJSON());
+		}
+	}
+	
+	public void order(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		String ip = this.getUserIp(req);
+		
+		WebUser wu = this.getUser(req);
+		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
+		int realFee = this.getIntParameterValue(req, "realFee", 0);
+		
+		boolean result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), wu.getUserId(),
+				ip, totalFee, realFee
+				);
+		WebJSONObject o = new WebJSONObject(result, "支付失败");
 		this.setRetJson(model, o.toString());
 	}
+	
 	
 	public void addBookComment(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {

@@ -198,15 +198,15 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long id;\n" + 
-				"	String childName;\n" + 
-				"	String birthday;\n" + 
-				"	int sex;\n" + 
-				"	int relation;//孩子和家长的关系：妈妈、爸爸这些\n" + 
-				"	long parentUserId;\n" + 
-				"	String extraInfo;\n" + 
-				"	long createTime;";
-		String className = "Child";
+		String s = "String address;\n" + 
+				"	String receiverMobile;\n" + 
+				"	String receiverName;\n" + 
+				"	\n" + 
+				"	String mchDesc;\n" + 
+				"	int realFee;\n" + 
+				"	\n" + 
+				"	int desopitFee;//押金";
+		String className = "WebPreOrder";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

@@ -164,6 +164,7 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
+		String region="";
 		String address = "";
 		String receiverMobile = "";
 		String receiverName = "";
@@ -171,6 +172,7 @@ public class JsonController extends EntryController implements Runnable {
 			String extraJson = wu.getUser().getExtraInfo();
 			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
 			JSONObject extra = new JSONObject(extraJson);
+			region = JSONUtil.getString(extra, "region");
 			address = JSONUtil.getString(extra, "address");
 			receiverMobile = JSONUtil.getString(extra, "receiverMobile");
 			receiverName = JSONUtil.getString(extra, "receiverName");
@@ -178,6 +180,7 @@ public class JsonController extends EntryController implements Runnable {
 		
 		int realFee = LimerConstants.getMemberPrice(address);
 		WebPreOrder wo = new WebPreOrder();
+		wo.setRegion(region);
 		wo.setAddress(address);
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
@@ -309,6 +312,7 @@ public class JsonController extends EntryController implements Runnable {
 			String extraJson = wu.getUser().getExtraInfo();
 			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
 			JSONObject extra = new JSONObject(extraJson);
+			extra.put("region", region);
 			extra.put("address", address);
 			extra.put("receiverMobile", receiverMobile);
 			extra.put("receiverName", receiverName);

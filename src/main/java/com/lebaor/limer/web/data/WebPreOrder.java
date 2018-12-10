@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import com.lebaor.utils.JSONUtil;
 
 public class WebPreOrder {
+	String region;
 	String address;
 	String receiverMobile;
 	String receiverName;
@@ -18,6 +19,7 @@ public class WebPreOrder {
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
+			o.put("region", region);
 			o.put("address", address);
 			o.put("receiverMobile", receiverMobile);
 			o.put("receiverName", receiverName);
@@ -44,6 +46,7 @@ public class WebPreOrder {
 	public static WebPreOrder parseJSON(JSONObject o) {
 		try {
 			WebPreOrder n = new WebPreOrder();
+			n.region = JSONUtil.getString(o, "region");
 			n.address = JSONUtil.getString(o, "address");
 			n.receiverMobile = JSONUtil.getString(o, "receiverMobile");
 			n.receiverName = JSONUtil.getString(o, "receiverName");
@@ -125,6 +128,14 @@ public class WebPreOrder {
 
 	public void setTotalFee(int totalFee) {
 		this.totalFee = totalFee;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
 	}
 	
 	

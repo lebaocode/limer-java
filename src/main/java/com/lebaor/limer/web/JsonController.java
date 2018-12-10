@@ -178,13 +178,13 @@ public class JsonController extends EntryController implements Runnable {
 			receiverName = JSONUtil.getString(extra, "receiverName");
 		} catch (Exception e) {}
 		
-		int realFee = LimerConstants.getMemberPrice(address);
+		int realFee = LimerConstants.getMemberPrice(region);
 		WebPreOrder wo = new WebPreOrder();
 		wo.setRegion(region);
 		wo.setAddress(address);
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
-		wo.setDesopitFee(LimerConstants.DEPOSIT_FEE);
+		wo.setDepositFee(LimerConstants.DEPOSIT_FEE);
 		wo.setMchDesc("青柠月度会员");
 		wo.setRealFee(realFee);
 		wo.setTotalFee(0);

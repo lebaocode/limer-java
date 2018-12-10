@@ -182,6 +182,10 @@ public class JsonController extends EntryController implements Runnable {
 		WebPreOrder wo = new WebPreOrder();
 		wo.setRegion(region);
 		wo.setAddress(address);
+		
+		WxUserInfo ui = WxUserInfoUtil.getUserInfoByOpenId(wu.getOpenId());
+		
+		wo.setAllowed(ui != null && ui.getSubscribe() != 0);//是否关注；关注则允许
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
 		wo.setDepositFee(LimerConstants.DEPOSIT_FEE);

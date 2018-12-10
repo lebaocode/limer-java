@@ -13,6 +13,7 @@ public class WebPreOrder {
 	String mchDesc;
 	int realFee;
 	int totalFee;
+	boolean isAllowed = false;//如果是苹果，是否允许支付
 	
 	int depositFee;//押金
 	
@@ -26,6 +27,7 @@ public class WebPreOrder {
 			o.put("mchDesc", mchDesc);
 			o.put("realFee", realFee);
 			o.put("totalFee", totalFee);
+			o.put("isAllowed", isAllowed);
 			o.put("depositFee", depositFee);
 			return o.toString();
 		} catch (Exception e) {
@@ -53,6 +55,7 @@ public class WebPreOrder {
 			n.mchDesc = JSONUtil.getString(o, "mchDesc");
 			n.realFee = JSONUtil.getInt(o, "realFee");
 			n.totalFee = JSONUtil.getInt(o, "totalFee");
+			n.isAllowed = JSONUtil.getBoolean(o, "isAllowed");
 			n.depositFee = JSONUtil.getInt(o, "depositFee");
 			return n;
 		} catch (Exception e) {
@@ -74,6 +77,14 @@ public class WebPreOrder {
 		}
 	}
 	
+	public boolean isAllowed() {
+		return isAllowed;
+	}
+
+	public void setAllowed(boolean isAllowed) {
+		this.isAllowed = isAllowed;
+	}
+
 	public String getAddress() {
 		return address;
 	}

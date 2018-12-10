@@ -54,6 +54,14 @@ public class JSONUtil {
 		}
 	}
 	
+	public static boolean getBoolean(JSONObject o, String key) {
+		try {
+			return o.getBoolean(key);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	public static long getLong(JSONObject o, String key) {
 		try {
 			return Long.parseLong(o.getString(key));

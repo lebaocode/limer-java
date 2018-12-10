@@ -14,7 +14,7 @@ public class WebPreOrder {
 	int realFee;
 	int totalFee;
 	
-	int desopitFee;//押金
+	int depositFee;//押金
 	
 	public String toJSON() {
 		try {
@@ -26,7 +26,7 @@ public class WebPreOrder {
 			o.put("mchDesc", mchDesc);
 			o.put("realFee", realFee);
 			o.put("totalFee", totalFee);
-			o.put("desopitFee", desopitFee);
+			o.put("depositFee", depositFee);
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -53,7 +53,7 @@ public class WebPreOrder {
 			n.mchDesc = JSONUtil.getString(o, "mchDesc");
 			n.realFee = JSONUtil.getInt(o, "realFee");
 			n.totalFee = JSONUtil.getInt(o, "totalFee");
-			n.desopitFee = JSONUtil.getInt(o, "desopitFee");
+			n.depositFee = JSONUtil.getInt(o, "depositFee");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -114,12 +114,14 @@ public class WebPreOrder {
 		this.realFee = realFee;
 	}
 
-	public int getDesopitFee() {
-		return desopitFee;
+	
+
+	public int getDepositFee() {
+		return depositFee;
 	}
 
-	public void setDesopitFee(int desopitFee) {
-		this.desopitFee = desopitFee;
+	public void setDepositFee(int depositFee) {
+		this.depositFee = depositFee;
 	}
 
 	public int getTotalFee() {

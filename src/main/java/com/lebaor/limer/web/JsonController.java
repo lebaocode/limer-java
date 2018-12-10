@@ -164,13 +164,14 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		String address = wu.getUser().getAddress();
+		String address = "";
 		String receiverMobile = "";
 		String receiverName = "";
 		try {
 			String extraJson = wu.getUser().getExtraInfo();
 			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
 			JSONObject extra = new JSONObject(extraJson);
+			address = JSONUtil.getString(extra, "address");
 			receiverMobile = JSONUtil.getString(extra, "receiverMobile");
 			receiverName = JSONUtil.getString(extra, "receiverName");
 		} catch (Exception e) {}
@@ -221,7 +222,15 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		boolean result = wu.getUser().getAddress() != null && wu.getUser().getAddress().trim().length() > 0;
+		boolean result = false;
+		try {
+			String extraJson = wu.getUser().getExtraInfo();
+			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
+			JSONObject extra = new JSONObject(extraJson);
+			String address = JSONUtil.getString(extra, "address");
+			result = address.trim().length() > 0;
+		} catch (Exception e) {}
+		
 		JSONObject fill = new JSONObject();
 		try {
 			fill.put("hasInfo", result);

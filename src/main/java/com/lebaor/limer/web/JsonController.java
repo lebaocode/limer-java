@@ -145,7 +145,47 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/isMpFollowed")) {
 			isMpFollowed(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getMemberPayInfo")) {
+			getMemberPayInfo(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/orderMember")) {
+			orderMember(req, res, model);
+			return;
 		} 
+	}
+	
+	public void getMemberPayInfo(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		String address = wu.getUser().getAddress();
+		String receiverMobile = "";
+		String receiverName = "";
+		try {
+			String extraJson = wu.getUser().getExtraInfo();
+			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
+			JSONObject extra = new JSONObject(extraJson);
+			receiverMobile = JSONUtil.getString(extra, "receiverMobile");
+			receiverName = JSONUtil.getString(extra, "receiverName");
+		} catch (Exception e) {}
+		
+		int realFee = LimerConstants.getMemberPrice(address);
+		WebPreOrder wo = new WebPreOrder();
+		wo.setAddress(address);
+		wo.setReceiverMobile(receiverMobile);
+		wo.setReceiverName(receiverName);
+		wo.setDesopitFee(LimerConstants.DEPOSIT_FEE);
+		wo.setMchDesc("青柠月度会员");
+		wo.setRealFee(realFee);
+		wo.setTotalFee(0);
+		
+		this.setRetJson(model, new WebJSONObject(wo.toJSON()).toJSON());
 	}
 	
 	public void isMpFollowed(HttpServletRequest req, 
@@ -244,12 +284,10 @@ public class JsonController extends EntryController implements Runnable {
 		String nickName = this.getParameterValue(req, "nickname", "");
 		int relation = this.getIntParameterValue(req, "relation", 0);
 		
+		String region = this.getParameterValue(req, "region", "");
 		String address = this.getParameterValue(req, "address", "");
 		String receiverMobile = this.getParameterValue(req, "receiverMobile", "");
 		String receiverName = this.getParameterValue(req, "receiverName", "");
-		
-		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
-		boolean order = this.getBooleanParameterValue(req, "order", false);
 		
 		WebUser wu = this.getUser(req);
 		
@@ -287,23 +325,9 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		//下单
-		if (order) {
-			int realFee = LimerConstants.getMemberPrice(address);
-			WebPreOrder wo = new WebPreOrder();
-			wo.setAddress(address);
-			wo.setReceiverMobile(receiverMobile);
-			wo.setReceiverName(receiverName);
-			wo.setDesopitFee(LimerConstants.DEPOSIT_FEE);
-			wo.setMchDesc("青柠月度会员");
-			wo.setRealFee(realFee);
-			wo.setTotalFee(totalFee);
-			
-			this.setRetJson(model, new WebJSONObject(wo.toJSON()).toJSON());
-		}
 	}
 	
-	public void order(HttpServletRequest req, 
+	public void orderMember(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		String ip = this.getUserIp(req);
 		

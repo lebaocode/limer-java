@@ -142,6 +142,9 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/isAddressFilled")) {
 			isAddressFilled(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getAddress")) {
+			getAddress(req, res, model);
+			return;
 		} else if (uri.startsWith("/json/isMpFollowed")) {
 			isMpFollowed(req, res, model);
 			return;
@@ -249,6 +252,54 @@ public class JsonController extends EntryController implements Runnable {
 		this.setRetJson(model, o.toString());
 	}
 	
+	public void getAddress(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		boolean result = true;
+		JSONObject fill = new JSONObject();
+		
+		try {
+			String extraJson = wu.getUser().getExtraInfo();
+			if (extraJson == null || extraJson.trim().length() == 0) {
+				extraJson = "{}";
+				result = false;
+			}
+			fill.put("hasInfo", result);
+			
+			JSONObject extra = new JSONObject(extraJson);
+			String address = JSONUtil.getString(extra, "address");
+			String region = JSONUtil.getString(extra, "region");
+			String receiverMobile = JSONUtil.getString(extra, "receiverMobile");
+			String receiverName = JSONUtil.getString(extra, "receiverName");
+			
+			fill.put("address", address);
+			fill.put("region", region);
+			fill.put("receiverMobile", receiverMobile);
+			fill.put("receiverName", receiverName);
+			
+			Child c = cache.getChild(wu.getUserId());
+			if (c != null) {
+				fill.put("birthday", c.getBirthday());
+				fill.put("childName", c.getChildName());
+				fill.put("relation", c.getRelation());
+				fill.put("sex", c.getSex());
+			}
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("getAddress: [userId="+ wu.getUserId() +"]", e);
+		}
+		
+		WebJSONObject o = new WebJSONObject(fill.toString());
+		
+		this.setRetJson(model, o.toString());
+	}
+	
 	public void agreeBookComment(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		long commentId = this.getLongParameterValue(req, "commentId", 0);
@@ -297,7 +348,7 @@ public class JsonController extends EntryController implements Runnable {
 			HttpServletResponse res, HashMap<String, Object> model) {
 		String birthday = this.getParameterValue(req, "birthday", "");
 		int sex = this.getIntParameterValue(req, "sex", 0);
-		String nickName = this.getParameterValue(req, "nickname", "");
+		String nickName = this.getParameterValue(req, "childName", "");
 		int relation = this.getIntParameterValue(req, "relation", 0);
 		
 		String region = this.getParameterValue(req, "region", "");
@@ -464,8 +515,14 @@ public class JsonController extends EntryController implements Runnable {
 		String unionId = this.getParameterValue(req, "unionId", "");
 		if (unionId.trim().length() == 0) {
 			//没有unionId
-			LogUtil.WEB_LOG.warn("getUser error, no user: [unionId=]");
-			return null;
+			//从session里取
+			Object o = req.getSession().getAttribute("unionId");
+			if (o == null) { 
+				LogUtil.WEB_LOG.warn("getUser error, no user: [unionId=]");
+				return null;
+			} else {
+				unionId = (String)o;
+			}
 		}
 		
 		long userId = cache.getUserIdByUnionId(unionId);
@@ -474,6 +531,9 @@ public class JsonController extends EntryController implements Runnable {
 			LogUtil.WEB_LOG.warn("getUser error, no user: [unionId="+ unionId +"] userId=" + userId);
 			return null;
 		}
+		
+		//set session
+		req.getSession().setAttribute("unionId", unionId);
 		
 		User user = cache.getUserInfo(userId);
 		LogUtil.STAT_LOG.info("[USER_VISIT] ["+ userId +"] ["+ unionId +"] ["+ req.getRequestURI() +"] ["+ req.getQueryString() +"]");

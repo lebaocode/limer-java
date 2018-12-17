@@ -211,7 +211,8 @@ public class LebaoCache {
 		//调起微信支付
 		String prepayId = "";
 		try {
-			prepayId = WxPayUtil.unifiedOrderJsApi(WxConstants.MINIPROGRAM_APPID, "", mchTradeNo, realFee, ip, wxPayNotifyUrl, openId, "青柠月度会员", "青柠月度会员");
+			prepayId = WxPayUtil.unifiedOrderJsApi(WxConstants.MINIPROGRAM_APPID, LimerConstants.PRODUCT_ID_MEM_MONTH, 
+					mchTradeNo, realFee, ip, wxPayNotifyUrl, openId, "青柠月度会员", "青柠月度会员");
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("WxPayUnifyOrder exception [userId="+ userId +"]", e);
 		}

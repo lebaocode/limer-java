@@ -16,14 +16,14 @@ import com.lebaor.wx.data.WxChargeNotifyData;
 public class WxPayUtil {
 	private static final Logger LOG = LogFormatter.getLogger(WxPayUtil.class);
 	
-	public static String unifiedOrderJsApi(String appId, String attach, String orderId, int priceFen, String userIp, String notifyUrl, 
+	public static String unifiedOrderJsApi(String appId, String productId, String orderId, int priceFen, String userIp, String notifyUrl, 
 			String userOpenId, String wxPayDesc, String detailDesc) throws Exception {
 		try {
 			XMLConfiguration xmlConfig = new XMLConfiguration();
 			xmlConfig.setRootElementName("xml");
 			xmlConfig.setDelimiterParsingDisabled(true);
 			xmlConfig.setProperty("appid", appId);
-			xmlConfig.setProperty("attach", attach);
+			xmlConfig.setProperty("product_id", productId);
 			xmlConfig.setProperty("body", wxPayDesc);
 			xmlConfig.setProperty("detail", detailDesc);
 			xmlConfig.setProperty("device_info", "WEB");
@@ -38,7 +38,7 @@ public class WxPayUtil {
 			xmlConfig.setProperty("trade_type", "JSAPI");
 			
 			String param = "appid=" + appId
-					+ "&attach=" + attach
+					
 					+ "&body=" + wxPayDesc
 					+ "&detail=" + detailDesc
 					+ "&device_info=WEB"
@@ -47,6 +47,7 @@ public class WxPayUtil {
 					+ "&notify_url=" + notifyUrl
 					+ "&openid=" + userOpenId
 					+ "&out_trade_no=" + orderId
+					+ "&product_id=" + productId //如果为空不能参与签名
 					+ "&sign_type=MD5"
 					+ "&spbill_create_ip=" + userIp
 					+ "&total_fee=" + priceFen

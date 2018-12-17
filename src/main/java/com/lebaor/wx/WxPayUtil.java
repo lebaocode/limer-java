@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import com.lebaor.utils.LogFormatter;
+import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
 import com.lebaor.webutils.HttpClientUtil;
 import com.lebaor.wx.data.WxChargeNotifyData;
@@ -87,7 +88,7 @@ public class WxPayUtil {
 				return null;
 			}
 			
-			if (!retAppId.equals(WxConstants.WX_APPID)
+			if (!retAppId.equals(appId)
 					|| !retMchId.equals(WxConstants.WX_MCH_ID)
 					) {
 				debug(retAppId + " " + retMchId + " " + retNonce + " " + retSign);
@@ -103,7 +104,7 @@ public class WxPayUtil {
 			
 			return prepayId;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogUtil.WEB_LOG.warn("unifiedOrderJsApi exception", e);
 			return null;
 		}
 		
@@ -111,7 +112,7 @@ public class WxPayUtil {
 	
 	
 	//返回transactionId
-	public static WxChargeNotifyData chargeToUser(String openId, String orderId, int price, String desc) {
+	public static WxChargeNotifyData chargeToUser(String appId, String openId, String orderId, int price, String desc) {
 		try {
 			XMLConfiguration xmlConfig = new XMLConfiguration();
 			xmlConfig.setRootElementName("xml");
@@ -119,7 +120,7 @@ public class WxPayUtil {
 			xmlConfig.setProperty("amount", price);
 			xmlConfig.setProperty("check_name", "NO_CHECK");
 			xmlConfig.setProperty("desc", desc);
-			xmlConfig.setProperty("mch_appid", WxConstants.WX_APPID);
+			xmlConfig.setProperty("mch_appid", appId);
 			xmlConfig.setProperty("mchid", WxConstants.WX_MCH_ID);
 			xmlConfig.setProperty("nonce_str", WxConstants.WX_NONCESTR);
 			xmlConfig.setProperty("openid", openId);
@@ -129,7 +130,7 @@ public class WxPayUtil {
 			String param = "amount=" + price
 					+ "&check_name=NO_CHECK"
 					+ "&desc=" + desc
-					+ "&mch_appid=" + WxConstants.WX_APPID
+					+ "&mch_appid=" + appId
 					+ "&mchid=" + WxConstants.WX_MCH_ID
 					+ "&nonce_str=" + WxConstants.WX_NONCESTR
 					+ "&openid=" + openId
@@ -155,7 +156,7 @@ public class WxPayUtil {
 			return data;
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogUtil.WEB_LOG.warn("chargeToUser exception", e);
 			return null;
 		}
 	}
@@ -171,6 +172,6 @@ public class WxPayUtil {
 		String s = "appid=wxd930ea5d5a258f4f&body=test&device_info=1000&mch_id=10000100&nonce_str=ibuaiVcKdpRxkhJA&key=192006250b4c09247ec02edce69f6a2d";
 		System.out.println(TextUtil.MD5(s).toUpperCase().equals("9A0A8659F005D6984697E2CA0A9CF3B7"));
 		
-		WxPayUtil.chargeToUser("obsyjwR0ewe9qbea2_w3ShSlhdf8", "20170417193802012345", 100, "测试");
+		WxPayUtil.chargeToUser(WxConstants.WX_APPID, "obsyjwR0ewe9qbea2_w3ShSlhdf8", "20170417193802012345", 100, "测试");
 	}
 }

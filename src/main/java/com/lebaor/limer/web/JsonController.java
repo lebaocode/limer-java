@@ -26,6 +26,7 @@ import com.lebaor.limer.web.data.WebDonateBook;
 import com.lebaor.limer.web.data.WebJSONArray;
 import com.lebaor.limer.web.data.WebJSONObject;
 import com.lebaor.limer.web.data.WebOrder;
+import com.lebaor.limer.web.data.WebPayParam;
 import com.lebaor.limer.web.data.WebPreOrder;
 import com.lebaor.limer.web.data.WebUser;
 import com.lebaor.limer.web.data.WebUserCenterInfo;
@@ -154,7 +155,23 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/orderMember")) {
 			orderMember(req, res, model);
 			return;
+		} else if (uri.startsWith("/wxpay/paynotify")) {
+			payNotify(req, res, model);
+			return;
 		} 
+	}
+	
+	public void payNotify(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		//TODO
 	}
 	
 	public void getMemberPayInfo(HttpServletRequest req, 
@@ -403,11 +420,18 @@ public class JsonController extends EntryController implements Runnable {
 		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
 		int realFee = this.getIntParameterValue(req, "realFee", 0);
 		
-		boolean result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), wu.getUserId(),
+		WebPayParam result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), wu.getUserId(),
 				ip, totalFee, realFee
 				);
-		WebJSONObject o = new WebJSONObject(result, "支付失败");
-		this.setRetJson(model, o.toString());
+		if (result == null) {
+			WebJSONObject o = new WebJSONObject(false, "支付失败");
+			this.setRetJson(model, o.toString());
+		} else {
+			WebJSONObject o = new WebJSONObject(result.toJSON());
+			this.setRetJson(model, o.toString());
+		}
+		
+		
 	}
 	
 	

@@ -106,7 +106,7 @@
         <props>
             
             <prop key="json/*">jsonController</prop>
-            
+            <prop key="wxpay/*">jsonController</prop>
             
             <prop key="error">errorPageController</prop>
             <prop key="errorpage">errorPageController</prop>

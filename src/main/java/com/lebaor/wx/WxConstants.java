@@ -15,6 +15,7 @@ public class WxConstants {
 	public static String SERVER_IP = "132.232.154.90";//qcloud www.limer.cn
 	//encodingAESKey:1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
 //	public static String SERVER_IP = "120.77.250.200";//www.limer.com.cn
+	public static String MINIPROGRAM_APPID = "wxd31b99e4d2f44791";
 	
 	public static String getWxSign(String token, String timestamp, String nonce) {
 		String[] str = { token, timestamp, nonce };
@@ -23,5 +24,21 @@ public class WxConstants {
         // SHA1加密
 		String digest = TextUtil.SHA1(bigStr);
 		return digest;
+	}
+	
+	public static String getMiniProgramPaySign(String prepayId, String timestamp, String nonce) {
+		
+		
+		String param = 
+				"appId=" + MINIPROGRAM_APPID
+				+ "&nonceStr="+nonce
+				+"&package=prepay_id="+prepayId
+				+"&signType=MD5"
+				+"&timeStamp="+timestamp
+				;
+		String temp = param + "&key=" + WX_MCHSECRET;
+		String sign = TextUtil.MD5(temp).toUpperCase();
+		
+		return sign;
 	}
 }

@@ -20,6 +20,7 @@ import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
 import com.lebaor.webutils.HttpClientUtil;
+import com.lebaor.wx.WxConstants;
 import com.lebaor.wx.WxMiniProgramUtil;
 import com.lebaor.wx.WxPayUtil;
 
@@ -181,7 +182,7 @@ public class LebaoCache {
 	}
 	
 	//下单
-	public boolean preOrderMember(String openId, String unionId, long userId, String ip, int totalFee, int realFee) {
+	public WebPayParam preOrderMember(String openId, String unionId, long userId, String ip, int totalFee, int realFee) {
 		Order order = new Order();
 		order.setMchNum(1);
 		order.setCoupounFee(0);
@@ -202,7 +203,7 @@ public class LebaoCache {
 		order.setWxTradeNo("");
 		boolean result = orderDB.addOrder(order);
 		if (!result) {
-			return false;
+			return null;
 		}
 		
 		//调起微信支付
@@ -218,7 +219,15 @@ public class LebaoCache {
 		order.setStatus(LimerConstants.ORDER_STATUS_WX_PRE_XIADAN);
 		result = orderDB.updateOrder(order);
 		
-		return result;
+		WebPayParam p = new WebPayParam();
+		p.setNonstr(WxConstants.WX_NONCESTR);
+		String timestamp = (long)(System.currentTimeMillis()/1000) + "";
+		p.setPrepayId(prepayId);
+		String sign = WxConstants.getMiniProgramPaySign(prepayId, timestamp, WxConstants.WX_NONCESTR);
+		p.setTimestamp(timestamp);
+		p.setPaySign(sign);
+		
+		return p;
 	}
 	
 	//只能添加一个孩子 TODO

@@ -188,6 +188,20 @@ public class TextUtil {
         }
     }
     
+    public static String hmacSHA256(String message, String secret) {
+        String hash = "";
+        try {
+            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+            sha256_HMAC.init(secret_key);
+            byte[] bytes = sha256_HMAC.doFinal(message.getBytes());
+            hash = getHexString(bytes);
+        } catch (Exception e) {
+            System.out.println("Error HmacSHA256 ===========" + e.getMessage());
+        }
+        return hash;
+    }
+    
     public static int getMinusDayOfTwoDate(String d1, String d2) {
 		Calendar cal = Calendar.getInstance();
 		

@@ -159,6 +159,7 @@ public class WxPayUtil {
 		}
 	}
 	
+	
 	public static void debug(String s) {
 		LOG.info(s);
 	}

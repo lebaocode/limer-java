@@ -198,15 +198,11 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "String address;\n" + 
-				"	String receiverMobile;\n" + 
-				"	String receiverName;\n" + 
-				"	\n" + 
-				"	String mchDesc;\n" + 
-				"	int realFee;\n" + 
-				"	\n" + 
-				"	int desopitFee;//押金";
-		String className = "WebPreOrder";
+		String s = "String timestamp;\n" + 
+				"	String prepayId;\n" + 
+				"	String nonstr;\n" + 
+				"	String paySign;";
+		String className = "WebPayParam";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

@@ -170,13 +170,6 @@ public class JsonController extends EntryController implements Runnable {
 	public void wxCallback(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		
-		WebUser wu = this.getUser(req);
-		
-		if (wu == null || wu.getUser() == null) {
-			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
-			return;
-		}
-		
 		String timestamp = this.getParameterValue(req, "timestamp", "");
 		String signature = this.getParameterValue(req, "signature", "");
 		String nonce = this.getParameterValue(req, "nonce", "");
@@ -194,13 +187,6 @@ public class JsonController extends EntryController implements Runnable {
 	
 	public void payNotify(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
-		
-		WebUser wu = this.getUser(req);
-		
-		if (wu == null || wu.getUser() == null) {
-			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
-			return;
-		}
 		
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(), "utf-8"));

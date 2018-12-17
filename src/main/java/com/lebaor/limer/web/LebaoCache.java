@@ -526,6 +526,8 @@ public class LebaoCache {
 		
 		try {
 			for (Order o : orders) {
+				if (!LimerConstants.isOrderSuccess(o.getStatus())) continue;
+				
 				WebOrder wo = new WebOrder();
 				
 				wo.setOrderTime(TextUtil.formatTime3(o.getOrderStartTime()));

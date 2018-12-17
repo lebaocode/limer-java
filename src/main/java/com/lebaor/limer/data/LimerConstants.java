@@ -63,8 +63,8 @@ public class LimerConstants {
 	public final static int USER_STATUS_NORMAL = 0;//正常
 	
 	public static String explainOrderStatus(int s) {
-		if (s == 2) return "支付成功";
-		else if (s == 3) return "支付失败";
+		if (s == ORDER_STATUS_PAY_SUCCESS) return "支付成功";
+		else if (s == ORDER_STATUS_PAY_FAILED) return "支付失败";
 		
 		return "未支付";
 	}

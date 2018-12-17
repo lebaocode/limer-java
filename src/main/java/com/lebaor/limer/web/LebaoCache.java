@@ -11,17 +11,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lebaor.limer.db.*;
-import com.lebaor.limer.task.OrderTask;
 import com.lebaor.limer.web.data.*;
-import com.lebaor.limer.web.data.WebOrder.WebOrderItem;
 import com.lebaor.limer.data.*;
 import com.lebaor.thirdpartyutils.DoubanUtil;
 import com.lebaor.utils.JSONUtil;
 import com.lebaor.utils.LogUtil;
 import com.lebaor.utils.TextUtil;
-import com.lebaor.webutils.HttpClientUtil;
 import com.lebaor.wx.WxConstants;
-import com.lebaor.wx.WxMiniProgramUtil;
 import com.lebaor.wx.WxPayUtil;
 import com.lebaor.wx.data.WxPayNotifyData;
 
@@ -183,7 +179,8 @@ public class LebaoCache {
 	}
 	
 	//下单
-	public WebPayParam preOrderMember(String openId, String unionId, String productId, long userId, String ip, int totalFee, int realFee) {
+	public WebPayParam preOrderMember(String openId, String unionId, String productId, long userId, String ip, 
+			int totalFee, int realFee, int depositFee) {
 		Order order = new Order();
 		order.setMchNum(1);
 		order.setCoupounFee(0);
@@ -203,6 +200,8 @@ public class LebaoCache {
 		order.setUserId(userId);
 		order.setProductId(productId);
 		order.setWxTradeNo("");
+		
+		order.setExtraJson("{depositFee: "+ depositFee +"}");
 		boolean result = orderDB.addOrder(order);
 		if (!result) {
 			return null;
@@ -528,31 +527,23 @@ public class LebaoCache {
 		try {
 			for (Order o : orders) {
 				WebOrder wo = new WebOrder();
+				
 				wo.setOrderTime(TextUtil.formatTime3(o.getOrderStartTime()));
 				wo.setStatus(o.getStatus());
 				wo.setMchTradeNo(o.getMchTradeNo());
 				wo.setTotalFee(o.getTotalFee());
 				wo.setRealFee(o.getRealFee());
 				wo.setStatusDesc(LimerConstants.explainOrderStatus(o.getStatus()));
-				JSONArray items = new JSONArray();
+				wo.setDeposit(LimerConstants.DEPOSIT_FEE);
+				wo.setProductId(o.getProductId());
+				wo.setProductDesc(LimerConstants.PRODUCT_DESC_MEM_MONTH);
+				wo.setWxTradeNo(o.getWxTradeNo());
 				
-				JSONArray ids = new JSONArray(o.getExtraJson());
-				for (int i = 0;i < ids.length(); i++) {
-					long limerBookId = Long.parseLong(ids.getString(i));
-					LimerBookInfo lbi = this.getLimerBookStatus(limerBookId);
-					WebBookDetail wbd = this.getBookInfo(lbi.getIsbn());
-					
-					WebOrderItem woi = new WebOrderItem();
-					woi.setAuthor(wbd.getBook().getAuthorAsString());
-					woi.setCoverUrl(wbd.getBook().getCoverUrl());
-					woi.setIsbn(lbi.getIsbn());
-					woi.setLimerBookId(limerBookId);
-					woi.setTitle(wbd.getBook().getTitle());
-					
-					items.put(woi.toJSONObject());
-				}
+				try {
+					int depositFee = JSONUtil.getInt(new JSONObject(o.getExtraJson()), "depositFee");
+					wo.setDeposit(depositFee);
+				} catch (Exception ex) {}
 				
-				wo.setItems(items);
 				myOrderList.add(wo);
 			}
 		} catch(Exception e) {

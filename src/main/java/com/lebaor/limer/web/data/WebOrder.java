@@ -1,21 +1,20 @@
 package com.lebaor.limer.web.data;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.lebaor.limer.data.Order;
+import com.lebaor.utils.JSONUtil;
 
 public class WebOrder {
 	String orderTime;//下单时间
 	int status;//状态
 	String statusDesc;//状态描述
-	String mchTradeNo;//订单号
+	String mchTradeNo;//商户订单号
+	String wxTradeNo;//微信订单号
 	int totalFee;//原价
 	int realFee;//实际价格
 	int deposit;//押金价格，单位分
-	JSONArray items; //itemsjson
-	
-	String remainTimeDesc;//剩余借阅时间描述
+	String productId;//产品id
+	String productDesc;//产品描述
 	
 	public String toJSON() {
 		try {
@@ -24,11 +23,12 @@ public class WebOrder {
 			o.put("status", status);
 			o.put("statusDesc", statusDesc);
 			o.put("mchTradeNo", mchTradeNo);
+			o.put("wxTradeNo", wxTradeNo);
 			o.put("totalFee", totalFee);
 			o.put("realFee", realFee);
 			o.put("deposit", deposit);
-			o.put("items", items);
-			o.put("remainTimeDesc", remainTimeDesc);
+			o.put("productId", productId);
+			o.put("productDesc", productDesc);
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -48,15 +48,16 @@ public class WebOrder {
 	public static WebOrder parseJSON(JSONObject o) {
 		try {
 			WebOrder n = new WebOrder();
-			n.orderTime = o.getString("orderTime");
-			n.status = o.getInt("status");
-			n.statusDesc = o.getString("statusDesc");
-			n.mchTradeNo = o.getString("mchTradeNo");
-			n.totalFee = o.getInt("totalFee");
-			n.realFee = o.getInt("realFee");
-			n.deposit = o.getInt("deposit");
-			n.items = o.getJSONArray("items");
-			n.remainTimeDesc = o.getString("remainTimeDesc");
+			n.orderTime = JSONUtil.getString(o, "orderTime");
+			n.status = JSONUtil.getInt(o, "status");
+			n.statusDesc = JSONUtil.getString(o, "statusDesc");
+			n.mchTradeNo = JSONUtil.getString(o, "mchTradeNo");
+			n.wxTradeNo = JSONUtil.getString(o, "wxTradeNo");
+			n.totalFee = JSONUtil.getInt(o, "totalFee");
+			n.realFee = JSONUtil.getInt(o, "realFee");
+			n.deposit = JSONUtil.getInt(o, "deposit");
+			n.productId = JSONUtil.getString(o, "productId");
+			n.productDesc = JSONUtil.getString(o, "productDesc");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -75,98 +76,6 @@ public class WebOrder {
 		} catch (Exception e) {
 			return new JSONObject();
 		}
-	}
-	
-	public static class WebOrderItem {
-		String isbn;
-		String title;
-		String author;
-		String coverUrl;
-		long limerBookId;
-		
-		public JSONObject toJSONObject() {
-			try {
-				return new JSONObject(toJSON());
-			} catch (Exception e) {
-				return new JSONObject();
-			}
-		}
-		
-		public String toJSON() {
-			try {
-				JSONObject o = new JSONObject();
-				o.put("isbn", isbn);
-				o.put("title", title);
-				o.put("author", author);
-				o.put("coverUrl", coverUrl);
-				o.put("limerBookId", limerBookId);
-				return o.toString();
-			} catch (Exception e) {
-				return "{error: 'format error.'}";
-			}
-			
-		}
-
-		public static WebOrderItem parseJSON(String s) {
-			try {
-				return parseJSON(new JSONObject(s));
-			} catch (Exception e) {
-				return null;
-			}
-		}
-
-
-		public static WebOrderItem parseJSON(JSONObject o) {
-			try {
-				WebOrderItem n = new WebOrderItem();
-				n.isbn = o.getString("isbn");
-				n.title = o.getString("title");
-				n.author = o.getString("author");
-				n.coverUrl = o.getString("coverUrl");
-				n.limerBookId = o.getLong("limerBookId");
-				return n;
-			} catch (Exception e) {
-				return null;
-			}
-		}
-
-
-		public String toString() {
-			return toJSON();
-		}
-		
-		public String getIsbn() {
-			return isbn;
-		}
-		public void setIsbn(String isbn) {
-			this.isbn = isbn;
-		}
-		public String getTitle() {
-			return title;
-		}
-		public void setTitle(String title) {
-			this.title = title;
-		}
-		public String getAuthor() {
-			return author;
-		}
-		public void setAuthor(String author) {
-			this.author = author;
-		}
-		public String getCoverUrl() {
-			return coverUrl;
-		}
-		public void setCoverUrl(String coverUrl) {
-			this.coverUrl = coverUrl;
-		}
-		public long getLimerBookId() {
-			return limerBookId;
-		}
-		public void setLimerBookId(long limerBookId) {
-			this.limerBookId = limerBookId;
-		}
-		
-		
 	}
 
 	public String getOrderTime() {
@@ -201,6 +110,14 @@ public class WebOrder {
 		this.mchTradeNo = mchTradeNo;
 	}
 
+	public String getWxTradeNo() {
+		return wxTradeNo;
+	}
+
+	public void setWxTradeNo(String wxTradeNo) {
+		this.wxTradeNo = wxTradeNo;
+	}
+
 	public int getTotalFee() {
 		return totalFee;
 	}
@@ -217,22 +134,6 @@ public class WebOrder {
 		this.realFee = realFee;
 	}
 
-	public JSONArray getItems() {
-		return items;
-	}
-
-	public void setItems(JSONArray items) {
-		this.items = items;
-	}
-
-	public String getRemainTimeDesc() {
-		return remainTimeDesc;
-	}
-
-	public void setRemainTimeDesc(String remainTimeDesc) {
-		this.remainTimeDesc = remainTimeDesc;
-	}
-
 	public int getDeposit() {
 		return deposit;
 	}
@@ -240,6 +141,23 @@ public class WebOrder {
 	public void setDeposit(int deposit) {
 		this.deposit = deposit;
 	}
+
+	public String getProductId() {
+		return productId;
+	}
+
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+
+	public String getProductDesc() {
+		return productDesc;
+	}
+
+	public void setProductDesc(String productDesc) {
+		this.productDesc = productDesc;
+	}
+	
 	
 	
 }

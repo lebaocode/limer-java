@@ -135,6 +135,7 @@ public class LimerConstants {
 	}
 	
 	public static final String PRODUCT_ID_MEM_MONTH = "member_month";
+	public static final String PRODUCT_DESC_MEM_MONTH = "青柠月度会员";
 	
 	//按地区收会员费
 	public static int getMemberPrice(String address) {

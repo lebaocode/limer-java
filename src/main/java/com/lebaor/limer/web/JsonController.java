@@ -454,10 +454,11 @@ public class JsonController extends EntryController implements Runnable {
 		WebUser wu = this.getUser(req);
 		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
 		int realFee = this.getIntParameterValue(req, "realFee", 0);
+		int depositFee = this.getIntParameterValue(req, "deposit", 0);
 		
 		WebPayParam result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), LimerConstants.PRODUCT_ID_MEM_MONTH,
 				wu.getUserId(),
-				ip, totalFee, realFee
+				ip, totalFee, realFee, depositFee
 				);
 		if (result == null) {
 			WebJSONObject o = new WebJSONObject(false, "支付失败");

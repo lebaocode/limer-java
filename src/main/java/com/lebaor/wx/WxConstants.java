@@ -16,7 +16,7 @@ public class WxConstants {
 	//encodingAESKey:1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
 	//1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
 //	public static String SERVER_IP = "120.77.250.200";//www.limer.com.cn
-	public static String MINIPROGRAM_APPID = "wxd31b99e4d2f44791";
+	public static String MINIPROGRAM_APPID = "wx2d040ec926fe84b2";//原始id: gh_3132dbdea032
 	
 	public static String getWxSign(String token, String timestamp, String nonce) {
 		String[] str = { token, timestamp, nonce };

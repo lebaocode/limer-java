@@ -15,13 +15,13 @@ import com.lebaor.wx.data.WxChargeNotifyData;
 public class WxPayUtil {
 	private static final Logger LOG = LogFormatter.getLogger(WxPayUtil.class);
 	
-	public static String unifiedOrderJsApi(String attach, String orderId, int priceFen, String userIp, String notifyUrl, 
+	public static String unifiedOrderJsApi(String appId, String attach, String orderId, int priceFen, String userIp, String notifyUrl, 
 			String userOpenId, String wxPayDesc, String detailDesc) throws Exception {
 		try {
 			XMLConfiguration xmlConfig = new XMLConfiguration();
 			xmlConfig.setRootElementName("xml");
 			xmlConfig.setDelimiterParsingDisabled(true);
-			xmlConfig.setProperty("appid", WxConstants.WX_APPID);
+			xmlConfig.setProperty("appid", appId);
 			xmlConfig.setProperty("attach", attach);
 			xmlConfig.setProperty("body", wxPayDesc);
 			xmlConfig.setProperty("detail", detailDesc);

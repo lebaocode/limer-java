@@ -36,7 +36,7 @@ public class WxPayUtil {
 			xmlConfig.setProperty("total_fee", priceFen);
 			xmlConfig.setProperty("trade_type", "JSAPI");
 			
-			String param = "appid=" + WxConstants.WX_APPID
+			String param = "appid=" + appId
 					+ "&attach=" + attach
 					+ "&body=" + wxPayDesc
 					+ "&detail=" + detailDesc

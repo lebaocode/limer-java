@@ -11,7 +11,7 @@ import com.lebaor.utils.LogFormatter;
 
 public class WxPayNotifyData {
 	private static final Logger LOG = LogFormatter.getLogger(WxPayNotifyData.class);
-	
+	String rawXml;
 	String returnCode;
 	String returnMsg;
 	String resultCode;
@@ -79,6 +79,7 @@ public class WxPayNotifyData {
 		}
 		
 		WxPayNotifyData data = new WxPayNotifyData();
+		data.setRawXml(xml);
 		data.setReturnCode(returnCode);
 		data.setReturnMsg(returnMsg);
 		data.setAttach(resultXmlConfig.getString("attach"));
@@ -204,6 +205,14 @@ public class WxPayNotifyData {
 
 	public void setPayEndTime(String payEndTime) {
 		this.payEndTime = payEndTime;
+	}
+
+	public String getRawXml() {
+		return rawXml;
+	}
+
+	public void setRawXml(String rawXml) {
+		this.rawXml = rawXml;
 	}
 	
 	

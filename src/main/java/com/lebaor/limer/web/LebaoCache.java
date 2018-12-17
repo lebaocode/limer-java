@@ -216,6 +216,11 @@ public class LebaoCache {
 			LogUtil.WEB_LOG.warn("WxPayUnifyOrder exception [userId="+ userId +"]", e);
 		}
 		
+		if (prepayId == null) {
+			LogUtil.WEB_LOG.warn("WxPayUnifyOrder prepayId=null [userId="+ userId +"]");
+			return null;
+		}
+		
 		order = orderDB.getOrderByMchOrderId(mchTradeNo);
 		order.setWxTradeNo(prepayId);
 		order.setStatus(LimerConstants.ORDER_STATUS_WX_PRE_XIADAN);
@@ -239,6 +244,14 @@ public class LebaoCache {
 		o.setOrderFinishTime(TextUtil.parseTime(data.getPayEndTime(), "yyyyMMddHHmmss"));
 		o.setWxTradeNo(data.getTransactionId());
 		o.setStatus(LimerConstants.ORDER_STATUS_PAY_SUCCESS);
+		
+		try {
+			String json = o.getExtraJson();
+			if (json == null || json.trim().length() == 0) json = "{}";
+			JSONObject jo = new JSONObject(json);
+			jo.put("pay_notify", data.getRawXml());
+			o.setExtraJson(jo.toString());
+		} catch (Exception e) {}
 		
 		orderDB.updateOrder(o);
 		LogUtil.STAT_LOG.info("[WXPAY] [SUCCESS] ["+ o.getUnionid() +"] ["+ o.getRealFee() +"] ["+ o.getWxTradeNo() +"] ["+ o.getTitle() +"]");

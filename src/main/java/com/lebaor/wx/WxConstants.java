@@ -14,6 +14,7 @@ public class WxConstants {
 	public static String WX_MCH_ID = "1430694502";
 	public static String SERVER_IP = "132.232.154.90";//qcloud www.limer.cn
 	//encodingAESKey:1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
+	//1GjIjHeANRV5FSScj4lRs9HTDdeDVGOswvdBVepuh54
 //	public static String SERVER_IP = "120.77.250.200";//www.limer.com.cn
 	public static String MINIPROGRAM_APPID = "wxd31b99e4d2f44791";
 	

@@ -50,6 +50,16 @@ public class LimerConstants {
 	public final static int ORDER_STATUS_PAY_FAILED = 4;//支付失败
 	public final static int ORDER_STATUS_PAY_EXPIRED = 5;//时间过期
 	
+	public static boolean isOrderEnd(int status) {
+		return status == ORDER_STATUS_PAY_SUCCESS 
+				|| status == ORDER_STATUS_PAY_FAILED
+				|| status == ORDER_STATUS_PAY_EXPIRED;
+	}
+	
+	public static boolean isOrderSuccess(int status) {
+		return status == ORDER_STATUS_PAY_SUCCESS;
+	}
+	
 	public final static int USER_STATUS_NORMAL = 0;//正常
 	
 	public static String explainOrderStatus(int s) {
@@ -123,6 +133,8 @@ public class LimerConstants {
 		}
 		return "其它";
 	}
+	
+	public static final String PRODUCT_ID_MEM_MONTH = "member_month";
 	
 	//按地区收会员费
 	public static int getMemberPrice(String address) {

@@ -1,5 +1,7 @@
 package com.lebaor.limer.web;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +41,7 @@ import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
 import com.lebaor.wx.WxMiniProgramUtil;
 import com.lebaor.wx.WxUserInfoUtil;
+import com.lebaor.wx.data.WxPayNotifyData;
 import com.lebaor.wx.data.WxUserInfo;
 
 
@@ -158,7 +161,35 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/wxpay/paynotify")) {
 			payNotify(req, res, model);
 			return;
+		} else if (uri.startsWith("/wx/callback")) {
+			wxCallback(req, res, model);
+			return;
 		} 
+	}
+	
+	public void wxCallback(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		String timestamp = this.getParameterValue(req, "timestamp", "");
+		String signature = this.getParameterValue(req, "signature", "");
+		String nonce = this.getParameterValue(req, "nonce", "");
+		String echostr = this.getParameterValue(req, "echostr", "");
+		String sign = WxConstants.getWxSign(WxConstants.WX_TOKEN, timestamp, nonce);
+		
+		if (sign != null && sign.equals(signature)) {
+			//符合
+			this.setRetText(model, echostr);
+		} else {
+			this.setRetText(model, "ERROR");
+		}
+		
 	}
 	
 	public void payNotify(HttpServletRequest req, 
@@ -171,7 +202,25 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		//TODO
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(req.getInputStream(), "utf-8"));
+			String xml = "";
+			String s = "";
+			while ((s = reader.readLine())!= null) {
+				xml += s + "\n";
+			}
+			WxPayNotifyData data = WxPayNotifyData.loadXml(xml);
+			
+			if (data != null && data.isSuccess()) {
+				//处理订单更新
+				cache.updateOrder(data);
+				
+				String resultXml = WxPayNotifyData.genSuccessResultXml();
+				this.setRetText(model, resultXml);
+			}
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("payNotify exception", e);
+		}
 	}
 	
 	public void getMemberPayInfo(HttpServletRequest req, 
@@ -420,7 +469,8 @@ public class JsonController extends EntryController implements Runnable {
 		int totalFee = this.getIntParameterValue(req, "totalFee", 0);
 		int realFee = this.getIntParameterValue(req, "realFee", 0);
 		
-		WebPayParam result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), wu.getUserId(),
+		WebPayParam result = cache.preOrderMember(wu.getOpenId(), wu.getUnionId(), LimerConstants.PRODUCT_ID_MEM_MONTH,
+				wu.getUserId(),
 				ip, totalFee, realFee
 				);
 		if (result == null) {

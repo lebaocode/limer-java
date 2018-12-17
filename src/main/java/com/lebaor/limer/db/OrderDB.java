@@ -40,18 +40,19 @@ public class OrderDB {
 		o.setOpenid(rs.getString(6));
 		o.setUnionid(rs.getString(7));
 		o.setIp(rs.getString(8));
-		o.setExtraJson(rs.getString(9));
-		o.setTitle(rs.getString(10));
-		o.setMchNum(rs.getInt(11));
-		o.setTotalFee(rs.getInt(12));
-		o.setRealFee(rs.getInt(13));
-		o.setCoupounId(rs.getString(14));
-		o.setCoupounFee(rs.getInt(15));
-		o.setFeeType(rs.getString(16));
-		o.setStatus(rs.getInt(17));
-		d = rs.getTimestamp(18);
-		o.setOrderStartTime(d != null ? d.getTime() : 0);
+		o.setProductId(rs.getString(9));
+		o.setExtraJson(rs.getString(10));
+		o.setTitle(rs.getString(11));
+		o.setMchNum(rs.getInt(12));
+		o.setTotalFee(rs.getInt(13));
+		o.setRealFee(rs.getInt(14));
+		o.setCoupounId(rs.getString(15));
+		o.setCoupounFee(rs.getInt(16));
+		o.setFeeType(rs.getString(17));
+		o.setStatus(rs.getInt(18));
 		d = rs.getTimestamp(19);
+		o.setOrderStartTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(20);
 		o.setOrderFinishTime(d != null ? d.getTime() : 0);
 		return o;
 	}
@@ -120,6 +121,7 @@ public class OrderDB {
 				o.getOpenid(),
 				o.getUnionid(),
 				o.getIp(),
+				o.getProductId(),
 				o.getExtraJson(),
 				o.getTitle(),
 				o.getMchNum(),
@@ -151,6 +153,7 @@ public class OrderDB {
 				o.getOpenid(),
 				o.getUnionid(),
 				o.getIp(),
+				o.getProductId(),
 				o.getExtraJson(),
 				o.getTitle(),
 				o.getMchNum(),
@@ -168,7 +171,7 @@ public class OrderDB {
 	
 	
 	private static final String[] COL_NAMES = {"id", "mch_trade_no", "wx_trade_no", "pay_method", 
-			"user_id", "openid", "unionid", "ip", 
+			"user_id", "openid", "unionid", "ip", "product_id",
 			"extra_json", "title", "mch_num", "total_fee", 
 			"real_fee", "coupoun_id", "coupoun_fee", "fee_type", 
 			"status", "order_start_time", "order_finish_time"};
@@ -188,6 +191,8 @@ public class OrderDB {
 				"  `unionid` varchar(255) NOT NULL,\r\n" +
 				
 				"  `ip` varchar(32) default NULL,\r\n" +
+				"  `product_id` varchar(32) default NULL,\r\n" +
+				
 				"  `extra_json` TEXT default NULL,\r\n" +
 				"  `title` varchar(255) default NULL,\r\n" +
 				"  `mch_num` smallint(2) default 0,\r\n" +

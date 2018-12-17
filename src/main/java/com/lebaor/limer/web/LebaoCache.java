@@ -23,6 +23,7 @@ import com.lebaor.webutils.HttpClientUtil;
 import com.lebaor.wx.WxConstants;
 import com.lebaor.wx.WxMiniProgramUtil;
 import com.lebaor.wx.WxPayUtil;
+import com.lebaor.wx.data.WxPayNotifyData;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -182,7 +183,7 @@ public class LebaoCache {
 	}
 	
 	//下单
-	public WebPayParam preOrderMember(String openId, String unionId, long userId, String ip, int totalFee, int realFee) {
+	public WebPayParam preOrderMember(String openId, String unionId, String productId, long userId, String ip, int totalFee, int realFee) {
 		Order order = new Order();
 		order.setMchNum(1);
 		order.setCoupounFee(0);
@@ -200,6 +201,7 @@ public class LebaoCache {
 		order.setTotalFee(totalFee);
 		order.setUnionid(unionId);
 		order.setUserId(userId);
+		order.setProductId(productId);
 		order.setWxTradeNo("");
 		boolean result = orderDB.addOrder(order);
 		if (!result) {
@@ -228,6 +230,19 @@ public class LebaoCache {
 		p.setPaySign(sign);
 		
 		return p;
+	}
+	
+	public void updateOrder(WxPayNotifyData data) {
+		Order o = orderDB.getOrderByMchOrderId(data.getOrderId());
+		if (o == null || LimerConstants.isOrderEnd(o.getStatus())) return;
+		
+		o.setOrderFinishTime(TextUtil.parseTime(data.getPayEndTime(), "yyyyMMddHHmmss"));
+		o.setWxTradeNo(data.getTransactionId());
+		o.setStatus(LimerConstants.ORDER_STATUS_PAY_SUCCESS);
+		
+		orderDB.updateOrder(o);
+		LogUtil.STAT_LOG.info("[WXPAY] [SUCCESS] ["+ o.getUnionid() +"] ["+ o.getRealFee() +"] ["+ o.getWxTradeNo() +"] ["+ o.getTitle() +"]");
+		
 	}
 	
 	//只能添加一个孩子 TODO

@@ -21,6 +21,7 @@ public class Order {
 	String unionid;
 	String ip;
 	
+	String productId;
 	String extraJson;//此次订单包含的书籍limerBookId ["3323", "23283"]
 	String title;//订单名称
 	int mchNum;//商品数量
@@ -35,7 +36,7 @@ public class Order {
 
 	long orderStartTime;//开始时间
 	long orderFinishTime;//订单完成时间
-	
+		
 	public static String genMchTradeNo(long userId) {
 		String s = Long.toString(userId);
 		if (s.length() >= 5) {
@@ -53,6 +54,7 @@ public class Order {
 			o.put("mchTradeNo", mchTradeNo);
 			o.put("wxTradeNo", wxTradeNo);
 			o.put("payMethod", payMethod);
+			o.put("productId", productId);
 			o.put("userId", userId);
 			o.put("openid", openid);
 			o.put("unionid", unionid);
@@ -91,6 +93,7 @@ public class Order {
 			n.mchTradeNo = JSONUtil.getString(o, "mchTradeNo");
 			n.wxTradeNo = JSONUtil.getString(o, "wxTradeNo");
 			n.payMethod = JSONUtil.getString(o, "payMethod");
+			n.productId = JSONUtil.getString(o, "productId");
 			n.userId = JSONUtil.getLong(o, "userId");
 			n.openid = JSONUtil.getString(o, "openid");
 			n.unionid = JSONUtil.getString(o, "unionid");
@@ -135,6 +138,15 @@ public class Order {
 	public void setWxTradeNo(String wxTradeNo) {
 		this.wxTradeNo = wxTradeNo;
 	}
+	
+	public String getProductId() {
+		return productId;
+	}
+
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+
 	public String getPayMethod() {
 		return payMethod;
 	}

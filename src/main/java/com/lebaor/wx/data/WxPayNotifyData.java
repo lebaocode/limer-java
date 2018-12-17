@@ -96,6 +96,9 @@ public class WxPayNotifyData {
 		
 		data.setTotalFee(resultXmlConfig.getInt("total_fee"));
 		data.setTransactionId(resultXmlConfig.getString("transaction_id"));
+		
+		//TODO 商户系统对于支付结果通知的内容一定要做签名验证,并校验返回的订单金额是否与商户侧的订单金额一致，防止数据泄漏导致出现“假通知”，造成资金损失。 
+		
 		return data;
 	}
 

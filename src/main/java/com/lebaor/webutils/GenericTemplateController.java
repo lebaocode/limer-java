@@ -31,6 +31,8 @@ public abstract class GenericTemplateController implements Controller {
     protected static String REDIRECT_PATH = "redirect_path";
     protected static String VIEW_PATH = "view_path";
     protected static String JSON = "json";
+    protected static String TEXT = "return_text";
+    
     
     public void setViewPath(String viewPath) {
         this.viewPath = viewPath;
@@ -97,6 +99,10 @@ public abstract class GenericTemplateController implements Controller {
     		ex.printStackTrace();
     	}
     	return input;
+    }
+    
+    protected void setRetText(HashMap<String, Object> model, String text) {
+    	model.put(TEXT, text);
     }
     
     protected void setRetJson(HashMap<String, Object> model, String json) {
@@ -291,6 +297,15 @@ public abstract class GenericTemplateController implements Controller {
 			res.setCharacterEncoding("utf-8");
 			res.setStatus(200);
 			res.getWriter().write(json);
+			res.getWriter().flush();
+			return null;
+		} else if (model.get(TEXT) != null) {
+			String text = (String)model.get(TEXT);
+			LogUtil.WEB_LOG.debug("text=" + text.substring(0, Math.min(500, text.length())));
+			res.setContentType("text/html;charset=utf-8");
+			res.setCharacterEncoding("utf-8");
+			res.setStatus(200);
+			res.getWriter().write(text);
 			res.getWriter().flush();
 			return null;
 		} else {

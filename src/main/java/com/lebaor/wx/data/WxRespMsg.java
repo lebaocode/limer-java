@@ -29,7 +29,7 @@ public abstract class WxRespMsg {
 	}
 	
 	protected String cdata(String s) {
-		return "<![CDATA[" + s +  "]]>";
+		return "\\<![CDATA[" + s +  "]]\\>";
 		//return s;
 	}
 	
@@ -38,6 +38,7 @@ public abstract class WxRespMsg {
 			XMLConfiguration xmlConfig = new XMLConfiguration();
 			xmlConfig.setRootElementName("xml");
 			xmlConfig.setDelimiterParsingDisabled(true);
+			
 			xmlConfig.setProperty("ToUserName",  cdata(this.toUserName));
 			xmlConfig.setProperty("FromUserName", cdata(this.fromUserName));
 			xmlConfig.setProperty("CreateTime", (int)(this.createTime/1000));
@@ -46,6 +47,7 @@ public abstract class WxRespMsg {
 			
 			StringWriter sw = new StringWriter();
 			xmlConfig.save(sw);
+			
 			return sw.toString();
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("toXml error: ", e);

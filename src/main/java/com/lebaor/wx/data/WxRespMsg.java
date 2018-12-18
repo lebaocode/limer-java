@@ -30,7 +30,7 @@ public abstract class WxRespMsg {
 	
 	protected String cdata(String s) {
 //		return "\\<![CDATA[" + s +  "]]\\>";
-		return s;
+		return s.replaceAll("\n", "\\n");
 	}
 	
 	public String toXml() {

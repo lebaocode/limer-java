@@ -429,15 +429,28 @@ public class JsonController extends EntryController implements Runnable {
 			LogUtil.WEB_LOG.warn("updateUserInfo exception [userId="+ wu.getUserId() +"]", e);
 		}
 		
-		Child child = new Child();
-		child.setBirthday(birthday);
-		child.setSex(sex);
-		child.setChildName(nickName);
-		child.setCreateTime(System.currentTimeMillis());
-		child.setExtraInfo("{}");
-		child.setParentUserId(wu.getUserId());
-		child.setRelation(relation);
-		boolean result = cache.addChild(child);
+		Child child = cache.getChild(wu.getUserId());
+		boolean result;
+		if (child == null) {
+			child = new Child();
+			child.setBirthday(birthday);
+			child.setSex(sex);
+			child.setChildName(nickName);
+			child.setCreateTime(System.currentTimeMillis());
+			child.setExtraInfo("{}");
+			child.setParentUserId(wu.getUserId());
+			child.setRelation(relation);
+			result = cache.addChild(child);
+		} else {
+			child.setBirthday(birthday);
+			child.setSex(sex);
+			child.setChildName(nickName);
+			child.setCreateTime(System.currentTimeMillis());
+			child.setExtraInfo("{}");
+			child.setParentUserId(wu.getUserId());
+			child.setRelation(relation);
+			result = cache.updateChild(child);
+		}
 		
 		if (!result) {
 			WebJSONObject o = new WebJSONObject(result, "填写信息提交失败");

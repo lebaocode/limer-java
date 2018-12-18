@@ -268,6 +268,16 @@ public class LebaoCache {
 		return result;
 	}
 	
+	//只能添加一个孩子 TODO
+	public boolean updateChild(Child child) {
+		boolean result = childDB.updateChild(child);
+		if (result) {
+			//添加缓存
+			getJedis().set(KEY_CHILD_PREFIX+ child.getParentUserId(), child.toJSON());
+		}
+		return result;
+	}
+	
 	//需要用缓存 只取了第一个孩子 TODO
 	public Child getChild(long parentId) {
 		Child child = null;

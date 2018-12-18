@@ -96,7 +96,7 @@ public abstract class WxEventMsg extends WxReqMsg {
 				
 		public WxMenuEventMsg(XMLConfiguration xmlConfig) {
 			super(xmlConfig);
-			this.eventKey = xmlConfig.getString("eventKey", null);
+			this.eventKey = xmlConfig.getString("EventKey", null);
 			
 		}
 		

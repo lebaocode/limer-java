@@ -158,22 +158,6 @@ public class LimerConstants {
 	public static final int DEPOSIT_FEE = 10000;//100元
 	
 	public static void main(String[] args) {
-		for (int i =11 ;i <100; i++  ) {
-			for (int j = 11;j<100;j++) {
-				int n = i*j;
-				
-				if (n % 2 == 1
-						&& (i % 2 == 1)
-						&& (j % 2 == 1)
-						&& (i/10 % 2 == 1)
-						&& (j/10 % 2 == 1)
-						&& (n/10 % 2 == 1)
-						&& (n/100 % 2 == 1)
-						&& (n/1000 % 2 == 1)
-						) {
-					System.out.println(i+"x" + j +"=" + n);
-				}
-			}
-		}
+		
 	}
 }

@@ -227,7 +227,7 @@ public class JsonController extends EntryController implements Runnable {
 			String extraJson = wu.getUser().getExtraInfo();
 			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
 			JSONObject extra = new JSONObject(extraJson);
-			region = JSONUtil.getString(extra, "region");
+			region = JSONUtil.getString(extra, "region").replaceAll("[\\[\\]\\,\"]", "");
 			address = JSONUtil.getString(extra, "address");
 			receiverMobile = JSONUtil.getString(extra, "receiverMobile");
 			receiverName = JSONUtil.getString(extra, "receiverName");

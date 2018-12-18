@@ -241,7 +241,7 @@ public class JsonController extends EntryController implements Runnable {
 						"您也可以添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
 				WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
 				
-				this.setRetXml(model, rspMsg.toXml());
+				this.setRetText(model, rspMsg.toXml());
 				return;
 			}
 			

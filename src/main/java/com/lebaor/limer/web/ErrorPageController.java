@@ -26,11 +26,11 @@ public class ErrorPageController extends EntryController{
         if(ex == null) {
             model.put("type", "not_found");
             model.put("request_uri", uri);
-            model.put("description",  "对不起，您找的东西好像不存在哦~");
+            model.put("msg",  "对不起，您找的页面好像不存在哦~");
         } else {
             model.put("type", "exception");
             model.put("exception", ex);
-            model.put("description",  "出错啦~ <br/>可能正在调试，过一会再看看吧~");
+            model.put("msg",  "出错啦~ <br/>可能正在调试，过一会再看看吧~");
             LogUtil.WEB_LOG.warn("Exception", ex);
         }
         setCommonVar(req, res, model);

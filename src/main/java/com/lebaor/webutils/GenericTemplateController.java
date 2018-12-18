@@ -32,6 +32,7 @@ public abstract class GenericTemplateController implements Controller {
     protected static String VIEW_PATH = "view_path";
     protected static String JSON = "json";
     protected static String TEXT = "return_text";
+    protected static String XML = "return_xml";
     
     
     public void setViewPath(String viewPath) {
@@ -103,6 +104,10 @@ public abstract class GenericTemplateController implements Controller {
     
     protected void setRetText(HashMap<String, Object> model, String text) {
     	model.put(TEXT, text);
+    }
+    
+    protected void setRetXml(HashMap<String, Object> model, String xml) {
+    	model.put(TEXT, xml);
     }
     
     protected void setRetJson(HashMap<String, Object> model, String json) {
@@ -303,6 +308,15 @@ public abstract class GenericTemplateController implements Controller {
 			String text = (String)model.get(TEXT);
 			LogUtil.WEB_LOG.debug("text=" + text.substring(0, Math.min(500, text.length())));
 			res.setContentType("text/html;charset=utf-8");
+			res.setCharacterEncoding("utf-8");
+			res.setStatus(200);
+			res.getWriter().write(text);
+			res.getWriter().flush();
+			return null;
+		} else if (model.get(XML) != null) {
+			String text = (String)model.get(XML);
+			LogUtil.WEB_LOG.debug("xml=" + text.substring(0, Math.min(500, text.length())));
+			res.setContentType("text/xml;charset=utf-8");
 			res.setCharacterEncoding("utf-8");
 			res.setStatus(200);
 			res.getWriter().write(text);

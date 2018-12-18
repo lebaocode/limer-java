@@ -107,7 +107,7 @@ public abstract class GenericTemplateController implements Controller {
     }
     
     protected void setRetXml(HashMap<String, Object> model, String xml) {
-    	model.put(TEXT, xml);
+    	model.put(XML, xml);
     }
     
     protected void setRetJson(HashMap<String, Object> model, String json) {

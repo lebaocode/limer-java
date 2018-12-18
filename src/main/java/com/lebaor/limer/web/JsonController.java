@@ -206,7 +206,7 @@ public class JsonController extends EntryController implements Runnable {
 			
 			WxReqMsg msg = WxReqMsg.createMsg(xc);
 			if (msg == null) {
-				this.setRetText(model, "ERROR");
+				this.setRetText(model, "");
 				return;
 			}
 			
@@ -340,7 +340,7 @@ public class JsonController extends EntryController implements Runnable {
 			LogUtil.WEB_LOG.warn("handleMpMsg exception", e);
 		} 
 		
-		this.setRetText(model, "ERROR");
+		this.setRetText(model, "");
 	}
 	
 	public void payNotify(HttpServletRequest req, 

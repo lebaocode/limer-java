@@ -211,6 +211,7 @@ public class JsonController extends EntryController implements Runnable {
 			}
 			
 			String userOpenId = msg.getFromUserName();
+			String devOpenId = msg.getToUserName();
 			
 			if (msg.isTextMsg()) {
 				//处理文字消息
@@ -226,7 +227,7 @@ public class JsonController extends EntryController implements Runnable {
 							String content = "您的账号已经授权，可以再次打开小程序试一下。\n" + 
 									"\n" + 
 									"您也可以添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
-							WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+							WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, devOpenId, content);
 							
 							this.setRetXml(model, rspMsg.toXml());
 							return;
@@ -239,7 +240,7 @@ public class JsonController extends EntryController implements Runnable {
 				String content = "您好，您的留言已收到。工作人员会在1个工作日内回复您。\n" + 
 						"\n" + 
 						"您也可以添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
-				WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+				WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, devOpenId, content);
 				
 				this.setRetText(model, rspMsg.toXml());
 				return;
@@ -278,7 +279,7 @@ public class JsonController extends EntryController implements Runnable {
 							" * 蚂蚁和西瓜\n" + 
 							"\n" + 
 							"绘本不断更新中...";
-					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, devOpenId, content);
 					
 					this.setRetXml(model, rspMsg.toXml());
 					return;
@@ -323,7 +324,7 @@ public class JsonController extends EntryController implements Runnable {
 							" *  不睡觉世界冠军\n" + 
 							"\n" + 
 							"绘本不断更新中...";
-					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, devOpenId, content);
 					
 					this.setRetXml(model, rspMsg.toXml());
 					return;

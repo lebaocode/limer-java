@@ -334,6 +334,22 @@ public class JsonController extends EntryController implements Runnable {
 			if (msg.isSubscribeMsg()) {
 				//记录openid和unionid的关系
 				//TODO
+				String content = "欢迎关注青柠童书馆~\n" + 
+						"我们面向1-6岁家长，提供优质经典童书及绘本推荐。\n" + 
+						"\n" + 
+						"加入青柠会员，即可享受：\n" + 
+						"* 每月10本、价值约200元、正版、优质童书及绘本邮寄到家。\n" + 
+						"\n" + 
+						"* 每月组建微信群，组织大家分享交流亲子阅读心得、督促大家读书打卡。\n" + 
+						"\n" + 
+						"* 邀请好友更可永久拥有这些书，无需归还。\n" + 
+						"\n" + 
+						"如需了解如何加入青柠会员，请点击菜单：会员权益\n" + 
+						"\n" + 
+						"如有任何疑问，可添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
+				WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, devOpenId, content);
+				
+				this.setRetXml(model, rspMsg.toXml());
 				return;
 			}
 			

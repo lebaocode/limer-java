@@ -577,7 +577,7 @@ public class LebaoCache {
 		
 		if (unionId.length() == 0) return;
 		
-		long userId = getUserIdByUnionId(unionId);
+		long userId = getUserIdByUnionId(WxConstants.MINIPROGRAM_APPID, unionId);
 		if (userId > 0) return;
 		
 		//创建用户
@@ -991,7 +991,24 @@ public class LebaoCache {
 		}
 	}
 	
-	public long getUserIdByUnionId(String unionId) {
+	public String getOpenId(String appId, String unionId) {
+		UserAuth u = userAuthDB.getUserAuthByUnionId(appId, unionId);
+		if (u == null) return null;
+		
+		return u.getOpenId();
+	}
+	
+	public void addUserAuth(long userId, String appId, String openId, String unionId) {
+		UserAuth o = new UserAuth();
+		o.setAppId(appId);
+		o.setCreateTime(System.currentTimeMillis());
+		o.setOpenId(openId);
+		o.setUnionId(unionId);
+		o.setUserId(userId);
+		userAuthDB.addUserAuth(o);
+	}
+	
+	public long getUserIdByUnionId(String appId, String unionId) {
 		//先从jedis取
 		String strUserId = getJedis().get(KEY_USER_AUTH_PREFIX+ unionId);
 		
@@ -1004,7 +1021,7 @@ public class LebaoCache {
 		}
 		
 		//去数据库里获取
-		UserAuth u = userAuthDB.getUserAuthByUnionId(unionId);
+		UserAuth u = userAuthDB.getUserAuthByUnionId(appId, unionId);
 		if (u == null) return 0;
 		
 		//存入jedis
@@ -1050,7 +1067,7 @@ public class LebaoCache {
 		User u = null;
 		synchronized (this) {
 			try {
-				userId = this.getUserIdByUnionId(unionId);
+				userId = this.getUserIdByUnionId(WxConstants.MINIPROGRAM_APPID, unionId);
 				if (userId == 0){
 					//新用户
 					long curTime = System.currentTimeMillis();

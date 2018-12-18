@@ -28,6 +28,7 @@ public class WxUserInfo {
 	 */
 	int subscribe = SUB_UNKNOWN;
 	String openId;//用户的标识，对当前公众号唯一
+	String unionId;
 	String nickName;//用户的昵称
 	int sex = SEX_UNKNOWN;
 	String city; //广州
@@ -55,6 +56,7 @@ public class WxUserInfo {
 			JSONObject obj = JSONObject.fromObject(json);
 			this.subscribe = obj.getInt("subscribe");
 			this.openId = obj.getString("openid");
+			this.unionId = obj.getString("unionid");
 			this.nickName = obj.getString("nickname");
 			this.sex = obj.getInt("sex");
 			this.city = obj.getString("city");
@@ -78,6 +80,7 @@ public class WxUserInfo {
 	public String toJson() {
 		JSONObject o = new JSONObject();
 		putIntoJson(o, "openid", this.openId);
+		putIntoJson(o, "unionId", this.unionId);
 		putIntoJson(o, "nickname", this.nickName);
 		putIntoJson(o, "sex", this.sex);
 		putIntoJson(o, "city", this.city);
@@ -181,6 +184,14 @@ public class WxUserInfo {
 
 	public void setSubscribeTime(long subscribeTime) {
 		this.subscribeTime = subscribeTime;
+	}
+
+	public String getUnionId() {
+		return unionId;
+	}
+
+	public void setUnionId(String unionId) {
+		this.unionId = unionId;
 	}
 	
 	

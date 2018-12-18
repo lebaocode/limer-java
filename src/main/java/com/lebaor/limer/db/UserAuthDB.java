@@ -83,11 +83,11 @@ public class UserAuthDB {
 			}
 		});
 	}
-		
-	public UserAuth getUserAuthByUnionId(String unionId) {
+	
+	public UserAuth getUserAuthByUnionId(String appId, String unionId) {
 		String sql = "SELECT * FROM " + TABLENAME + " " 
-				+ " WHERE union_id=? ";
-		return (UserAuth)dbUtils.executeQuery(sql, new Object[]{unionId}, new ResultSetHandler(){
+				+ " WHERE app_id=? AND union_id=? ";
+		return (UserAuth)dbUtils.executeQuery(sql, new Object[]{appId, unionId}, new ResultSetHandler(){
 			public Object handle(ResultSet rs, Object[] params) throws Exception {
 				while (rs.next()) {
 					UserAuth u = readOneRow(rs);

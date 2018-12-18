@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.configuration.XMLConfiguration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -41,7 +42,10 @@ import com.lebaor.wx.WxAccessTokenUtil;
 import com.lebaor.wx.WxConstants;
 import com.lebaor.wx.WxMiniProgramUtil;
 import com.lebaor.wx.WxUserInfoUtil;
+import com.lebaor.wx.data.WxEventMsg.WxMenuEventMsg;
 import com.lebaor.wx.data.WxPayNotifyData;
+import com.lebaor.wx.data.WxReqMsg;
+import com.lebaor.wx.data.WxRespMsg;
 import com.lebaor.wx.data.WxUserInfo;
 
 
@@ -174,15 +178,169 @@ public class JsonController extends EntryController implements Runnable {
 		String signature = this.getParameterValue(req, "signature", "");
 		String nonce = this.getParameterValue(req, "nonce", "");
 		String echostr = this.getParameterValue(req, "echostr", "");
-		String sign = WxConstants.getWxSign(WxConstants.WX_TOKEN, timestamp, nonce);
 		
-		if (sign != null && sign.equals(signature)) {
-			//符合
-			this.setRetText(model, echostr);
+		if (echostr.length() > 0) {
+			String sign = WxConstants.getWxSign(WxConstants.WX_TOKEN, timestamp, nonce);
+			
+			if (sign != null && sign.equals(signature)) {
+				//符合
+				this.setRetText(model, echostr);
+			} else {
+				this.setRetText(model, "ERROR");
+			}
 		} else {
-			this.setRetText(model, "ERROR");
+			//可能是消息推送
+			handleMpMsg(req, res, model);
 		}
 		
+	}
+	
+	//处理公众号消息
+	public void handleMpMsg(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model)  {
+		
+		try {
+			
+			XMLConfiguration xc = new XMLConfiguration();
+			xc.load(new InputStreamReader(req.getInputStream(), "utf-8"));
+			
+			WxReqMsg msg = WxReqMsg.createMsg(xc);
+			if (msg == null) {
+				this.setRetText(model, "ERROR");
+				return;
+			}
+			
+			String userOpenId = msg.getFromUserName();
+			
+			if (msg.isTextMsg()) {
+				//处理文字消息
+				LogUtil.WEB_LOG.debug("MP_RECEIVE_TEXT_MSG:" + msg.getContent());
+				
+				//关键词回复
+				if (msg.getContent().indexOf("苹果") != -1) {
+					WxUserInfo ui = WxUserInfoUtil.getUserInfoByOpenId(userOpenId);
+					if (ui != null) {
+						long userId = cache.getUserIdByUnionId(WxConstants.MINIPROGRAM_APPID, ui.getUnionId());
+						if (userId > 0) {
+							cache.addUserAuth(userId, WxConstants.WX_APPID, userOpenId, ui.getUnionId());
+							String content = "您的账号已经授权，可以再次打开小程序试一下。\n" + 
+									"\n" + 
+									"您也可以添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
+							WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+							
+							this.setRetText(model, rspMsg.toXml());
+							return;
+						}
+					}
+					
+				}
+				
+				//自动回复
+				String content = "您好，您的留言已收到。工作人员会在1个工作日内回复您。\n" + 
+						"\n" + 
+						"您也可以添加工作人员微信沟通：青柠李老师（微信号：qingning_lilaoshi）";
+				WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+				
+				this.setRetText(model, rspMsg.toXml());
+				return;
+			}
+			
+			if (msg.isClickMsg()) {
+				WxMenuEventMsg menu = (WxMenuEventMsg)msg;
+				if (menu.getEventKey().equals("KEY_BOOKLIST_13")) {
+					String content = "加入会员后，我们会每月为您邮寄10本正版绘本。绘本将从以下书单里随机挑选。如有不在书单中的优秀童书希望推荐，可以在公众号留言。\n" + 
+							"\n" + 
+							"1-3岁：\n" + 
+							"系列绘本：\n" + 
+							" * 小猪佩奇（30册）\n" + 
+							" * 米菲绘本（20册）\n" + 
+							" * 托马斯系列（20册）\n" + 
+							" * 鼠小弟系列（23册）\n" + 
+							" * 小熊宝宝绘本 蒲蒲兰经典畅销绘本！（15册）\n" + 
+							" * 我的后面是谁呢系列（全5册）\n" + 
+							" * 可爱的身体（全8册）\n" + 
+							" * 我的第一套自然认知书（全20册）\n" + 
+							" * 0-3岁行为习惯教养绘本（全6册）\n" + 
+							" * 歪歪兔行为习惯系列互动图画书（10册）\n" + 
+							" * 歪歪兔安全习惯系列绘本（10册）\n" + 
+							"\n" + 
+							"单本绘本：\n" + 
+							" * 点点点+变变变\n" + 
+							" * 蹦（2018版 绘本大师松冈达英低幼作品）\n" + 
+							" * 哇！（2018版 畅销低幼绘本《蹦！》的姊妹篇）\n" + 
+							" * 好疼呀好疼呀\n" + 
+							" * 是谁嗯嗯在我的头上\n" + 
+							" * 谁的声音？\n" + 
+							" * 谁藏起来了\n" + 
+							" * 小金鱼逃走了\n" + 
+							" * 我爸爸+我妈妈+我喜欢书+我哥哥\n" + 
+							" * 落叶跳舞\n" + 
+							" * 蚂蚁和西瓜\n" + 
+							"\n" + 
+							"绘本不断更新中...";
+					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+					
+					this.setRetText(model, rspMsg.toXml());
+					return;
+				} else if (menu.getEventKey().equals("KEY_BOOKLIST_36")){
+				
+					String content = "加入会员后，我们会每月为您邮寄10本正版绘本。绘本将从以下书单里随机挑选。如有不在书单中的优秀童书希望推荐，可以在公众号留言。\n" + 
+							"\n" + 
+							"3-6岁：\n" + 
+							"系列绘本：\n" + 
+							" *  小兔汤姆系列（46册 ）\n" + 
+							" *  神奇校车·图画书版（6册）\n" + 
+							" *  青蛙弗洛格的成长故事（共26册）\n" + 
+							" *  大卫不可以+大卫上学去+大卫惹麻烦（大卫系列全3册）\n" + 
+							" *  穿越时空的奇幻之旅：不可思议的旅程 莎莎的石头（全4册）\n" + 
+							" *  暖暖心绘本（19本）\n" + 
+							" *  全景式图画书 开车出发系列（共7册）\n" + 
+							" *  学会爱自己（共17册）\n" + 
+							" *  这就是二十四节气（中国二十四节气彩绘版，文津图书奖获奖绘本，共4册）\n" + 
+							" *  小熊和最好的爸爸（全7册）\n" + 
+							" *  郑渊洁给孙女的好习惯书：十二生肖童话绘本（12本）\n" + 
+							" *  歪歪兔教育系列图画书（30册）\n" + 
+							" *  你看起来好像很好吃（恐龙简装套装全7册）\n" + 
+							" *  汪汪队立大功儿童安全救援故事书 全18册\n" + 
+							"\n" + 
+							"单本绘本：\n" + 
+							" *  蚯蚓的日记\n" + 
+							" *  鸭子骑车记\n" + 
+							" *  彩虹色的花\n" + 
+							" *  爱心树\n" + 
+							" *  勇气\n" + 
+							" *  晚安，大猩猩\n" + 
+							" *  小威向前冲\n" + 
+							" *  花婆婆\n" + 
+							" *  公园里的声音\n" + 
+							" *  小凯的家不一样了\n" + 
+							" *  隧道\n" + 
+							" *  朱家故事\n" + 
+							" *  第一次自己睡觉\n" + 
+							" *  请不要生气\n" + 
+							" *  小黑鱼\n" + 
+							" *  月亮的味道\n" + 
+							" *  不睡觉世界冠军\n" + 
+							"\n" + 
+							"绘本不断更新中...";
+					WxRespMsg rspMsg = new WxRespMsg.WxRespTextMsg(userOpenId, LimerConstants.WX_KEFU_ID, content);
+					
+					this.setRetText(model, rspMsg.toXml());
+					return;
+				}
+			}
+			
+			if (msg.isSubscribeMsg()) {
+				//记录openid和unionid的关系
+				//TODO
+				return;
+			}
+			
+		} catch (Exception e) {
+			LogUtil.WEB_LOG.warn("handleMpMsg exception", e);
+		} 
+		
+		this.setRetText(model, "ERROR");
 	}
 	
 	public void payNotify(HttpServletRequest req, 
@@ -238,9 +396,14 @@ public class JsonController extends EntryController implements Runnable {
 		wo.setRegion(region);
 		wo.setAddress(address);
 		
-		WxUserInfo ui = WxUserInfoUtil.getUserInfoByOpenId(wu.getOpenId());
+		String mpOpenId = cache.getOpenId(WxConstants.WX_APPID, wu.getUnionId());
+		boolean isSubscribed = false;
+		if (mpOpenId != null) {
+			WxUserInfo ui = WxUserInfoUtil.getUserInfoByOpenId(mpOpenId);
+			isSubscribed = ui != null && ui.getSubscribe() != 0;
+		}
 		
-		wo.setAllowed(ui != null && ui.getSubscribe() != 0);//是否关注；关注则允许
+		wo.setAllowed(isSubscribed);//是否关注；关注则允许
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
 		wo.setDepositFee(LimerConstants.DEPOSIT_FEE);
@@ -599,7 +762,7 @@ public class JsonController extends EntryController implements Runnable {
 			}
 		}
 		
-		long userId = cache.getUserIdByUnionId(unionId);
+		long userId = cache.getUserIdByUnionId(WxConstants.MINIPROGRAM_APPID, unionId);
 		if (userId <= 0) {
 			//没有unionId
 			LogUtil.WEB_LOG.warn("getUser error, no user: [unionId="+ unionId +"] userId=" + userId);

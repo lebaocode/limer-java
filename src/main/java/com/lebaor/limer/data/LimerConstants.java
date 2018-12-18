@@ -60,6 +60,8 @@ public class LimerConstants {
 		return status == ORDER_STATUS_PAY_SUCCESS;
 	}
 	
+	public final static String WX_KEFU_ID = "qingning_lilaoshi";
+	
 	public final static int USER_STATUS_NORMAL = 0;//正常
 	
 	public static String explainOrderStatus(int s) {

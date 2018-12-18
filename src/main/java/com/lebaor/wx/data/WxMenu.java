@@ -12,18 +12,25 @@ import com.lebaor.utils.TextUtil;
 public class WxMenu {
 	public static final String TYPE_CLICK = "click";
 	public static final String TYPE_VIEW = "view";
+	public static final String TYPE_MINIPROGRAM = "miniprogram";
 	public static final String PARAM_BUTTON = "button";
 	public static final String PARAM_SUB_BUTTON = "sub_button";
 	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_NAME = "name";
 	public static final String PARAM_KEY = "key";
 	public static final String PARAM_URL = "url";
+	public static final String PARAM_APPID = "appid";
+	public static final String PARAM_PAGEPATH = "pagepath";
 	
 	boolean isClickType = true;//菜单的响应动作类型，目前有click、view两种类型
 	String name = null;//菜单标题，不超过16个字节，子菜单不超过40个字节
 	String key = null;//菜单KEY值，用于消息接口推送，不超过128字节; click类型必须
 	String url = null; //网页链接，用户点击菜单可打开链接，不超过256字节; view类型必须
 	LinkedList<WxMenu> subMenus = new LinkedList<WxMenu>();//每个一级菜单最多包含5个二级菜单
+	
+	boolean isMiniProgram = false;//是否小程序
+	String miniProgramAppId;
+	String miniProgramPagePath;
 	
 	public WxMenu(boolean isClickType, String name, String value) {
 		this.isClickType = isClickType;
@@ -33,6 +40,17 @@ public class WxMenu {
 		} else {
 			this.url = value;
 		}
+		this.subMenus.clear();
+	}
+	
+	//小程序菜单
+	public WxMenu(String name, String url, String appId, String pagePath) {
+		this.isClickType = false;
+		this.isMiniProgram = true;
+		this.name = name;
+		this.url = url;
+		this.miniProgramAppId = appId;
+		this.miniProgramPagePath = pagePath;
 		this.subMenus.clear();
 	}
 	
@@ -54,14 +72,21 @@ public class WxMenu {
 		StringBuilder sb = new StringBuilder(); 
 		if (subMenus.size() == 0) {
 			sb.append("{\n");
-			sb.append("\"" + PARAM_TYPE + "\":\"" + (isClickType ? TYPE_CLICK : TYPE_VIEW)+ "\", \n");
+			sb.append("\"" + PARAM_TYPE + "\":\"" + (isMiniProgram ? TYPE_MINIPROGRAM : (isClickType ? TYPE_CLICK : TYPE_VIEW))+ "\", \n");
 			sb.append("\"" + PARAM_NAME + "\":\"" + TextUtil.filterNull(name)+ "\", \n");
-			if (isClickType) {
-				sb.append("\"" + PARAM_KEY + "\":\"" + TextUtil.filterNull(key)+ "\"\n");
-			} else {
-				sb.append("\"" + PARAM_URL + "\":\"" + TextUtil.filterNull(url)+ "\"\n");
-			}
 			
+			if (isMiniProgram) {
+				sb.append("\"" + PARAM_URL + "\":\"" + TextUtil.filterNull(url)+ "\", \n");
+				sb.append("\"" + PARAM_APPID + "\":\"" + TextUtil.filterNull(miniProgramAppId)+ "\", \n");
+				sb.append("\"" + PARAM_PAGEPATH + "\":\"" + TextUtil.filterNull(miniProgramPagePath)+ "\"\n");
+			} else {
+			
+				if (isClickType) {
+					sb.append("\"" + PARAM_KEY + "\":\"" + TextUtil.filterNull(key)+ "\"\n");
+				} else {
+					sb.append("\"" + PARAM_URL + "\":\"" + TextUtil.filterNull(url)+ "\"\n");
+				}
+			}
 			sb.append("}");
 		} else {
 			sb.append("{\n\"" + PARAM_NAME + "\":\"" + TextUtil.filterNull(name)+ "\", \n");

@@ -45,8 +45,22 @@ public abstract class WxReqMsg {
 		return s;
 	}
 	
+	public boolean isTextMsg() {
+		return this.msgType != null && this.msgType.equalsIgnoreCase(TYPE_TEXT);
+	}
+	
 	public boolean isEventMsg() {
 		return this.msgType != null && this.msgType.equalsIgnoreCase(TYPE_EVENT);
+	}
+	
+	public boolean isClickMsg() {
+		if (isEventMsg()) {
+			WxEventMsg msg = (WxEventMsg)this;
+			if (msg.getEvent().equals(WxEventMsg.EVENT_TYPE_CLICK)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public boolean isSubscribeMsg() {
@@ -60,13 +74,19 @@ public abstract class WxReqMsg {
 	}
 	
 	public abstract String getContent();
-	
 	public static WxReqMsg createMsg(String xml) {
-		XMLConfiguration xmlConfig;
+		XMLConfiguration xmlConfig = new XMLConfiguration();
 		try {
-            xmlConfig = new XMLConfiguration();
-            xmlConfig.load(new StringReader(xml));
-            
+	        xmlConfig.load(new StringReader(xml));
+	        return createMsg(xmlConfig);
+		}  catch(Exception e) {
+			LogUtil.WEB_LOG.warn("createMsg error: " + xml, e);
+		}
+		return null;
+	}
+	
+	public static WxReqMsg createMsg(XMLConfiguration xmlConfig) {
+		try {
             String type = xmlConfig.getString("MsgType", "");
             if (type.equalsIgnoreCase(TYPE_TEXT)) {
             	return new WxReqTextMsg(xmlConfig);
@@ -102,7 +122,7 @@ public abstract class WxReqMsg {
             }
             
 		} catch(Exception e) {
-			LogUtil.WEB_LOG.warn("createMsg error: " + xml, e);
+			LogUtil.WEB_LOG.warn("createMsg error: ", e);
 		}
 		
 		return null;

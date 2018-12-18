@@ -29,8 +29,8 @@ public abstract class WxRespMsg {
 	}
 	
 	protected String cdata(String s) {
-		//return "<![CDATA[" + s +  "]]>";
-		return s;
+		return "<![CDATA[" + s +  "]]>";
+		//return s;
 	}
 	
 	public String toXml() {

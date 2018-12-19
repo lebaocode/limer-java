@@ -272,7 +272,9 @@ public class LebaoCache {
 					endTime += LimerConstants.PERIOD_MONTH;
 				}
 				
-			} 
+			} else if (a.getActionType() == LimerConstants.ACTION_TYPE_ADDVALIDTIME) {
+				endTime += a.getPriceFen() * 24*3600*1000L;
+			}
 		}
 		
 		if (System.currentTimeMillis() > endTime) {

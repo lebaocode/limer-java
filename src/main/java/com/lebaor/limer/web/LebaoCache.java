@@ -263,21 +263,24 @@ public class LebaoCache {
 		UserMemberAction[] as = actionDB.getActionsByUser(userId);
 		if (as.length == 0) return 0;
 		
-		long lastStartTime = 0;
+		long endTime = 0;
 		for (UserMemberAction a : as) {
 			if (a.getActionType() == LimerConstants.ACTION_TYPE_PAYMEMBERMONTH) {
-				if (a.getActionTime() > lastStartTime) {
-					lastStartTime = a.getActionTime();
+				if (endTime == 0 || a.getActionTime() > endTime) {
+					endTime = a.getActionTime() + LimerConstants.PERIOD_INTERVAL + LimerConstants.PERIOD_MONTH;
+				} else {
+					endTime += LimerConstants.PERIOD_MONTH;
 				}
+				
 			} 
 		}
 		
-		if (System.currentTimeMillis() - lastStartTime > 31*24*60*60*1000L) {
+		if (System.currentTimeMillis() > endTime) {
 			//已过期
 			return 0;
 		}
 		
-		return lastStartTime + 31*24*60*60*1000L;//月度会员，一个月时间
+		return endTime;
 	}
 	
 	//申请退还押金

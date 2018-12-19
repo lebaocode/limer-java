@@ -15,6 +15,9 @@ public class LimerConstants {
 	public final static int ACTION_TYPE_RETURNDEPOSIT = 3;//退还押金
 	public final static int ACTION_TYPE_ASKRETURNDEPOSIT = 4;//申请退还押金
 	
+	public final static long PERIOD_MONTH = 31*24*60*60*1000L;
+	public final static long PERIOD_INTERVAL = 7 *24*60*60*1000L; //7天内寄出
+	
 	public static String explainDonateBookStatus(int s) {
 		if (s == 1) return "未借出";
 		else if (s == 2) return "已借出";

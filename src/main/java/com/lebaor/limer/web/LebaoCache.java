@@ -259,6 +259,27 @@ public class LebaoCache {
 		return 0;
 	}
 	
+	public long getMemberEndTime(long userId) {
+		UserMemberAction[] as = actionDB.getActionsByUser(userId);
+		if (as.length == 0) return 0;
+		
+		long lastStartTime = 0;
+		for (UserMemberAction a : as) {
+			if (a.getActionType() == LimerConstants.ACTION_TYPE_PAYMEMBERMONTH) {
+				if (a.getActionTime() > lastStartTime) {
+					lastStartTime = a.getActionTime();
+				}
+			} 
+		}
+		
+		if (System.currentTimeMillis() - lastStartTime > 31*24*60*60*1000L) {
+			//已过期
+			return 0;
+		}
+		
+		return lastStartTime + 31*24*60*60*1000L;//月度会员，一个月时间
+	}
+	
 	//申请退还押金
 	public boolean askReturnDeposit(long userId, int priceFen) {
 		UserMemberAction act = new UserMemberAction();

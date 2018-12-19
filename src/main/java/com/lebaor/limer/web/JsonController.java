@@ -174,6 +174,9 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/askReturnDeposit")) {
 			askReturnDeposit(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getMemberEndTime")) {
+			getMemberEndTime(req, res, model);
+			return;
 		} 
 	}
 	
@@ -390,6 +393,24 @@ public class JsonController extends EntryController implements Runnable {
 		}
 	}
 	
+	public void getMemberEndTime(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		long endTime = cache.getMemberEndTime(wu.getUserId());
+		JSONObject o = new JSONObject();
+		try {
+			o.put("isMember", endTime > 0);
+			o.put("endTime", TextUtil.formatTime(endTime));
+		} catch (Exception e) {}
+		this.setRetJson(model, new WebJSONObject(o.toString()).toJSON());
+	}
 	public void getDeposit(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model) {
 		

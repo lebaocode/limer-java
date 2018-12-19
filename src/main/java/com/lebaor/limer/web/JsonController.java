@@ -404,10 +404,12 @@ public class JsonController extends EntryController implements Runnable {
 		}
 		
 		long endTime = cache.getMemberEndTime(wu.getUserId());
+		int depositFee = cache.getDepositFee(wu.getUserId());
 		JSONObject o = new JSONObject();
 		try {
 			o.put("isMember", endTime > 0);
 			o.put("endTime", TextUtil.formatTime(endTime));
+			o.put("depositFee", depositFee);
 		} catch (Exception e) {}
 		this.setRetJson(model, new WebJSONObject(o.toString()).toJSON());
 	}

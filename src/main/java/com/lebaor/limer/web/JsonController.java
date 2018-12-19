@@ -485,7 +485,10 @@ public class JsonController extends EntryController implements Runnable {
 		wo.setAllowed(isSubscribed);//是否关注；关注则允许
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
-		wo.setDepositFee(LimerConstants.DEPOSIT_FEE);
+		
+		//如果押金还没退，则不再需要交押金
+		int oldDepositFee = cache.getDepositFee(wu.getUserId());
+		wo.setDepositFee(oldDepositFee > 0 ? 0 : LimerConstants.DEPOSIT_FEE);
 		wo.setMchDesc("青柠月度会员");
 		wo.setRealFee(realFee);
 		wo.setTotalFee(0);

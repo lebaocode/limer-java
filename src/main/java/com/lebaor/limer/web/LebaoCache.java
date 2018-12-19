@@ -39,6 +39,7 @@ public class LebaoCache {
 	ActivityDB activityDB;
 	BookCommentDB commentDB;
 	BookListItemDB booklistItemDB;
+	UserMemberActionDB actionDB;
 	
 	String wxPayNotifyUrl;
 	
@@ -237,6 +238,37 @@ public class LebaoCache {
 		return p;
 	}
 	
+	//判断该用户是否有押金没退
+	public int getDepositFee(long userId) {
+		UserMemberAction[] as = actionDB.getActionsByUser(userId);
+		if (as.length == 0) return 0;
+		
+		int paied = 0;
+		int returned = 0;
+		for (UserMemberAction a : as) {
+			if (a.getActionType() == LimerConstants.ACTION_TYPE_PAYDEPOSIT) {
+				paied += a.getPriceFen();
+			} else if (a.getActionType() == LimerConstants.ACTION_TYPE_RETURNDEPOSIT) {
+				returned += a.getPriceFen();
+			}
+		}
+		
+		int res = paied - returned;
+		if (res > 0) return res;
+		
+		return 0;
+	}
+	
+	//申请退还押金
+	public boolean askReturnDeposit(long userId, int priceFen) {
+		UserMemberAction act = new UserMemberAction();
+		act.setActionTime(System.currentTimeMillis());
+		act.setActionType(LimerConstants.ACTION_TYPE_ASKRETURNDEPOSIT);
+		act.setPriceFen(priceFen);
+		act.setUserId(userId);
+		return actionDB.addUserMemberAction(act);
+	}
+	
 	public void updateOrder(WxPayNotifyData data) {
 		Order o = orderDB.getOrderByMchOrderId(data.getOrderId());
 		if (o == null || LimerConstants.isOrderEnd(o.getStatus())) return;
@@ -255,6 +287,26 @@ public class LebaoCache {
 		
 		orderDB.updateOrder(o);
 		LogUtil.STAT_LOG.info("[WXPAY] [SUCCESS] ["+ o.getUnionid() +"] ["+ o.getRealFee() +"] ["+ o.getWxTradeNo() +"] ["+ o.getTitle() +"]");
+		
+		//记录action
+		int depositFee = o.getDepositFee();
+		int memberFee = o.getRealFee() - depositFee;
+		
+		UserMemberAction act = new UserMemberAction();
+		act.setActionTime(System.currentTimeMillis());
+		act.setActionType(LimerConstants.ACTION_TYPE_PAYMEMBERMONTH);
+		act.setPriceFen(memberFee);
+		act.setUserId(o.getUserId());
+		actionDB.addUserMemberAction(act);
+		
+		if (depositFee > 0) {
+			act = new UserMemberAction();
+			act.setActionTime(System.currentTimeMillis());
+			act.setActionType(LimerConstants.ACTION_TYPE_PAYDEPOSIT);
+			act.setPriceFen(depositFee);
+			act.setUserId(o.getUserId());
+			actionDB.addUserMemberAction(act);
+		}
 		
 	}
 	
@@ -1192,6 +1244,10 @@ public class LebaoCache {
 
 	public void setWxPayNotifyUrl(String wxPayNotifyUrl) {
 		this.wxPayNotifyUrl = wxPayNotifyUrl;
+	}
+
+	public void setActionDB(UserMemberActionDB actionDB) {
+		this.actionDB = actionDB;
 	}
 	
 }

@@ -168,6 +168,12 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/wx/callback")) {
 			wxCallback(req, res, model);
 			return;
+		} else if (uri.startsWith("/json/getDeposit")) {
+			getDeposit(req, res, model);
+			return;
+		} else if (uri.startsWith("/json/askReturnDeposit")) {
+			askReturnDeposit(req, res, model);
+			return;
 		} 
 	}
 	
@@ -382,6 +388,39 @@ public class JsonController extends EntryController implements Runnable {
 		} catch (Exception e) {
 			LogUtil.WEB_LOG.warn("payNotify exception", e);
 		}
+	}
+	
+	public void getDeposit(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		int fee = cache.getDepositFee(wu.getUserId());
+		JSONObject o = new JSONObject();
+		try {
+			o.put("depositFee", fee);
+		} catch (Exception e) {}
+		this.setRetJson(model, new WebJSONObject(o.toString()).toJSON());
+	}
+	
+	public void askReturnDeposit(HttpServletRequest req, 
+			HttpServletResponse res, HashMap<String, Object> model) {
+		
+		WebUser wu = this.getUser(req);
+		
+		if (wu == null || wu.getUser() == null) {
+			this.setRetJson(model, new WebJSONObject(false, "没有用户信息").toJSON());
+			return;
+		}
+		
+		int fee = cache.getDepositFee(wu.getUserId());
+		cache.askReturnDeposit(wu.getUserId(), fee);
+		this.setRetJson(model, new WebJSONObject("申请成功，押金将在5个工作日内原路退回").toJSON());
 	}
 	
 	public void getMemberPayInfo(HttpServletRequest req, 

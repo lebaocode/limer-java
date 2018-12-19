@@ -10,6 +10,11 @@ public class LimerConstants {
 		return status == LIMER_BOOK_STATUS_READY;
 	}
 	
+	public final static int ACTION_TYPE_PAYMEMBERMONTH = 1;//月度会员付费
+	public final static int ACTION_TYPE_PAYDEPOSIT = 2;//缴纳押金
+	public final static int ACTION_TYPE_RETURNDEPOSIT = 3;//退还押金
+	public final static int ACTION_TYPE_ASKRETURNDEPOSIT = 4;//申请退还押金
+	
 	public static String explainDonateBookStatus(int s) {
 		if (s == 1) return "未借出";
 		else if (s == 2) return "已借出";

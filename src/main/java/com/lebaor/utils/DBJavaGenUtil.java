@@ -198,17 +198,12 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "String orderTime;//下单时间\n" + 
-				"	int status;//状态\n" + 
-				"	String statusDesc;//状态描述\n" + 
-				"	String mchTradeNo;//商户订单号\n" + 
-				"	String wxTradeNo;//微信订单号\n" + 
-				"	int totalFee;//原价\n" + 
-				"	int realFee;//实际价格\n" + 
-				"	int deposit;//押金价格，单位分\n" + 
-				"	String productId;//产品id\n" + 
-				"	String productDesc;//产品描述";
-		String className = "WebOrder";
+		String s = "long id;\n" + 
+				"	long userId;//哪个用户\n" + 
+				"	int actionType;// 动作类型\n" + 
+				"	int priceFen;//金额\n" + 
+				"	long actionTime;";
+		String className = "UserMemberAction";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);

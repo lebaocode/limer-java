@@ -22,7 +22,7 @@ public class Order {
 	String ip;
 	
 	String productId;
-	String extraJson;//此次订单包含的书籍limerBookId ["3323", "23283"]
+	String extraJson;//包含depositFee
 	String title;//订单名称
 	int mchNum;//商品数量
 	
@@ -36,6 +36,17 @@ public class Order {
 
 	long orderStartTime;//开始时间
 	long orderFinishTime;//订单完成时间
+	
+	public int getDepositFee() {
+		if (this.extraJson != null && this.extraJson.trim().length() > 0) {
+			try {
+				JSONObject o = new JSONObject(this.extraJson);
+				return JSONUtil.getInt(o, "depositFee");
+			}catch (Exception e) {}
+		}
+		
+		return 0;
+	}
 		
 	public static String genMchTradeNo(long userId) {
 		String s = Long.toString(userId);

@@ -87,9 +87,6 @@ public class JsonController extends EntryController implements Runnable {
 		} else if (uri.startsWith("/json/code2Session")) {
 			code2Session(req, res, model);
 			return;
-		} else if (uri.startsWith("/json/submitDonate")) {
-			submitDonate(req, res, model);
-			return;
 		} else if (uri.startsWith("/json/getUserCenterInfo")) {
 			getUserCenterInfo(req, res, model);
 			return;
@@ -104,21 +101,6 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		} else if (uri.startsWith("/json/getMyBorrowBooks")) {
 			getMyBorrowBooks(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/getMyDonateBooks")) {
-			getMyDonateBooks(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/borrowBooks")) {
-			borrowBooks(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/preBorrowOneBook")) {
-			preBorrowOneBook(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/returnBook")) {
-			returnBook(req, res, model);
-			return;
-		} else if (uri.startsWith("/json/isBookDonated")) {
-			isBookDonated(req, res, model);
 			return;
 		} else if (uri.startsWith("/json/getMyOrders")) {
 			getMyOrders(req, res, model);
@@ -460,6 +442,7 @@ public class JsonController extends EntryController implements Runnable {
 		String address = "";
 		String receiverMobile = "";
 		String receiverName = "";
+		String recomMobile = "";
 		try {
 			String extraJson = wu.getUser().getExtraInfo();
 			if (extraJson == null || extraJson.trim().length() == 0) extraJson = "{}";
@@ -468,6 +451,7 @@ public class JsonController extends EntryController implements Runnable {
 			address = JSONUtil.getString(extra, "address");
 			receiverMobile = JSONUtil.getString(extra, "receiverMobile");
 			receiverName = JSONUtil.getString(extra, "receiverName");
+			recomMobile = JSONUtil.getString(extra, "recomMobile");
 		} catch (Exception e) {}
 		
 		int realFee = LimerConstants.getMemberPrice(region);
@@ -482,9 +466,11 @@ public class JsonController extends EntryController implements Runnable {
 			isSubscribed = ui != null && ui.getSubscribe() != 0;
 		}
 		
-		wo.setAllowed(isSubscribed);//是否关注；关注则允许
+		//wo.setAllowed(isSubscribed);//是否关注；关注则允许
+		wo.setAllowed(true);//审核貌似没走到支付这一步
 		wo.setReceiverMobile(receiverMobile);
 		wo.setReceiverName(receiverName);
+		wo.setRecomMobile(recomMobile);
 		
 		//如果押金还没退，则不再需要交押金
 		int oldDepositFee = cache.getDepositFee(wu.getUserId());
@@ -653,6 +639,8 @@ public class JsonController extends EntryController implements Runnable {
 		String receiverMobile = this.getParameterValue(req, "receiverMobile", "");
 		String receiverName = this.getParameterValue(req, "receiverName", "");
 		
+		String recomMobile = this.getParameterValue(req, "recomMobile", "");
+		
 		WebUser wu = this.getUser(req);
 		
 		if (wu == null || wu.getUser() == null) {
@@ -668,6 +656,7 @@ public class JsonController extends EntryController implements Runnable {
 			extra.put("address", address);
 			extra.put("receiverMobile", receiverMobile);
 			extra.put("receiverName", receiverName);
+			extra.put("recomMobile", recomMobile);
 			wu.getUser().setExtraInfo(extra.toString());
 			cache.updateUserInfo(wu.getUserId(), wu.getUser());
 		} catch (Exception e) {
@@ -880,118 +869,118 @@ public class JsonController extends EntryController implements Runnable {
 		this.setRetJson(model, wja.toJSON());
 	}
 	
-	public void preBorrowOneBook(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		
-		//用户一次借n本书
-		String isbn = this.getParameterValue(req, "isbn", "");
-		LimerBookInfo lbi = cache.preBorrowOneBook(isbn, wu.getUserId());
-		
-		if (lbi != null) {
-			this.setRetJson(model, new WebJSONObject(lbi.getId()+"").toJSON());
-		} else {
-			this.setRetJson(model, new WebJSONObject(false, "已无库存").toJSON());
-		}
-	}
+//	public void preBorrowOneBook(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		
+//		//用户一次借n本书
+//		String isbn = this.getParameterValue(req, "isbn", "");
+//		LimerBookInfo lbi = cache.preBorrowOneBook(isbn, wu.getUserId());
+//		
+//		if (lbi != null) {
+//			this.setRetJson(model, new WebJSONObject(lbi.getId()+"").toJSON());
+//		} else {
+//			this.setRetJson(model, new WebJSONObject(false, "已无库存").toJSON());
+//		}
+//	}
+//	
+//	public void borrowBooks(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		
+//		//用户一次借n本书
+//		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
+//		
+//		JSONArray jArr = new JSONArray(isbnArrJson);
+//		String[] isbnArr = new String[jArr.length()];
+//		for (int i = 0; i <  jArr.length(); i++) {
+//			String isbn = jArr.getString(i);
+//			isbnArr[i] = isbn;
+//		}
+//		
+//		String ip = this.getUserIp(req);
+//		WebJSONArray wja = cache.borrowBooks(isbnArr, wu, ip);
+//		
+//		this.setRetJson(model, wja.toJSON());
+//	}
 	
-	public void borrowBooks(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		
-		//用户一次借n本书
-		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
-		
-		JSONArray jArr = new JSONArray(isbnArrJson);
-		String[] isbnArr = new String[jArr.length()];
-		for (int i = 0; i <  jArr.length(); i++) {
-			String isbn = jArr.getString(i);
-			isbnArr[i] = isbn;
-		}
-		
-		String ip = this.getUserIp(req);
-		WebJSONArray wja = cache.borrowBooks(isbnArr, wu, ip);
-		
-		this.setRetJson(model, wja.toJSON());
-	}
+//	public void isBookDonated(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		long curUserId = wu.getUserId();
+//		JSONObject o = new JSONObject();
+//		
+//		String isbn = this.getParameterValue(req, "isbn", "");
+//		WebBookDetail wbd = cache.getBookInfo(isbn);
+//		if (wbd == null) {
+//			o.put("donated", false);
+//			this.setRetJson(model, o.toString());
+//			return;
+//		} 
+//		
+//		boolean isDonated = cache.isDonatedBook(curUserId, isbn);
+//		o.put("donated", isDonated);
+//		
+//		WebJSONObject wjo = new WebJSONObject(o.toString());
+//		this.setRetJson(model, wjo.toString());
+//	}
 	
-	public void isBookDonated(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		long curUserId = wu.getUserId();
-		JSONObject o = new JSONObject();
-		
-		String isbn = this.getParameterValue(req, "isbn", "");
-		WebBookDetail wbd = cache.getBookInfo(isbn);
-		if (wbd == null) {
-			o.put("donated", false);
-			this.setRetJson(model, o.toString());
-			return;
-		} 
-		
-		boolean isDonated = cache.isDonatedBook(curUserId, isbn);
-		o.put("donated", isDonated);
-		
-		WebJSONObject wjo = new WebJSONObject(o.toString());
-		this.setRetJson(model, wjo.toString());
-	}
-	
-	public void returnBook(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		long curUserId = wu.getUserId();
-		
-		long limerBookId = this.getLongParameterValue(req, "limerBookId", 0L);
-		boolean result = cache.returnBook(curUserId, limerBookId);
-		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
-		
-		this.setRetJson(model, o.toString());
-	}
+//	public void returnBook(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		long curUserId = wu.getUserId();
+//		
+//		long limerBookId = this.getLongParameterValue(req, "limerBookId", 0L);
+//		boolean result = cache.returnBook(curUserId, limerBookId);
+//		WebJSONObject o = new WebJSONObject(result, result? "成功":"失败");
+//		
+//		this.setRetJson(model, o.toString());
+//	}
 	
 	
-	public void getMyDonateBooks(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		long curUserId = wu.getUserId();
-		
-		WebDonateBook[] bArr = cache.getMyDonateBooks(curUserId);
-		JSONArray arr = new JSONArray();
-		for (int i = 0; i < bArr.length; i++) {
-			arr.put(new JSONObject(bArr[i].toJSON()));
-		}
-		
-		this.setRetJson(model, new WebJSONArray(arr.toString()).toJSON());
-	}
+//	public void getMyDonateBooks(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		long curUserId = wu.getUserId();
+//		
+//		WebDonateBook[] bArr = cache.getMyDonateBooks(curUserId);
+//		JSONArray arr = new JSONArray();
+//		for (int i = 0; i < bArr.length; i++) {
+//			arr.put(new JSONObject(bArr[i].toJSON()));
+//		}
+//		
+//		this.setRetJson(model, new WebJSONArray(arr.toString()).toJSON());
+//	}
 	
 	public void getMyBorrowBooks(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
@@ -1035,42 +1024,42 @@ public class JsonController extends EntryController implements Runnable {
 	}
 	
 	
-	public void submitDonate(HttpServletRequest req, 
-			HttpServletResponse res, HashMap<String, Object> model)  
-            throws Exception {
-		WebUser wu = this.getUser(req);
-		if (wu == null) {
-			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
-			return;
-		}
-		
-		long curUserId = wu.getUserId();
-		
-		JSONArray resArr = new JSONArray();
-		
-		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
-		JSONArray arr = new JSONArray(isbnArrJson);
-		for (int i = 0; i <arr.length(); i++) {
-			String isbn = arr.getString(i);
-			WebBookDetail wbd = cache.getBookInfo(isbn);
-			
-			
-			JSONObject data = new JSONObject();
-			data.put("isbn", isbn);
-			if (wbd == null) {
-				WebJSONObject ro = new WebJSONObject(false, "没有isbn="+isbn+"对应的书籍", data.toString());
-				resArr.put(ro.toJSONObject());
-				continue;
-			}
-			LogUtil.WEB_LOG.debug("begin addDonateBook("+ isbn +", "+ curUserId +")");
-			boolean success = cache.addDonateBook(isbn, curUserId);
-			WebJSONObject ro = new WebJSONObject(success, success ? "成功" : "失败", data.toString());
-			resArr.put(ro.toJSONObject());
-		}
-		
-		WebJSONArray resJson = new WebJSONArray(resArr.toString());
-		this.setRetJson(model, resJson.toJSON());
-	}
+//	public void submitDonate(HttpServletRequest req, 
+//			HttpServletResponse res, HashMap<String, Object> model)  
+//            throws Exception {
+//		WebUser wu = this.getUser(req);
+//		if (wu == null) {
+//			this.setRetJson(model, new WebJSONObject(false, "用户不存在").toJSON());
+//			return;
+//		}
+//		
+//		long curUserId = wu.getUserId();
+//		
+//		JSONArray resArr = new JSONArray();
+//		
+//		String isbnArrJson = this.getParameterValue(req, "isbn_arr", "");
+//		JSONArray arr = new JSONArray(isbnArrJson);
+//		for (int i = 0; i <arr.length(); i++) {
+//			String isbn = arr.getString(i);
+//			WebBookDetail wbd = cache.getBookInfo(isbn);
+//			
+//			
+//			JSONObject data = new JSONObject();
+//			data.put("isbn", isbn);
+//			if (wbd == null) {
+//				WebJSONObject ro = new WebJSONObject(false, "没有isbn="+isbn+"对应的书籍", data.toString());
+//				resArr.put(ro.toJSONObject());
+//				continue;
+//			}
+//			LogUtil.WEB_LOG.debug("begin addDonateBook("+ isbn +", "+ curUserId +")");
+//			boolean success = cache.addDonateBook(isbn, curUserId);
+//			WebJSONObject ro = new WebJSONObject(success, success ? "成功" : "失败", data.toString());
+//			resArr.put(ro.toJSONObject());
+//		}
+//		
+//		WebJSONArray resJson = new WebJSONArray(resArr.toString());
+//		this.setRetJson(model, resJson.toJSON());
+//	}
 	
 	public void getLogisticsFee(HttpServletRequest req, 
 			HttpServletResponse res, HashMap<String, Object> model)  
@@ -1096,12 +1085,7 @@ public class JsonController extends EntryController implements Runnable {
 			return;
 		}
 		
-		//加入该书状态，是否可借阅
-		WebBookStatus wbs = cache.getWebBookStatus(isbn);
-		
 		JSONObject jo = wbd.toWebJSONObject();
-		jo.put("status", wbs.getStatus());
-		jo.put("statusDesc", LimerConstants.explainBookStatus(wbs.getStatus()));
 		
 		//该用户是否已填写孩子信息
 		WebUser wu = this.getUser(req);

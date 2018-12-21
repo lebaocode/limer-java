@@ -11,6 +11,7 @@ public class BorrowRecord {
 	long userId;
 	String isbn;
 	long limerBookId;
+	long orderId;
 	int status;
 	long borrowTime;//借书时间
 	long returnTime;//归还时间
@@ -23,6 +24,12 @@ public class BorrowRecord {
 		this.id = id;
 	}
 	
+	public long getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(long orderId) {
+		this.orderId = orderId;
+	}
 	public String getIsbn() {
 		return isbn;
 	}

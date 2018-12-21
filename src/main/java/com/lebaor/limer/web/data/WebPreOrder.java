@@ -9,6 +9,7 @@ public class WebPreOrder {
 	String address;
 	String receiverMobile;
 	String receiverName;
+	String recomMobile;
 	
 	String mchDesc;
 	int realFee;
@@ -25,6 +26,7 @@ public class WebPreOrder {
 			o.put("receiverMobile", receiverMobile);
 			o.put("receiverName", receiverName);
 			o.put("mchDesc", mchDesc);
+			o.put("recomMobile", recomMobile);
 			o.put("realFee", realFee);
 			o.put("totalFee", totalFee);
 			o.put("isAllowed", isAllowed);
@@ -52,6 +54,7 @@ public class WebPreOrder {
 			n.address = JSONUtil.getString(o, "address");
 			n.receiverMobile = JSONUtil.getString(o, "receiverMobile");
 			n.receiverName = JSONUtil.getString(o, "receiverName");
+			n.recomMobile = JSONUtil.getString(o, "recomMobile");
 			n.mchDesc = JSONUtil.getString(o, "mchDesc");
 			n.realFee = JSONUtil.getInt(o, "realFee");
 			n.totalFee = JSONUtil.getInt(o, "totalFee");
@@ -77,6 +80,14 @@ public class WebPreOrder {
 		}
 	}
 	
+	public String getRecomMobile() {
+		return recomMobile;
+	}
+
+	public void setRecomMobile(String recomMobile) {
+		this.recomMobile = recomMobile;
+	}
+
 	public boolean isAllowed() {
 		return isAllowed;
 	}

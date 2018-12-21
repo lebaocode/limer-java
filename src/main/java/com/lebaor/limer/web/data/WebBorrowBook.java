@@ -2,6 +2,8 @@ package com.lebaor.limer.web.data;
 
 import org.json.JSONObject;
 
+import com.lebaor.utils.JSONUtil;
+
 public class WebBorrowBook {
 	long bookId;
 	long limerBookId;
@@ -9,31 +11,23 @@ public class WebBorrowBook {
 	String isbn;
 	String author;
 	String coverUrl;
+	int price;
+	int pageNum;
 	int status;
 	String statusDesc;
 	long borrowTime;
-	
-	public void setInfo(WebBookDetail b, long limerBookId, int status, String statusDesc, long borrowTime) {
-		this.bookId = b.getBook().getId();
-		this.limerBookId = limerBookId;
-		this.title = b.getBook().getTitle();
-		this.isbn = b.getBook().getIsbn13();
-		this.author = b.getBook().getAuthors().toString();
-		this.coverUrl = b.getBook().getCoverUrl();
-		this.status = status;
-		this.statusDesc = statusDesc;
-		this.borrowTime = borrowTime;
-	}
-	
+
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
-			o.put("bookId", bookId);
-			o.put("limerBookId", limerBookId);
+			o.put("bookId", Long.toString(bookId));
+			o.put("limerBookId", Long.toString(limerBookId));
 			o.put("title", title);
 			o.put("isbn", isbn);
 			o.put("author", author);
 			o.put("coverUrl", coverUrl);
+			o.put("price", price);
+			o.put("pageNum", pageNum);
 			o.put("status", status);
 			o.put("statusDesc", statusDesc);
 			o.put("borrowTime", Long.toString(borrowTime));
@@ -56,22 +50,31 @@ public class WebBorrowBook {
 	public static WebBorrowBook parseJSON(JSONObject o) {
 		try {
 			WebBorrowBook n = new WebBorrowBook();
-			n.bookId = o.getLong("bookId");
-			n.limerBookId = o.getLong("limerBookId");
-			n.title = o.getString("title");
-			n.isbn = o.getString("isbn");
-			n.author = o.getString("author");
-			n.coverUrl = o.getString("coverUrl");
-			n.status = o.getInt("status");
-			n.statusDesc = o.getString("statusDesc");
-			n.borrowTime = Long.parseLong(o.getString("borrowTime"));
+			n.bookId = JSONUtil.getLong(o, "bookId");
+			n.limerBookId = JSONUtil.getLong(o, "limerBookId");
+			n.title = JSONUtil.getString(o, "title");
+			n.isbn = JSONUtil.getString(o, "isbn");
+			n.author = JSONUtil.getString(o, "author");
+			n.coverUrl = JSONUtil.getString(o, "coverUrl");
+			n.price = JSONUtil.getInt(o, "price");
+			n.pageNum = JSONUtil.getInt(o, "pageNum");
+			n.status = JSONUtil.getInt(o, "status");
+			n.statusDesc = JSONUtil.getString(o, "statusDesc");
+			n.borrowTime = JSONUtil.getLong(o, "borrowTime");
 			return n;
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-
+	public JSONObject toJSONObject() {
+		try {
+			return new JSONObject(toJSON());
+		} catch (Exception e) {
+			return new JSONObject();
+		}
+	}
+	
 	public String toString() {
 		return toJSON();
 	}

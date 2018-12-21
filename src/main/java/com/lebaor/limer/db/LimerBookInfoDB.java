@@ -1,7 +1,10 @@
 package com.lebaor.limer.db;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.LinkedList;
+
+import org.json.JSONObject;
 
 import com.lebaor.dbutils.DBUtils;
 import com.lebaor.dbutils.ResultSetHandler;
@@ -58,14 +61,16 @@ public class LimerBookInfoDB {
 		LimerBookInfo o = new LimerBookInfo();
 		o.setId(rs.getLong(1));
 		o.setIsbn(rs.getString(2));
-		o.setDonateUserId(rs.getLong(3));
-		o.setStatus(rs.getInt(4));
-		o.setDegree(rs.getInt(5));
-		o.setExtraInfo(rs.getString(6));
-		d = rs.getTimestamp(7);
-		o.setDonateTime(d != null ? d.getTime() : 0);
-		d = rs.getTimestamp(8);
+		o.setStoreNum(rs.getInt(3));
+		o.setExtraInfo(rs.getString(4));
+		d = rs.getTimestamp(5);
 		o.setLastUpdateTime(d != null ? d.getTime() : 0);
+		o.setBookTitle(rs.getString(6));
+		o.setBookPrice(rs.getInt(7));
+		o.setBookPageNum(rs.getInt(8));
+		o.setIsbnSingle(rs.getInt(9) == 1);
+		o.setBookNo(rs.getString(10));
+		o.setBookSeriesTitle(rs.getString(11));
 		return o;
 	}
 	
@@ -155,14 +160,16 @@ public class LimerBookInfoDB {
 		
 		String sql = DBUtils.genAddRowSql(TABLENAME, COL_NAMES);
 		return dbUtils.executeUpdate(sql, new Object[]{
-				
 				o.getIsbn(),
-				o.getDonateUserId(),
-				o.getStatus(),
-				o.getDegree(),
+				o.getStoreNum(),
 				o.getExtraInfo(),
-				TextUtil.formatTime(o.getDonateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
+				o.getBookTitle(),
+				o.getBookPrice(),
+				o.getBookPageNum(),
+				o.isIsbnSingle(),
+				o.getBookNo(),
+				o.getBookSeriesTitle(),
 		});
 	}
 	
@@ -176,41 +183,47 @@ public class LimerBookInfoDB {
 		return dbUtils.executeUpdate(sql, new Object[]{
 				
 				o.getIsbn(),
-				o.getDonateUserId(),
-				o.getStatus(),
-				o.getDegree(),
+				o.getStoreNum(),
 				o.getExtraInfo(),
-				TextUtil.formatTime(o.getDonateTime()),
 				TextUtil.formatTime(o.getLastUpdateTime()),
+				o.getBookTitle(),
+				o.getBookPrice(),
+				o.getBookPageNum(),
+				o.isIsbnSingle(),
+				o.getBookNo(),
+				o.getBookSeriesTitle(),
 				o.getId(),
 				});
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "isbn", "donate_user_id", "status", "degree", "extra_info", "donate_time", "last_update_time"};
+	private static final String[] COL_NAMES = {
+			"id", "isbn", "store_num", "extra_info", 
+			"last_update_time", "book_title", "book_price", "book_page_num", 
+			"is_isbn_single", "book_no", "book_series_title"		
+	};
 	
 	
 	private void createLimerBookInfoDBTable() {
 
 		String sql = "  CREATE TABLE `"+ TABLENAME.toLowerCase() +"` (\r\n" + 
 				"  `id` bigint(20) NOT NULL auto_increment,\r\n" +
-				"  `isbn` varchar(255) NOT NULL,\r\n" +
-				"  `donate_user_id` bigint(20) NOT NULL,\r\n" +
-				"  `status` smallint(2) default 0,\r\n" +
-				"  `degree` smallint(3) default 0,\r\n" +
-				"  `extra_info` TEXT default NULL,\r\n" +
-				
-				"  `donate_time` datetime default NULL,\r\n" +
+				"  `isbn` varchar(255) default NULL,\r\n" +
+				"  `store_num` smallint(2) default 0,\r\n" +
+				"  `extra_info` varchar(1023) default NULL,\r\n" +
 				"  `last_update_time` datetime default NULL,\r\n" +
-				
+				"  `book_title` varchar(255) default NULL,\r\n" +
+				"  `book_price` MEDIUMINT(9) default 0,\r\n" +
+				"  `book_page_num` smallint(4) default 0,\r\n" +
+				"  `is_isbn_single` smallint(2)  default 0,\r\n" +
+				"  `book_no` varchar(255) default NULL,\r\n" +
+				"  `book_series_title` varchar(255) default NULL,\r\n" +
 				
 				"  PRIMARY KEY  (`ID`)\r\n" + 
 				") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 		
 		if (dbUtils.createTable(TABLENAME, sql)) {
-			sql = " CREATE INDEX index_"+ TABLENAME +"_userid" + 
-					" ON "+ TABLENAME +" (donate_user_id)";
-			dbUtils.executeSql(sql, null);
+			
 			
 			sql = " CREATE INDEX index_"+ TABLENAME +"_isbn" + 
 					" ON "+ TABLENAME +" (isbn)";
@@ -230,5 +243,38 @@ public class LimerBookInfoDB {
 
 	public void setDbUtils(DBUtils dbUtils) {
 		this.dbUtils = dbUtils;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		Connection conn = null;
+		try {
+//			DBUtils dbUtils = new DBUtils();
+//			dbUtils.setDbUrl("jdbc:mysql://cd-cdb-bh931mgw.sql.tencentcdb.com:63600/lebao?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8");
+//			dbUtils.setCharset("utf-8");
+//			dbUtils.setDbName("lebao");
+//			dbUtils.setDbPassword("d3tIrGk32");
+//			dbUtils.setDbUser("root");
+//			
+//			dbUtils.connect();
+//			conn = dbUtils.getConnection();
+//			if (conn == null) {
+//				System.out.println("conn is null");
+//				return;
+//			}
+//			
+//			LimerBookInfoDB db = new LimerBookInfoDB();
+//			db.setDbUtils(dbUtils);
+			
+			LimerBookInfo lbi = new LimerBookInfo();
+			
+			System.out.println(lbi.getExtraInfo());
+			lbi.setId(6);
+//			db.updateLimerBookInfo(lbi);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) conn.close();
+		}
 	}
 }

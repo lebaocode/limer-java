@@ -60,12 +60,13 @@ public class BorrowRecordDB {
 		o.setUserId(rs.getLong(2));
 		o.setIsbn(rs.getString(3));
 		o.setLimerBookId(rs.getLong(4));
-		o.setStatus(rs.getInt(5));
-		d = rs.getTimestamp(6);
-		o.setBorrowTime(d != null ? d.getTime() : 0);
+		o.setOrderId(rs.getLong(5));
+		o.setStatus(rs.getInt(6));
 		d = rs.getTimestamp(7);
-		o.setReturnTime(d != null ? d.getTime() : 0);
+		o.setBorrowTime(d != null ? d.getTime() : 0);
 		d = rs.getTimestamp(8);
+		o.setReturnTime(d != null ? d.getTime() : 0);
+		d = rs.getTimestamp(9);
 		o.setPunishTime(d != null ? d.getTime() : 0);
 		return o;
 
@@ -177,6 +178,7 @@ public class BorrowRecordDB {
 				o.getUserId(),
 				o.getIsbn(),
 				o.getLimerBookId(),
+				o.getOrderId(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getBorrowTime()),
 				TextUtil.formatTime(o.getReturnTime()),
@@ -196,6 +198,7 @@ public class BorrowRecordDB {
 				o.getUserId(),
 				o.getIsbn(),
 				o.getLimerBookId(),
+				o.getOrderId(),
 				o.getStatus(),
 				TextUtil.formatTime(o.getBorrowTime()),
 				TextUtil.formatTime(o.getReturnTime()),
@@ -205,7 +208,7 @@ public class BorrowRecordDB {
 	}
 	
 	
-	private static final String[] COL_NAMES = {"id", "user_id", "isbn", "limer_book_id", "status", 
+	private static final String[] COL_NAMES = {"id", "user_id", "isbn", "limer_book_id", "order_id", "status", 
 		"borrow_time", "return_time", "punish_time"};
 	
 	
@@ -216,6 +219,7 @@ public class BorrowRecordDB {
 				"  `user_id` bigint(20) NOT NULL,\r\n" +
 				"  `isbn` varchar(255) NOT NULL,\r\n" +
 				"  `limer_book_id` bigint(20) NOT NULL,\r\n" +
+				"  `order_id` bigint(20) NOT NULL,\r\n" +
 				"  `status` smallint(2) default 0,\r\n" +
 				"  `borrow_time` datetime default NULL,\r\n" +
 				"  `return_time` datetime default NULL,\r\n" +
@@ -237,6 +241,9 @@ public class BorrowRecordDB {
 					" ON "+ TABLENAME +" (limer_book_id)";
 			dbUtils.executeSql(sql, null);
 			
+			sql = " CREATE INDEX index_"+ TABLENAME +"_orderid" + 
+					" ON "+ TABLENAME +" (order_id)";
+			dbUtils.executeSql(sql, null);
 		}
 		
 	}

@@ -18,23 +18,32 @@ public class LimerBookInfo {
 	
 	long id;
 	String isbn;
-	long donateUserId;//捐赠人id 如果为0，表示是公司的书
-	int status;
-	int degree = 80;//书籍新旧程度
-	String extraInfo;//如果是一套书里的其中一本，则把每一本信息放在这里no, title, price, pageNum
-	long donateTime;//捐赠时间
+	int storeNum;//购买数量
+	String extraInfo;//如果是一套书里的其中一本，则把每一本信息放在这里isSingle(此isbn是否单本),no, title, price, pageNum
 	long lastUpdateTime;
+	
+	String bookTitle;//单本title 如果不是单本，则不需要填写。因为在book表里都有
+	int bookPrice; //单本price
+	int bookPageNum;//单本的书页数量
+	
+	boolean isIsbnSingle;//isbn是否本书的（true），还是该书系列的（false）
+	String bookNo;//单本书在系里里的序号 如果isIsbnSingle=false，再填。也可以不填。
+	String bookSeriesTitle;//系列书的名称   如果isIsbnSingle=false，必填。否则不填。
 	
 	public String toJSON() {
 		try {
 			JSONObject o = new JSONObject();
 			o.put("id", Long.toString(id));
 			o.put("isbn", isbn);
-			o.put("donateUserId", donateUserId);
-			o.put("status", status);
-			o.put("degree", degree);
-			o.put("donateTime", Long.toString(donateTime));
+			o.put("storeNum", storeNum);
+			o.put("extraInfo", extraInfo);
 			o.put("lastUpdateTime", Long.toString(lastUpdateTime));
+			o.put("bookTitle", bookTitle);
+			o.put("bookPrice", bookPrice);
+			o.put("bookPageNum", bookPageNum);
+			o.put("isIsbnSingle", isIsbnSingle);
+			o.put("bookNo", bookNo);
+			o.put("bookSeriesTitle", bookSeriesTitle);
 			return o.toString();
 		} catch (Exception e) {
 			return "{error: 'format error.'}";
@@ -56,11 +65,15 @@ public class LimerBookInfo {
 			LimerBookInfo n = new LimerBookInfo();
 			n.id = JSONUtil.getLong(o, "id");
 			n.isbn = JSONUtil.getString(o, "isbn");
-			n.donateUserId = JSONUtil.getLong(o, "donateUserId");
-			n.status = JSONUtil.getInt(o, "status");
-			n.degree = JSONUtil.getInt(o, "degee");
-			n.donateTime = JSONUtil.getLong(o, "donateTime");
+			n.storeNum = JSONUtil.getInt(o, "storeNum");
+			n.extraInfo = JSONUtil.getString(o, "extraInfo");
 			n.lastUpdateTime = JSONUtil.getLong(o, "lastUpdateTime");
+			n.bookTitle = JSONUtil.getString(o, "bookTitle");
+			n.bookPrice = JSONUtil.getInt(o, "bookPrice");
+			n.bookPageNum = JSONUtil.getInt(o, "bookPageNum");
+			n.isIsbnSingle = JSONUtil.getBoolean(o, "isIsbnSingle");
+			n.bookNo = JSONUtil.getString(o, "bookNo");
+			n.bookSeriesTitle = JSONUtil.getString(o, "bookSeriesTitle");
 			return n;
 		} catch (Exception e) {
 			return null;
@@ -71,6 +84,15 @@ public class LimerBookInfo {
 	public String toString() {
 		return toJSON();
 	}
+
+
+	public JSONObject toJSONObject() {
+		try {
+			return new JSONObject(toJSON());
+		} catch (Exception e) {
+			return new JSONObject();
+		}
+	}
 	
 	public long getId() {
 		return id;
@@ -78,30 +100,23 @@ public class LimerBookInfo {
 	public void setId(long id) {
 		this.id = id;
 	}
-	
 	public String getIsbn() {
 		return isbn;
 	}
 	public void setIsbn(String isbn) {
 		this.isbn = isbn;
 	}
-	public long getDonateUserId() {
-		return donateUserId;
+	public int getStoreNum() {
+		return storeNum;
 	}
-	public void setDonateUserId(long donateUserId) {
-		this.donateUserId = donateUserId;
+	public void setStoreNum(int storeNum) {
+		this.storeNum = storeNum;
 	}
-	public long getDonateTime() {
-		return donateTime;
+	public String getExtraInfo() {
+		return extraInfo;
 	}
-	public void setDonateTime(long donateTime) {
-		this.donateTime = donateTime;
-	}
-	public int getStatus() {
-		return status;
-	}
-	public void setStatus(int status) {
-		this.status = status;
+	public void setExtraInfo(String extraInfo) {
+		this.extraInfo = extraInfo;
 	}
 	public long getLastUpdateTime() {
 		return lastUpdateTime;
@@ -109,74 +124,43 @@ public class LimerBookInfo {
 	public void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
 	}
-
-	public int getDegree() {
-		return degree;
+	public String getBookTitle() {
+		return bookTitle;
 	}
-
-	public void setDegree(int degree) {
-		this.degree = degree;
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
 	}
-
-	public String getExtraInfo() {
-		return extraInfo;
+	public int getBookPrice() {
+		return bookPrice;
 	}
-
-	public void setExtraInfo(String extraInfo) {
-		this.extraInfo = extraInfo;
+	public void setBookPrice(int bookPrice) {
+		this.bookPrice = bookPrice;
+	}
+	public int getBookPageNum() {
+		return bookPageNum;
+	}
+	public void setBookPageNum(int bookPageNum) {
+		this.bookPageNum = bookPageNum;
+	}
+	public boolean isIsbnSingle() {
+		return isIsbnSingle;
+	}
+	public void setIsbnSingle(boolean isIsbnSingle) {
+		this.isIsbnSingle = isIsbnSingle;
+	}
+	public String getBookNo() {
+		return bookNo;
+	}
+	public void setBookNo(String bookNo) {
+		this.bookNo = bookNo;
+	}
+	public String getBookSeriesTitle() {
+		return bookSeriesTitle;
+	}
+	public void setBookSeriesTitle(String bookSeriesTitle) {
+		this.bookSeriesTitle = bookSeriesTitle;
 	}
 	
-	public void setSingleBookInfo(int no, String title, int price, int pageNum) {
-		try {
-			JSONObject o = new JSONObject();
-			o.put("no", no);
-			o.put("title", title);
-			o.put("price", price);
-			o.put("pageNum", pageNum);
-			this.extraInfo = o.toString();
-		}catch (Exception e) {
-			
-		}
-	}
 	
-	//是一个isbn里的单册书吗？即每册书没有自己的isbn，一整套书才有一个isbn
-	public boolean isSingleBook() {
-		if (this.extraInfo == null || this.extraInfo.trim().length() == 0 || this.extraInfo.equals("{}")) return false;
-		
-		return true;
-	}
-	
-	public int getSingleBookNo() {
-		try {
-			JSONObject o = new JSONObject(this.extraInfo);
-			return o.getInt("no");
-		} catch (Exception e) {
-			return 0;
-		}
-	}
-	public String getSingleBookTitle() {
-		try {
-			JSONObject o = new JSONObject(this.extraInfo);
-			return o.getString("title");
-		} catch (Exception e) {
-			return "";
-		}
-	}
-	public int getSingleBookPrice() {
-		try {
-			JSONObject o = new JSONObject(this.extraInfo);
-			return o.getInt("price");
-		} catch (Exception e) {
-			return 0;
-		}
-	}
-	public int getSingleBookPageNum() {
-		try {
-			JSONObject o = new JSONObject(this.extraInfo);
-			return o.getInt("pageNum");
-		} catch (Exception e) {
-			return 0;
-		}
-	}
 	
 }

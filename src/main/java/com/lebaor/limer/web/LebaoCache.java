@@ -58,6 +58,9 @@ public class LebaoCache {
 	private static final String KEY_BOOK_PREFIX = "bk:";//key,value key=bk:isbn, value=bookObject
 	private static final int KEY_BOOK_EXPIRE = 3600*24*21;//21天
 	
+	private static final String KEY_LIMERBOOK_PREFIX = "lbi:";//key,value key=lbi:id, value=bookObject
+	private static final int KEY_LIMERBOOK_EXPIRE = 3600*24*21;//21天
+	
 	private static final String KEY_COMMENTNUM_PREFIX = "cmn:";//key,value key=cmn:isbn, value=书评数
 	private static final int KEY_COMMENTNUM_EXPIRE = 3600*720;//30天
 	
@@ -541,72 +544,72 @@ public class LebaoCache {
 		return list.toArray(new WebBookComment[0]);
 	}
 	
-	public LimerBookInfo preBorrowOneBook(String isbn, long userId) {
-		//判断该书是否可借
-		LimerBookInfo one =null;
-		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
-		for (LimerBookInfo lbs : lbsArr) {
-			//判断缓存里是否已经被借走
-			if (getJedis().exists(KEY_PRE_BORROW_PREFIX + lbs.getId())) {
-				//已被预借
-				continue;
-			}
-			
-			if (lbs.getStatus() == LimerConstants.LIMER_BOOK_STATUS_READY) {
-				//可以借
-				if (one == null) one = lbs;
-				break;
-			}
-		}
-		
-		//无书可借
-		if (one == null) return null;
-		
-		WebBookDetail wb = this.getBookInfo(isbn);
-		if (wb == null) return null;
-		
-		//放入缓存
-		getJedis().set(KEY_PRE_BORROW_PREFIX + one.getId(), Long.toString(userId));
-		getJedis().expire(KEY_PRE_BORROW_PREFIX + one.getId(), KEY_PRE_BORROW_EXPIRE);
-		
-		return one;
-	}
-	
-	public LimerBookInfo borrowOneBook(String isbn, long userId) {
-		//判断该书是否可借
-		LimerBookInfo one =null;
-		int inlibNum = 0;
-		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
-		for (LimerBookInfo lbs : lbsArr) {
-			if (lbs.getStatus() == LimerConstants.LIMER_BOOK_STATUS_READY) {
-				//可以借
-				if (one == null) one = lbs;
-				inlibNum++;
-			}
-		}
-		
-		//无书可借
-		if (one == null) return null;
-		
-		WebBookDetail wb = this.getBookInfo(isbn);
-		if (wb == null) return null;
-		
-		//更新书籍状态
-		one.setStatus(LimerConstants.LIMER_BOOK_STATUS_BUSY);
-		one.setLastUpdateTime(System.currentTimeMillis());
-		lbiDB.updateLimerBookInfo(one);
-		
-		//产生一条借书记录
-		BorrowRecord br = new BorrowRecord();
-		br.setBorrowTime(System.currentTimeMillis());
-		br.setLimerBookId(one.getId());
-		br.setStatus(LimerConstants.BORROW_STATUS_ING);
-		br.setUserId(userId);
-		brDB.addBorrowRecord(br);
-		br = brDB.getBorrowRecordByUserBook(br.getLimerBookId(), userId);
-		
-		return one;
-	}
+//	public LimerBookInfo preBorrowOneBook(String isbn, long userId) {
+//		//判断该书是否可借
+//		LimerBookInfo one =null;
+//		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
+//		for (LimerBookInfo lbs : lbsArr) {
+//			//判断缓存里是否已经被借走
+//			if (getJedis().exists(KEY_PRE_BORROW_PREFIX + lbs.getId())) {
+//				//已被预借
+//				continue;
+//			}
+//			
+//			if (lbs.getStatus() == LimerConstants.LIMER_BOOK_STATUS_READY) {
+//				//可以借
+//				if (one == null) one = lbs;
+//				break;
+//			}
+//		}
+//		
+//		//无书可借
+//		if (one == null) return null;
+//		
+//		WebBookDetail wb = this.getBookInfo(isbn);
+//		if (wb == null) return null;
+//		
+//		//放入缓存
+//		getJedis().set(KEY_PRE_BORROW_PREFIX + one.getId(), Long.toString(userId));
+//		getJedis().expire(KEY_PRE_BORROW_PREFIX + one.getId(), KEY_PRE_BORROW_EXPIRE);
+//		
+//		return one;
+//	}
+//	
+//	public LimerBookInfo borrowBook(long userId, long limerBookId) {
+//		//判断该书是否可借
+//		LimerBookInfo one =null;
+//		int inlibNum = 0;
+//		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
+//		for (LimerBookInfo lbs : lbsArr) {
+//			if (lbs.getStatus() == LimerConstants.LIMER_BOOK_STATUS_READY) {
+//				//可以借
+//				if (one == null) one = lbs;
+//				inlibNum++;
+//			}
+//		}
+//		
+//		//无书可借
+//		if (one == null) return null;
+//		
+//		WebBookDetail wb = this.getBookInfo(isbn);
+//		if (wb == null) return null;
+//		
+//		//更新书籍状态
+//		one.setStatus(LimerConstants.LIMER_BOOK_STATUS_BUSY);
+//		one.setLastUpdateTime(System.currentTimeMillis());
+//		lbiDB.updateLimerBookInfo(one);
+//		
+//		//产生一条借书记录
+//		BorrowRecord br = new BorrowRecord();
+//		br.setBorrowTime(System.currentTimeMillis());
+//		br.setLimerBookId(one.getId());
+//		br.setStatus(LimerConstants.BORROW_STATUS_ING);
+//		br.setUserId(userId);
+//		brDB.addBorrowRecord(br);
+//		br = brDB.getBorrowRecordByUserBook(br.getLimerBookId(), userId);
+//		
+//		return one;
+//	}
 	
 	public WebOrder[] getMyOrders(long userId) {
 		Order[] orders = orderDB.getOrderByUserId(userId);
@@ -690,34 +693,34 @@ public class LebaoCache {
 		
 	}
 	
-	public WebJSONArray borrowBooks(String[] isbnArr, WebUser u, String ip) {
-		if (isbnArr == null ||  isbnArr.length == 0 || u == null) return null;
-		
-		JSONArray resArr = new JSONArray();
-		synchronized (this) {
-			try {
-				int successNum = 0;
-				JSONArray limerBookIds = new JSONArray();
-				for (String isbn : isbnArr) {
-					LimerBookInfo lbi = borrowOneBook(isbn, u.getUserId());
-					if (lbi == null) {
-						resArr.put(new WebJSONObject(false, "借书失败"));
-					} else {
-						successNum++;
-						limerBookIds.put(Long.toString(lbi.getId()));
-						resArr.put(new WebJSONObject(true, "借书成功", lbi.toJSON()));
-					}
-				}
-				
-				//创建一个订单TODO
-			} catch(Throwable t) {
-				LogUtil.WEB_LOG.warn("Exception when borrowBook(books="+ Arrays.toString(isbnArr) +", userId=" + u.getUserId()+")", t);
-				return null;
-			}
-			
-			return new WebJSONArray(resArr.toString());
-		}
-	}
+//	public WebJSONArray borrowBooks(String[] isbnArr, WebUser u, String ip) {
+//		if (isbnArr == null ||  isbnArr.length == 0 || u == null) return null;
+//		
+//		JSONArray resArr = new JSONArray();
+//		synchronized (this) {
+//			try {
+//				int successNum = 0;
+//				JSONArray limerBookIds = new JSONArray();
+//				for (String isbn : isbnArr) {
+//					LimerBookInfo lbi = borrowOneBook(isbn, u.getUserId());
+//					if (lbi == null) {
+//						resArr.put(new WebJSONObject(false, "借书失败"));
+//					} else {
+//						successNum++;
+//						limerBookIds.put(Long.toString(lbi.getId()));
+//						resArr.put(new WebJSONObject(true, "借书成功", lbi.toJSON()));
+//					}
+//				}
+//				
+//				//创建一个订单TODO
+//			} catch(Throwable t) {
+//				LogUtil.WEB_LOG.warn("Exception when borrowBook(books="+ Arrays.toString(isbnArr) +", userId=" + u.getUserId()+")", t);
+//				return null;
+//			}
+//			
+//			return new WebJSONArray(resArr.toString());
+//		}
+//	}
 	
 	
 	
@@ -759,64 +762,66 @@ public class LebaoCache {
 	}
 	
 	
-	public boolean returnBook(long userId, long limerBookId) {
-		boolean res = false;
-		synchronized (this) {
-			try {
-				BorrowRecord br = brDB.getBorrowRecordByUserBook(limerBookId, userId);
-				if (br == null) {
-					LogUtil.WEB_LOG.error("[return book but no record] [userId="+ userId +"] [limerBookId="+ limerBookId +"]");
-					return false;
-				}
-				
-				br.setStatus(LimerConstants.BORROW_STATUS_RETURNED);
-				br.setReturnTime(System.currentTimeMillis());
-				res = brDB.updateBorrowRecord(br);
-				if (res) {
-					LogUtil.WEB_LOG.info("[RETURN_BOOK_SUCCESS] [userId=]"+ userId +"] [limerBookId="+ limerBookId +"]");
-					
-					//更新书籍状态
-					LimerBookInfo lbi = lbiDB.getLimerBookInfoById(limerBookId);
-					if (lbi == null) {
-						LogUtil.WEB_LOG.error("[return book but no book status] [userId="+ userId +"] [limerBookId="+ limerBookId +"]");
-						return false;
-					}
-					lbi.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
-					lbiDB.updateLimerBookInfo(lbi);
-
-					//更新缓存
-					getJedis().set(KEY_BOOK_STATUS_PREFIX+limerBookId, lbi.toJSON());
-				}
-			} catch(Throwable e) {
-				LogUtil.WEB_LOG.warn("[returnBook error: "+ "[userId=]"+ userId +"] [limerBookId="+ limerBookId +"]", e);
-			}
-		}
-		return res;
-	}
+//	public boolean returnBook(long userId, long limerBookId) {
+//		boolean res = false;
+//		synchronized (this) {
+//			try {
+//				BorrowRecord br = brDB.getBorrowRecordByUserBook(limerBookId, userId);
+//				if (br == null) {
+//					LogUtil.WEB_LOG.error("[return book but no record] [userId="+ userId +"] [limerBookId="+ limerBookId +"]");
+//					return false;
+//				}
+//				
+//				br.setStatus(LimerConstants.BORROW_STATUS_RETURNED);
+//				br.setReturnTime(System.currentTimeMillis());
+//				res = brDB.updateBorrowRecord(br);
+//				if (res) {
+//					LogUtil.WEB_LOG.info("[RETURN_BOOK_SUCCESS] [userId=]"+ userId +"] [limerBookId="+ limerBookId +"]");
+//					
+//					//更新书籍状态
+//					LimerBookInfo lbi = lbiDB.getLimerBookInfoById(limerBookId);
+//					if (lbi == null) {
+//						LogUtil.WEB_LOG.error("[return book but no book status] [userId="+ userId +"] [limerBookId="+ limerBookId +"]");
+//						return false;
+//					}
+//					lbi.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
+//					lbiDB.updateLimerBookInfo(lbi);
+//
+//					//更新缓存
+//					getJedis().set(KEY_BOOK_STATUS_PREFIX+limerBookId, lbi.toJSON());
+//				}
+//			} catch(Throwable e) {
+//				LogUtil.WEB_LOG.warn("[returnBook error: "+ "[userId=]"+ userId +"] [limerBookId="+ limerBookId +"]", e);
+//			}
+//		}
+//		return res;
+//	}
 	
-	public LimerBookInfo getLimerBookStatus(long limerBookId) {
-		//先从jedis取
-		String bookJson = getJedis().get(KEY_BOOK_STATUS_PREFIX + limerBookId);
-		if (bookJson != null) {
-			try {
-				JSONObject o = new JSONObject(bookJson);
-				if (o != null && !o.has("error")) {
-					return LimerBookInfo.parseJSON(o);
-				}
-			} catch (Exception e) {
-				return null;
-			}
-		}
-		
-		//去数据库里获取
-		LimerBookInfo b = lbiDB.getLimerBookInfoById(limerBookId);
-		if (b == null) return null;
-		
-		//存入jedis
-		getJedis().set(KEY_BOOK_STATUS_PREFIX + limerBookId, b.toJSON());
-		
-		return b;
-	}
+//	public LimerBookInfo getLimerBookStatus(long limerBookId) {
+//		//先从jedis取
+//		String bookJson = getJedis().get(KEY_BOOK_STATUS_PREFIX + limerBookId);
+//		if (bookJson != null) {
+//			try {
+//				JSONObject o = new JSONObject(bookJson);
+//				if (o != null && !o.has("error")) {
+//					return LimerBookInfo.parseJSON(o);
+//				}
+//			} catch (Exception e) {
+//				return null;
+//			}
+//		}
+//		
+//		//去数据库里获取
+//		LimerBookInfo b = lbiDB.getLimerBookInfoById(limerBookId);
+//		if (b == null) return null;
+//		
+//		//存入jedis
+//		getJedis().set(KEY_BOOK_STATUS_PREFIX + limerBookId, b.toJSON());
+//		
+//		return b;
+//	}
+	
+	
 	
 	public WebBorrowBook[] getMyBorrowBooks(long userId) {
 		BorrowRecord[] brs = brDB.getBorrowRecordByUserId(userId);
@@ -825,39 +830,46 @@ public class LebaoCache {
 			WebBorrowBook wbb = new WebBorrowBook();
 			wbb.setLimerBookId(br.getLimerBookId());
 			
-			WebBookDetail wb = this.getBookInfo(wbb.getIsbn());
-			LimerBookInfo lbs = this.getLimerBookStatus(br.getLimerBookId());
-			if (lbs == null) {
-				LogUtil.WEB_LOG.error("no status of limer book: [id="+ br.getLimerBookId() +"]");
-				continue;//有问题
-			}
+			WebBookDetail b = this.getBookInfo(br.getIsbn());
+			wbb.setAuthor(b.getBook().getAuthorAsString());
+			wbb.setBookId(b.getBook().getId());
+			wbb.setBorrowTime(br.getBorrowTime());
+			wbb.setCoverUrl(b.getBook().getCoverUrl());
+			wbb.setIsbn(br.getIsbn());
 			
-			wbb.setInfo(wb, br.getLimerBookId(), lbs.getStatus(), 
-					LimerConstants.explainBorrowBookStatus(lbs.getStatus()), br.getBorrowTime());
+			LimerBookInfo lbi = this.getLimerBookInfo(br.getLimerBookId());
+			if (lbi.isIsbnSingle()) {
+				wbb.setTitle(lbi.getBookTitle());
+			} else {
+				wbb.setTitle(b.getBook().getTitle() + "："+ lbi.getBookTitle());
+			}
+			wbb.setStatus(br.getStatus());
+			wbb.setStatusDesc(LimerConstants.explainBorrowBookStatus(br.getStatus()));
+			
 			wbbList.add(wbb);
 		}
 		return wbbList.toArray(new WebBorrowBook[0]);
 	}
 	
-	public WebDonateBook[] getMyDonateBooks(long userId) {
-		LimerBookInfo[] lbis = lbiDB.getLimerBooksByDonateUser(userId);
-		LinkedList<WebDonateBook> wbbList = new LinkedList<WebDonateBook>();
-		for (LimerBookInfo b: lbis) {
-			WebDonateBook wbb = new WebDonateBook();
-			wbb.setLimerBookId(b.getId());
-			
-			WebBookDetail wb = this.getBookInfo(wbb.getIsbn());
-			LimerBookInfo lbs = this.getLimerBookStatus(b.getId());
-			if (lbs == null) {
-				LogUtil.WEB_LOG.error("no status of limer book: [id="+ b.getId() +"]");
-				continue;//有问题
-			}
-			
-			wbb.setInfo(wb, b.getId(), lbs.getStatus(), LimerConstants.explainDonateBookStatus(lbs.getStatus()));
-			wbbList.add(wbb);
-		}
-		return wbbList.toArray(new WebDonateBook[0]);
-	}
+//	public WebDonateBook[] getMyDonateBooks(long userId) {
+//		LimerBookInfo[] lbis = lbiDB.getLimerBooksByDonateUser(userId);
+//		LinkedList<WebDonateBook> wbbList = new LinkedList<WebDonateBook>();
+//		for (LimerBookInfo b: lbis) {
+//			WebDonateBook wbb = new WebDonateBook();
+//			wbb.setLimerBookId(b.getId());
+//			
+//			WebBookDetail wb = this.getBookInfo(wbb.getIsbn());
+//			LimerBookInfo lbs = this.getLimerBookStatus(b.getId());
+//			if (lbs == null) {
+//				LogUtil.WEB_LOG.error("no status of limer book: [id="+ b.getId() +"]");
+//				continue;//有问题
+//			}
+//			
+//			wbb.setInfo(wb, b.getId(), lbs.getStatus(), LimerConstants.explainDonateBookStatus(lbs.getStatus()));
+//			wbbList.add(wbb);
+//		}
+//		return wbbList.toArray(new WebDonateBook[0]);
+//	}
 	
 	public WebUserCenterInfo getWebUserCenterInfo(long userId, String unionId) {
 		
@@ -875,30 +887,30 @@ public class LebaoCache {
 	}
 	
 	//直接取数据库
-	public WebBookStatus getWebBookStatus(String isbn) {
-		//不从jedis里取了，因为状态一直在发生改变，而且读取不频繁，可以直接读写数据库
-		//去数据库里获取
-		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
-		LinkedList<Long> ids = new LinkedList<Long>();
-		int inlibNum = 0;
-		for (LimerBookInfo lbs: lbsArr) {
-			if (lbs.getStatus() != LimerConstants.LIMER_BOOK_STATUS_READY) continue;
-			inlibNum ++;
-			ids.add(lbs.getId());
-		}
-		
-		WebBookStatus wbs = new WebBookStatus();
-		wbs.setIsbn(isbn);
-		wbs.setInlibNum(inlibNum);
-		wbs.setLimerBookIds(ids.toArray(new Long[0]));
-		
-		if (inlibNum == 0) {
-			wbs.setStatus(LimerConstants.LIMER_BOOK_STATUS_BUSY);
-		} else {
-			wbs.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
-		}
-		return wbs;
-	}
+//	public WebBookStatus getWebBookStatus(String isbn) {
+//		//不从jedis里取了，因为状态一直在发生改变，而且读取不频繁，可以直接读写数据库
+//		//去数据库里获取
+//		LimerBookInfo[] lbsArr = lbiDB.getLimerBooksByIsbn(isbn);
+//		LinkedList<Long> ids = new LinkedList<Long>();
+//		int inlibNum = 0;
+//		for (LimerBookInfo lbs: lbsArr) {
+//			if (lbs.getStatus() != LimerConstants.LIMER_BOOK_STATUS_READY) continue;
+//			inlibNum ++;
+//			ids.add(lbs.getId());
+//		}
+//		
+//		WebBookStatus wbs = new WebBookStatus();
+//		wbs.setIsbn(isbn);
+//		wbs.setInlibNum(inlibNum);
+//		wbs.setLimerBookIds(ids.toArray(new Long[0]));
+//		
+//		if (inlibNum == 0) {
+//			wbs.setStatus(LimerConstants.LIMER_BOOK_STATUS_BUSY);
+//		} else {
+//			wbs.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
+//		}
+//		return wbs;
+//	}
 	
 	
 	
@@ -1024,50 +1036,67 @@ public class LebaoCache {
 		return wbd;
 	}
 	
-	public boolean addDonateBook(String isbn, long userId) {
-		if (isbn == null || isbn.trim().length() == 0 || userId <= 0) return false;
-		
-		synchronized (this) {
-			try {
-				
-				//判断isbn是否入库过，如果没有，则入库
-				WebBookDetail wbd = this.getBookInfo(isbn);
-				
-				//添加书的状态
-				LimerBookInfo lbi = new LimerBookInfo();
-				lbi.setIsbn(isbn);
-				lbi.setDonateUserId(userId);
-				lbi.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
-				lbi.setDonateTime(System.currentTimeMillis());
-				lbi.setLastUpdateTime(System.currentTimeMillis());
-				boolean res = lbiDB.addLimerBookInfo(lbi);
-				if (!res) {
-					LogUtil.WEB_LOG.debug("add book info failed: " + lbi);
-					return false;
-				}
-				
-				LogUtil.STAT_LOG.info("[DONATE_BOOK] ["+ isbn +"] ["+ userId +"]");
-
-				//更新缓存
-				lbi = lbiDB.getRecentDonateBook(isbn, userId);
-				getJedis().set(KEY_BOOK_STATUS_PREFIX+ lbi.getId(), lbi.toJSON());
-				
-				//更新recentBooks缓存
-				//把这本书加入tag对应的缓存
-				String[] tags = wbd.getBook().getLimerTagsAsArray();
-				for (String tag : tags) {
-					Map<String, Double> sm = new HashMap<String, Double>();
-					sm.put(wbd.getBook().getIsbn(), (double)wbd.computeScore());
-					getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(tag), sm);
-				}
-				
-				return res;
-			} catch(Throwable t) {
-				LogUtil.WEB_LOG.warn("Exception when addDonateBook(isbn="+ isbn +", userId=" + userId+")", t);
-				return false;
-			}
+	public LimerBookInfo getLimerBookInfo(long limerBookId) {
+		String json = getJedis().get(KEY_LIMERBOOK_PREFIX + limerBookId);
+		if (json != null) {
+			return LimerBookInfo.parseJSON(json);
 		}
+		
+		//从数据库里读
+		LimerBookInfo lbi = lbiDB.getLimerBookInfoById(limerBookId);
+		if (lbi == null) return null;
+		
+		//存入缓存
+		getJedis().set(KEY_LIMERBOOK_PREFIX + limerBookId, lbi.toJSON());
+		getJedis().expire(KEY_LIMERBOOK_PREFIX+ limerBookId, KEY_LIMERBOOK_EXPIRE);
+		
+		return lbi;
 	}
+	
+//	public boolean addDonateBook(String isbn, long userId) {
+//		if (isbn == null || isbn.trim().length() == 0 || userId <= 0) return false;
+//		
+//		synchronized (this) {
+//			try {
+//				
+//				//判断isbn是否入库过，如果没有，则入库
+//				WebBookDetail wbd = this.getBookInfo(isbn);
+//				
+//				//添加书的状态
+//				LimerBookInfo lbi = new LimerBookInfo();
+//				lbi.setIsbn(isbn);
+//				lbi.setDonateUserId(userId);
+//				lbi.setStatus(LimerConstants.LIMER_BOOK_STATUS_READY);
+//				lbi.setDonateTime(System.currentTimeMillis());
+//				lbi.setLastUpdateTime(System.currentTimeMillis());
+//				boolean res = lbiDB.addLimerBookInfo(lbi);
+//				if (!res) {
+//					LogUtil.WEB_LOG.debug("add book info failed: " + lbi);
+//					return false;
+//				}
+//				
+//				LogUtil.STAT_LOG.info("[DONATE_BOOK] ["+ isbn +"] ["+ userId +"]");
+//
+//				//更新缓存
+//				lbi = lbiDB.getRecentDonateBook(isbn, userId);
+//				getJedis().set(KEY_BOOK_STATUS_PREFIX+ lbi.getId(), lbi.toJSON());
+//				
+//				//更新recentBooks缓存
+//				//把这本书加入tag对应的缓存
+//				String[] tags = wbd.getBook().getLimerTagsAsArray();
+//				for (String tag : tags) {
+//					Map<String, Double> sm = new HashMap<String, Double>();
+//					sm.put(wbd.getBook().getIsbn(), (double)wbd.computeScore());
+//					getJedis().zadd(KEY_RECENT_BOOKS+"_" + TextUtil.MD5(tag), sm);
+//				}
+//				
+//				return res;
+//			} catch(Throwable t) {
+//				LogUtil.WEB_LOG.warn("Exception when addDonateBook(isbn="+ isbn +", userId=" + userId+")", t);
+//				return false;
+//			}
+//		}
+//	}
 	
 	public String getOpenId(String appId, String unionId) {
 		UserAuth u = userAuthDB.getUserAuthByUnionId(appId, unionId);

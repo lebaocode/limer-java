@@ -198,12 +198,18 @@ public class DBJavaGenUtil {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String s = "long id;\n" + 
-				"	long userId;//哪个用户\n" + 
-				"	int actionType;// 动作类型\n" + 
-				"	int priceFen;//金额\n" + 
-				"	long actionTime;";
-		String className = "UserMemberAction";
+		String s = "long bookId;\n" + 
+				"	long limerBookId;\n" + 
+				"	String title;\n" + 
+				"	String isbn;\n" + 
+				"	String author;\n" + 
+				"	String coverUrl;\n" + 
+				"	int price;\n" + 
+				"	int pageNum;\n" + 
+				"	int status;\n" + 
+				"	String statusDesc;\n" + 
+				"	long borrowTime;";
+		String className = "WebBorrowBook";
 		
 		String[] lines = s.split("\n+");
 		gen1(lines, className);
